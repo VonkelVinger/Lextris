@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
+    <title>Lextris</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            width: 90vw;
+            max-width: 500px;
+            margin: 20px;
+        }
+
+        #lextris-title {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .title-blocks .block {
+            width: 35px;
+            height: 35px;
+            margin: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 33px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        #target-word-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #target-word-label {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        #target-word {
+            display: flex;
+            justify-content: center;
+        }
+
+        #target-word .block {
+            width: 30px;
+            height: 30px;
+            margin: 0 3px;
+            font-size: 16px;
+            background-color: #0288d1;
+            color: white;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        #game-grid {
+            width: 90vw;
+            max-width: 320px;
+            height: 55vh;
+            max-height: 450px;
+            border: 2px solid #00796b;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 2px;
+            background-color: #e0f7fa;
+            border-radius: 10px;
+        }
+
+        .grid-cell {
+            background-color: #004d40;
+            border: 1px solid #004d40;
+            border-radius: 3px;
+        }
+
+        .block {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #ffffff;
+            border-radius: 3px;
+        }
+
+        #mobile-controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 15px;
+        }
+
+        .mobile-btn {
+            width: 75px;
+            height: 75px;
+            border-radius: 10px; /* Changed to rounded corners */
+            background-color: #5a3b33;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        .mobile-btn svg {
+            width: 50px;
+            height: 50px;
+            fill: #ffffff; /* Arrow color */
+            stroke: #ffffff; /* Outline color */
+            stroke-width: 2; /* Adjust thickness */
+        }
+
+        .mobile-btn:active {
+            background-color: #00332f;
+        }
+
+        #timer {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #004d40;
+        }
+
+        #best-time {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: red;
+        }
+
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            font-size: 14px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #004d40;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #00332f;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .game-over, .game-won {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 77, 64, 0.9);
+            color: #ffffff;
+            padding: 25px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+
+        .game-rules {
+            margin-top: 25px;
+            font-size: 15px;
+            text-align: center;
+            color: #333;
+            max-width: 90%;
+        }
+
+        .game-rules h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .game-rules ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .game-rules li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <div id="lextris-title" class="title-blocks">
+            <div class="block" style="background-color: #0288d1;">L</div>
+            <div class="block" style="background-color: #e53935;">E</div>
+            <div class="block" style="background-color: #43a047;">X</div>
+            <div class="block" style="background-color: #ffb300;">T</div>
+            <div class="block" style="background-color: #8e24aa;">R</div>
+            <div class="block" style="background-color: #6d4c41;">I</div>
+            <div class="block" style="background-color: #009688;">S</div>
+        </div>
+        <div id="target-word-container">
+            <div id="target-word-label">TARGET WORD:</div>
+            <div id="target-word"></div>
+        </div>
+        <div id="game-container">
+            <div id="game-grid"></div>
+        </div>
+        <div id="mobile-controls">
+            <div class="mobile-btn" id="left-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M10 19l-7-7 7-7v4h11v6H10v4z"/>
+                </svg>
+            </div>
+            <div class="mobile-btn" id="drop-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M19 10l-7 7-7-7h4V3h6v7h4z"/>
+                </svg>
+            </div>
+            <div class="mobile-btn" id="right-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M14 5l7 7-7 7v-4H3v-6h11V5z"/>
+                </svg>
+            </div>
+        </div>
+        <div id="timer">Time: 00:00</div>
+        <div id="best-time">Best Time: --:--</div>
+        <div id="controls">
+            <button id="start-btn">START</button>
+            <button id="pause-btn">PAUSE</button>
+            <button id="restart-btn">RESTART</button>
+        </div>
+        <div class="game-rules">
+            <h2>HERE'S HOW TO PLAY</h2>
+            <ul>
+                <li>1. Move falling blocks to create the target word shown at the top.</li>
+                <li>2. Use the arrow keys on your keyboard or the arrows below the grid on your mobile device to move the blocks left/right.</li>
+                <li>3. Press spacebar or down arrow to drop a block quickly.</li>
+                <li>4. If a block falls on top of or next to another block with a matching letter or color, both blocks will disappear from the grid, UNLESS that letter is part of the target word.</li>
+                <li>5. The game is over when there is no more room for further blocks to fall.</li>
+                <li>6. Win by creating the target word in one row.</li>
+                <li>7. See how quickly you can do it!</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const GRID_WIDTH = 8;
+            const GRID_HEIGHT = 10;
+            const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#6d4c41', '#009688'];
+            const LETTERS = 'BCDFGHJKLMNPQRSTVWXYZ';
+            const VOWELS = 'AEIOUY';
+            let targetWord = 'QUIXOTIC';
+            let grid = [];
+            let currentBlock = null;
+            let nextBlock = null;
+            let gameInterval = null;
+            let gameTime = 0;
+            let isPaused = false;
+            let isGameOver = false;
+            let bestTime = localStorage.getItem('bestTime') || null;
+
+            const gameGrid = document.getElementById('game-grid');
+            const timerDisplay = document.getElementById('timer');
+            const bestTimeDisplay = document.getElementById('best-time');
+            const targetWordDisplay = document.getElementById('target-word');
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const leftBtn = document.getElementById('left-btn');
+            const dropBtn = document.getElementById('drop-btn');
+            const rightBtn = document.getElementById('right-btn');
+
+            function initGrid() {
+                gameGrid.innerHTML = '';
+                grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'grid-cell';
+                        gameGrid.appendChild(cell);
+                    }
+                }
+            }
+
+            function createBlock() {
+                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                const letter = Math.random() < 0.3 ? 
+                    VOWELS[Math.floor(Math.random() * VOWELS.length)] :
+                    LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                return { color, letter, x: Math.floor(GRID_WIDTH / 2), y: 0 };
+            }
+
+            function drawBlock(block) {
+                if (!block) return;
+                const cell = gameGrid.children[block.y * GRID_WIDTH + block.x];
+                cell.innerHTML = `<div class="block" style="background-color: ${block.color};">${block.letter}</div>`;
+            }
+
+            function clearBlock(block) {
+                if (!block) return;
+                const cell = gameGrid.children[block.y * GRID_WIDTH + block.x];
+                cell.innerHTML = '';
+            }
+
+            function isCollision(block) {
+                if (!block) return false;
+                return block.y >= GRID_HEIGHT || 
+                    block.x < 0 || 
+                    block.x >= GRID_WIDTH || 
+                    (block.y >= 0 && grid[block.y][block.x] !== null);
+            }
+
+            function moveBlock(dx, dy) {
+                if (!currentBlock || isPaused || isGameOver) return;
+                clearBlock(currentBlock);
+                const newX = currentBlock.x + dx;
+                const newY = currentBlock.y + dy;
+                const testBlock = { ...currentBlock, x: newX, y: newY };
+
+                if (!isCollision(testBlock)) {
+                    currentBlock.x = newX;
+                    currentBlock.y = newY;
+                } else if (dy > 0) {
+                    placeBlock();
+                    currentBlock = nextBlock;
+                    nextBlock = createBlock();
+                }
+
+                if (currentBlock) drawBlock(currentBlock);
+            }
+
+            function dropBlock() {
+                if (!currentBlock || isPaused || isGameOver) return;
+                clearBlock(currentBlock);
+                while (!isCollision({ ...currentBlock, y: currentBlock.y + 1 })) {
+                    currentBlock.y++;
+                }
+                placeBlock();
+                currentBlock = nextBlock;
+                nextBlock = createBlock();
+                drawBlock(currentBlock);
+            }
+
+            function placeBlock() {
+                if (!currentBlock) return;
+                grid[currentBlock.y][currentBlock.x] = currentBlock;
+                drawBlock(currentBlock);
+                checkMatches();
+                checkGameOver();
+                checkWin();
+            }
+
+            function checkMatches() {
+                const toRemove = new Set();
+
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        if (grid[y][x] && !isPartOfTargetWord(grid[y][x].letter)) {
+                            checkNeighbors(x, y, toRemove);
+                        }
+                    }
+                }
+
+                toRemove.forEach(pos => {
+                    const [x, y] = pos.split(',').map(Number);
+                    grid[y][x] = null;
+                    clearBlock({ x, y });
+                });
+
+                dropColumns();
+            }
+
+            function checkNeighbors(x, y, toRemove) {
+                const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+                const current = grid[y][x];
+
+                for (const [dx, dy] of directions) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+
+                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT && grid[ny][nx]) {
+                        const neighbor = grid[ny][nx];
+                        if ((current.letter === neighbor.letter || current.color === neighbor.color) &&
+                            !isPartOfTargetWord(current.letter) && !isPartOfTargetWord(neighbor.letter)) {
+                            toRemove.add(`${x},${y}`);
+                            toRemove.add(`${nx},${ny}`);
+                        }
+                    }
+                }
+            }
+
+            function isPartOfTargetWord(letter) {
+                return targetWord.includes(letter);
+            }
+
+            function dropColumns() {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    let writeY = GRID_HEIGHT - 1;
+                    for (let y = GRID_HEIGHT - 1; y >= 0; y--) {
+                        if (grid[y][x] !== null) {
+                            if (y !== writeY) {
+                                grid[writeY][x] = grid[y][x];
+                                grid[y][x] = null;
+                                clearBlock({ x, y });
+                                drawBlock({ ...grid[writeY][x], x, y: writeY });
+                            }
+                            writeY--;
+                        }
+                    }
+                }
+            }
+
+            function checkGameOver() {
+                if (nextBlock && isCollision(nextBlock)) {
+                    endGame('GAME OVER!');
+                    isGameOver = true;
+                }
+            }
+
+            function checkWin() {
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x <= GRID_WIDTH - targetWord.length; x++) {
+                        let foundWord = '';
+                        let isConsecutive = true;
+                        
+                        for (let i = 0; i < targetWord.length; i++) {
+                            if (!grid[y][x + i]) {
+                                isConsecutive = false;
+                                break;
+                            }
+                            foundWord += grid[y][x + i].letter;
+                        }
+                        
+                        if (isConsecutive && foundWord === targetWord) {
+                            endGame(`YOU DID IT IN ${formatTime(gameTime)}!`);
+                            isGameOver = true;
+                            updateBestTime(gameTime);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            function endGame(message) {
+                clearInterval(gameInterval);
+                const overlay = document.createElement('div');
+                overlay.className = message.includes('GAME OVER') ? 'game-over' : 'game-won';
+                overlay.textContent = message;
+                gameGrid.appendChild(overlay);
+            }
+
+            function updateTimer() {
+                if (!isPaused && !isGameOver) {
+                    gameTime++;
+                    timerDisplay.textContent = `Time: ${formatTime(gameTime)}`;
+                }
+            }
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+
+            function displayTargetWord() {
+                targetWordDisplay.innerHTML = '';
+                for (const letter of targetWord) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    block.style.backgroundColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+                    block.textContent = letter;
+                    targetWordDisplay.appendChild(block);
+                }
+            }
+
+            function startGame() {
+                isGameOver = false;
+                isPaused = false;
+                clearInterval(gameInterval);
+                gameTime = 0;
+                currentBlock = createBlock();
+                nextBlock = createBlock();
+                initGrid();
+                displayTargetWord();
+                gameInterval = setInterval(() => {
+                    if (!isPaused && !isGameOver) {
+                        moveBlock(0, 1);
+                        updateTimer();
+                    }
+                }, 1000);
+                updateBestTimeDisplay();
+            }
+
+            function pauseGame() {
+                isPaused = !isPaused;
+                pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+            }
+
+            function updateBestTimeDisplay() {
+                if (bestTime) {
+                    bestTimeDisplay.textContent = `Best Time: ${formatTime(bestTime)}`;
+                } else {
+                    bestTimeDisplay.textContent = 'Best Time: --:--';
+                }
+            }
+
+            function updateBestTime(newTime) {
+                if (!bestTime || newTime < bestTime) {
+                    bestTime = newTime;
+                    localStorage.setItem('bestTime', newTime);
+                    updateBestTimeDisplay();
+                }
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
+                if (e.key === 'ArrowRight') moveBlock(1, 0);
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    dropBlock();
+                }
+            });
+
+            leftBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moveBlock(-1, 0);
+            });
+            rightBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moveBlock(1, 0);
+            });
+            dropBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                dropBlock();
+            });
+
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', pauseGame);
+            restartBtn.addEventListener('click', startGame);
+
+            initGrid();
+            displayTargetWord();
+            updateBestTimeDisplay();
+        });
+    </script>
+</body>
+</html>
