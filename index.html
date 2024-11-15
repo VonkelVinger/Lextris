@@ -283,12 +283,12 @@
         <div class="game-rules">
             <h2>HERE'S HOW TO PLAY</h2>
             <ul>
-               <li>1. Move the falling blocks horizontally to create the target word shown at the top.</li>
-                <li>2. Use the arrow keys on your keyboard or the arrows below the grid on your mobile device to move the blocks horizontally.</li>
-                <li>3. Press the spacebar or the down arrow to drop a block quickly.</li>
+               <li>1. Move the falling blocks horizontally before they drop to the bottom to create the target word shown at the top.</li>
+                <li>2. Use the arrow keys on your keyboard or the arrows below the grid on your mobile device to move the blocks.</li>
+                <li>3. Press the spacebar (desktop) or the down arrow (mobile) to drop a block faster.</li>
                 <li>4. If a block falls on top of or next to another block with a matching letter or color, both blocks will disappear from the grid, BUT letters that are part of the target word never disappear.</li>
                 <li>5. The game is over when there is no more room for further blocks to fall.</li>
-                <li>6. Win by creating the target word in one row in the least possible time.</li>
+                <li>6. Win by creating the target word as quickly as you can.</li>
             </ul>
         </div>
     </div>
@@ -299,7 +299,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#6d4c41', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXYZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'CONQUEST';
+            let targetWord = 'ACQUIRE';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -584,9 +584,29 @@
                 dropBlock();
             });
 
-            startBtn.addEventListener('click', startGame);
+            startBtn.addEventListener('click', () => {
+                if (!gameInterval && !isGameOver) {
+                    startGame();
+                }
+            });
             pauseBtn.addEventListener('click', pauseGame);
-            restartBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', () => {
+                clearInterval(gameInterval);
+                gameInterval = null;
+                isPaused = false;
+                isGameOver = false;
+                initGrid();
+                displayTargetWord();
+                currentBlock = createBlock();
+                nextBlock = createBlock();
+                drawBlock(currentBlock);
+                gameInterval = setInterval(() => {
+                    if (!isPaused && !isGameOver) {
+                        moveBlock(0, 1);
+                        updateTimer();
+                    }
+                }, 1000);
+            });
 
             initGrid();
             displayTargetWord();
