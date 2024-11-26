@@ -1,6 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<style>
+    #timer, #best-time {
+        font-family: Arial, sans-serif !important;
+        color: #ffffff !important;
+        background-color: #004d40 !important;
+        border-radius: 10px;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        font-weight: bold;
+        font-size: 18px;
+        height: 50px; /* Ensure equal height */
+    }
+
+    #timer span, #best-time span {
+        color: #ffffff !important;
+    }
+</style>
+
+<style>
+    #timer {
+        font-family: Arial, sans-serif !important;
+        color: #ffffff !important;
+        background-color: #004d40 !important;
+        border-radius: 10px;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    #timer span {
+        color: #ffffff !important;
+    }
+</style>
+
+<style>
+    #best-time {
+        font-family: Arial, sans-serif !important;
+        color: #ffffff !important;
+        background-color: #004d40 !important;
+        border-radius: 10px;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    #best-time span {
+        color: #ffffff !important;
+    }
+</style>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
     <title>Lextris</title>
@@ -64,7 +125,7 @@
         #target-word-label {
             font-weight: bold;
             font-size: 18px;
-            color: #333;
+            color: #666;
             margin-bottom: 8px;
         }
 
@@ -262,7 +323,7 @@
             </div>
         </div>
         <div id="time-container" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 10px;">
-            <div id="timer" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 18px; background-color: #e0f7fa; padding: 5px 10px; border-radius: 8px;">
+            <div id="timer" style="display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; font-size: 18px; background-color: #004d40; padding: 10px 15px; border-radius: 10px; color: #ffffff;">
                 <span style="font-size: 24px; color: #004d40;">⏱</span>
                 <span style="color: #004d40;">Time: 00:00</span>
             </div>
@@ -295,7 +356,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'TIMELESS';
+            let targetWord = 'ZEPPELIN';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
