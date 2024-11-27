@@ -64,7 +64,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
-    <title>Lextris</title>
+    <title>LEXIMAX!</title>
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -293,10 +293,11 @@
             <div class="block" style="background-color: #0288d1;">L</div>
             <div class="block" style="background-color: #e53935;">E</div>
             <div class="block" style="background-color: #43a047;">X</div>
-            <div class="block" style="background-color: #ffb300;">T</div>
-            <div class="block" style="background-color: #8e24aa;">R</div>
-            <div class="block" style="background-color: #003366;">I</div>
-            <div class="block" style="background-color: #009688;">S</div>
+            <div class="block" style="background-color: #ffb300;">I</div>
+            <div class="block" style="background-color: #8e24aa;">M</div>
+            <div class="block" style="background-color: #003366;">A</div>
+            <div class="block" style="background-color: #009688;">X</div>
+            <div class="block" style="background-color: #d32f2f;">!</div>
         </div>
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
@@ -338,14 +339,14 @@
             
         </div>
         <div class="game-rules">
-            <h2>HERE'S HOW TO PLAY</h2>
+            <h2>HOW TO PLAY</h2>
             <ul>
-               <li>1. Move the falling blocks horizontally before they drop to the bottom to create the target word shown at the top.</li>
+               <li>1. Position the falling blocks to form the target word shown at the top.</li>
                 <li>2. Use the arrow keys on your keyboard or the arrows below the grid on your mobile device to move the blocks.</li>
-                <li>3. Press the spacebar (desktop) or the down arrow (mobile) to drop a block faster.</li>
-                <li>4. If a block falls on top of or next to another block with a matching letter or color, both blocks will disappear from the grid, BUT letters that are part of the target word never disappear.</li>
+                <li>3. Press the spacebar (desktop) or the down arrow (mobile) to drop a block quickly.</li>
+                <li>4. If a block falls on top of or next to another block with a matching letter or color, both blocks will disappear from the grid, BUT letters that are in the target word never disappear.</li>
                 <li>5. The game is over when there is no more room for further blocks to fall.</li>
-                <li>6. Win by creating the target word as quickly as you can.</li>
+                <li>6. See if you can beat the Best Time!</li>
             </ul>
         </div>
     </div>
@@ -356,7 +357,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'ZEPPELIN';
+            let targetWord = 'SUNSHINE';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
