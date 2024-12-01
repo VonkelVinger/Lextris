@@ -953,6 +953,21 @@ function endGame(message) {
   }
 </script>
 
+
+<script>
+  function resetGame() {
+    // Reset game state but do NOT clear Best Time or Firebase leaderboard entries
+    clearInterval(gameInterval); // Stop the game timer
+    gameInterval = null;
+    isPaused = false;
+    isGameOver = false;
+    gameTime = 0;
+    currentBlock = null;
+    nextBlock = null;
+    startGame(); // Restart the game logic
+  }
+</script>
+
 </body>
 </html>
     </div>
@@ -1143,6 +1158,21 @@ function endGame(message) {
       const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
       addLeaderboardEntry(name.slice(0, 12), time); // Limit name to 12 characters.
     }
+  }
+</script>
+
+
+<script>
+  function resetGame() {
+    // Reset game state but do NOT clear Best Time or Firebase leaderboard entries
+    clearInterval(gameInterval); // Stop the game timer
+    gameInterval = null;
+    isPaused = false;
+    isGameOver = false;
+    gameTime = 0;
+    currentBlock = null;
+    nextBlock = null;
+    startGame(); // Restart the game logic
   }
 </script>
 
