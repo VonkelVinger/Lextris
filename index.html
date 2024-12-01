@@ -332,9 +332,10 @@
       const bestTimeDoc = doc(db, "gameData", "bestTime");
       const docSnap = await getDoc(bestTimeDoc);
       if (docSnap.exists()) {
+        console.log("Best Time fetched successfully:", docSnap.data().time);
         return docSnap.data().time;
       } else {
-        console.log("No Best Time found in Firebase.");
+        console.log("No Best Time found in Firebase. Document might not exist.");
         return null;
       }
     } catch (error) {
@@ -345,11 +346,26 @@
 
   async function saveBestTime(newTime) {
     try {
+      console.log("Attempting to save Best Time to Firebase:", newTime);
       const bestTimeDoc = doc(db, "gameData", "bestTime");
       await setDoc(bestTimeDoc, { time: newTime }, { merge: true });
-      console.log("Best Time saved successfully.");
+      console.log("Best Time saved successfully to Firebase.");
     } catch (error) {
       console.error("Error saving Best Time to Firebase:", error);
+    }
+  }
+
+  async function initializeBestTimeIfMissing() {
+    try {
+      const bestTimeDoc = doc(db, "gameData", "bestTime");
+      const docSnap = await getDoc(bestTimeDoc);
+      if (!docSnap.exists()) {
+        console.log("No Best Time document found in Firebase. Initializing with placeholder value.");
+        await setDoc(bestTimeDoc, { time: null }, { merge: true });
+        console.log("Placeholder Best Time document created in Firebase.");
+      }
+    } catch (error) {
+      console.error("Error initializing Best Time in Firebase:", error);
     }
   }
 
@@ -371,6 +387,7 @@
         `;
         tbody.appendChild(row);
       });
+      console.log("Leaderboard rendered successfully.");
     } catch (error) {
       console.error("Error rendering leaderboard from Firebase:", error);
     }
@@ -389,10 +406,12 @@
 
   document.addEventListener("DOMContentLoaded", async () => {
     try {
-      await updateBestTimeDisplay();
-      await renderLeaderboard();
+      console.log("Initializing Firebase data...");
+      await initializeBestTimeIfMissing(); // Ensure Best Time document exists in Firebase
+      await updateBestTimeDisplay(); // Display Best Time on page load
+      await renderLeaderboard(); // Display leaderboard on page load
     } catch (error) {
-      console.error("Error during initialization:", error);
+      console.error("Error during Firebase initialization:", error);
     }
   });
 
@@ -473,7 +492,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'MOW';
+            let targetWord = 'MOB';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
