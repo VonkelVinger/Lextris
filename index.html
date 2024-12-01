@@ -329,17 +329,19 @@
 
   async function fetchBestTime() {
     try {
-      console.log("Fetching Best Time from Firebase...");
+      console.log("Attempting to fetch Best Time from Firebase...");
       const bestTimeDoc = doc(db, "gameData", "bestTime");
       const docSnap = await getDoc(bestTimeDoc);
       if (docSnap.exists()) {
-        console.log("Best Time fetched:", docSnap.data().time);
-        return docSnap.data().time;
+        const time = docSnap.data().time;
+        console.log("Best Time retrieved from Firebase:", time);
+        return time;
+      } else {
+        console.log("No Best Time found in Firebase.");
+        return null; // No Best Time saved
       }
-      console.log("No Best Time found in Firebase.");
-      return null; // No Best Time yet
     } catch (error) {
-      console.error("Error fetching Best Time:", error);
+      console.error("Error fetching Best Time from Firebase:", error);
       return null;
     }
   }
@@ -349,19 +351,9 @@
       console.log("Saving Best Time to Firebase:", newTime);
       const bestTimeDoc = doc(db, "gameData", "bestTime");
       await setDoc(bestTimeDoc, { time: newTime }, { merge: true });
-      console.log("Best Time successfully saved.");
+      console.log("Best Time successfully saved to Firebase.");
     } catch (error) {
-      console.error("Error saving Best Time:", error);
-    }
-  }
-
-  async function updateBestTimeDisplay() {
-    const bestTime = await fetchBestTime();
-    const bestTimeDisplay = document.getElementById("best-time");
-    if (bestTime !== null) {
-      bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-    } else {
-      bestTimeDisplay.textContent = "Best Time: --:--";
+      console.error("Error saving Best Time to Firebase:", error);
     }
   }
 
@@ -372,11 +364,11 @@
       const q = query(leaderboardRef, orderBy("time", "asc"), limit(10));
       const querySnapshot = await getDocs(q);
       const tbody = document.querySelector("#leaderboard tbody");
-      tbody.innerHTML = "";
+      tbody.innerHTML = ""; // Clear existing leaderboard entries
       let rank = 1;
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        console.log("Leaderboard entry fetched:", data);
+        console.log(`Rank ${rank}:`, data);
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${rank++}</td>
@@ -387,7 +379,7 @@
       });
       console.log("Leaderboard successfully rendered.");
     } catch (error) {
-      console.error("Error rendering leaderboard:", error);
+      console.error("Error rendering leaderboard from Firebase:", error);
     }
   }
 
@@ -396,16 +388,17 @@
       console.log("Adding leaderboard entry:", { name, time });
       const leaderboardRef = collection(db, "leaderboard");
       await addDoc(leaderboardRef, { name, time });
-      console.log("Leaderboard entry successfully added.");
-      await renderLeaderboard(); // Re-render leaderboard after adding entry
+      console.log("Leaderboard entry successfully added to Firebase.");
+      await renderLeaderboard();
     } catch (error) {
-      console.error("Error adding leaderboard entry:", error);
+      console.error("Error adding leaderboard entry to Firebase:", error);
     }
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
-    await updateBestTimeDisplay(); // Display Best Time on page load
-    await renderLeaderboard(); // Display leaderboard on page load
+    console.log("Page loaded. Initializing Best Time and leaderboard...");
+    await updateBestTimeDisplay(); // Ensure Best Time is displayed on page load
+    await renderLeaderboard(); // Ensure leaderboard is displayed on page load
   });
 
   function formatTime(seconds) {
@@ -473,7 +466,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'MON';
+            let targetWord = 'MAD';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -999,13 +992,13 @@ function endGame(message) {
 <script>
   async function endGame(message, time) {
     try {
-      console.log("Ending game with time:", time);
-      clearInterval(gameInterval); // Stop the game timer
+      console.log("Ending game. Checking Best Time and adding to leaderboard if necessary.");
+      clearInterval(gameInterval);
 
       const bestTime = await fetchBestTime();
       if (!bestTime || time < bestTime) {
-        console.log("New Best Time detected. Updating...");
-        await saveBestTime(time); // Save Best Time to Firebase
+        console.log("New Best Time detected:", time);
+        await saveBestTime(time); // Save new Best Time to Firebase
         await updateBestTimeDisplay(); // Update Best Time on the page
       } else {
         console.log("Best Time remains unchanged.");
@@ -1013,28 +1006,27 @@ function endGame(message) {
 
       if (message.includes("YOU DID IT")) {
         const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
-        console.log("Adding new leaderboard entry:", { name, time });
         await addLeaderboardEntry(name.slice(0, 12), time); // Add to Firebase leaderboard
       }
     } catch (error) {
-      console.error("Error during endGame logic:", error);
+      console.error("Error in endGame logic:", error);
     }
   }
 
   function resetGame() {
     try {
-      console.log("Resetting game...");
-      clearInterval(gameInterval); // Stop the timer
+      console.log("Resetting game state...");
+      clearInterval(gameInterval);
       gameInterval = null;
       isPaused = false;
       isGameOver = false;
       gameTime = 0;
       currentBlock = null;
       nextBlock = null;
-      startGame(); // Restart the game logic
-      console.log("Game reset successfully.");
+      startGame();
+      console.log("Game reset completed.");
     } catch (error) {
-      console.error("Error during game reset:", error);
+      console.error("Error resetting game:", error);
     }
   }
 </script>
@@ -1226,13 +1218,13 @@ function endGame(message) {
 <script>
   async function endGame(message, time) {
     try {
-      console.log("Ending game with time:", time);
-      clearInterval(gameInterval); // Stop the game timer
+      console.log("Ending game. Checking Best Time and adding to leaderboard if necessary.");
+      clearInterval(gameInterval);
 
       const bestTime = await fetchBestTime();
       if (!bestTime || time < bestTime) {
-        console.log("New Best Time detected. Updating...");
-        await saveBestTime(time); // Save Best Time to Firebase
+        console.log("New Best Time detected:", time);
+        await saveBestTime(time); // Save new Best Time to Firebase
         await updateBestTimeDisplay(); // Update Best Time on the page
       } else {
         console.log("Best Time remains unchanged.");
@@ -1240,28 +1232,27 @@ function endGame(message) {
 
       if (message.includes("YOU DID IT")) {
         const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
-        console.log("Adding new leaderboard entry:", { name, time });
         await addLeaderboardEntry(name.slice(0, 12), time); // Add to Firebase leaderboard
       }
     } catch (error) {
-      console.error("Error during endGame logic:", error);
+      console.error("Error in endGame logic:", error);
     }
   }
 
   function resetGame() {
     try {
-      console.log("Resetting game...");
-      clearInterval(gameInterval); // Stop the timer
+      console.log("Resetting game state...");
+      clearInterval(gameInterval);
       gameInterval = null;
       isPaused = false;
       isGameOver = false;
       gameTime = 0;
       currentBlock = null;
       nextBlock = null;
-      startGame(); // Restart the game logic
-      console.log("Game reset successfully.");
+      startGame();
+      console.log("Game reset completed.");
     } catch (error) {
-      console.error("Error during game reset:", error);
+      console.error("Error resetting game:", error);
     }
   }
 </script>
