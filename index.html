@@ -309,6 +309,60 @@
     });
 </script>
 
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+    authDomain: "leximax-96299.firebaseapp.com",
+    projectId: "leximax-96299",
+    storageBucket: "leximax-96299.appspot.com",
+    messagingSenderId: "1067424610925",
+    appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+    measurementId: "G-R4QL2RYESM"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function addLeaderboardEntry(name, time) {
+    const leaderboardRef = collection(db, "leaderboard");
+    await addDoc(leaderboardRef, { name, time });
+    await renderLeaderboard();
+  }
+
+  async function renderLeaderboard() {
+    const leaderboardRef = collection(db, "leaderboard");
+    const q = query(leaderboardRef, orderBy("time", "asc"), limit(10));
+    const querySnapshot = await getDocs(q);
+    const tbody = document.querySelector("#leaderboard tbody");
+    tbody.innerHTML = "";
+    let rank = 1;
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${rank++}</td>
+        <td>${data.name}</td>
+        <td>${formatTime(data.time)}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    renderLeaderboard();
+  });
+</script>
+
 </head>
 <body>
     <div class="game-wrapper">
@@ -367,7 +421,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'MOUNTAIN';
+            let targetWord = 'MUSHROOM';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -889,6 +943,16 @@ function endGame(message) {
     });
 </script>
 
+
+<script>
+  function endGame(message, time) {
+    if (message.includes("YOU DID IT")) {
+      const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
+      addLeaderboardEntry(name.slice(0, 12), time); // Limit name to 12 characters.
+    }
+  }
+</script>
+
 </body>
 </html>
     </div>
@@ -1070,6 +1134,16 @@ function endGame(message) {
         updateBestTimeDisplay();
         renderLeaderboard();
     });
+</script>
+
+
+<script>
+  function endGame(message, time) {
+    if (message.includes("YOU DID IT")) {
+      const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
+      addLeaderboardEntry(name.slice(0, 12), time); // Limit name to 12 characters.
+    }
+  }
 </script>
 
 </body>
