@@ -363,6 +363,79 @@
   });
 </script>
 
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDoc, setDoc, doc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+    authDomain: "leximax-96299.firebaseapp.com",
+    projectId: "leximax-96299",
+    storageBucket: "leximax-96299.appspot.com",
+    messagingSenderId: "1067424610925",
+    appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+    measurementId: "G-R4QL2RYESM"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function fetchBestTime() {
+    const bestTimeDoc = doc(db, "gameData", "bestTime");
+    const docSnap = await getDoc(bestTimeDoc);
+    if (docSnap.exists()) {
+      return docSnap.data().time;
+    }
+    return null; // No Best Time yet
+  }
+
+  async function saveBestTime(newTime) {
+    const bestTimeDoc = doc(db, "gameData", "bestTime");
+    await setDoc(bestTimeDoc, { time: newTime }, { merge: true });
+  }
+
+  async function updateBestTimeDisplay() {
+    const bestTime = await fetchBestTime();
+    const bestTimeDisplay = document.getElementById("best-time");
+    if (bestTime !== null) {
+      bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
+    } else {
+      bestTimeDisplay.textContent = "Best Time: --:--";
+    }
+  }
+
+  async function renderLeaderboard() {
+    const leaderboardRef = collection(db, "leaderboard");
+    const q = query(leaderboardRef, orderBy("time", "asc"), limit(10));
+    const querySnapshot = await getDocs(q);
+    const tbody = document.querySelector("#leaderboard tbody");
+    tbody.innerHTML = "";
+    let rank = 1;
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${rank++}</td>
+        <td>${data.name}</td>
+        <td>${formatTime(data.time)}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    await updateBestTimeDisplay(); // Ensure Best Time is fetched and displayed on page load
+    await renderLeaderboard(); // Ensure leaderboard entries are fetched and displayed on page load
+  });
+
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  }
+</script>
+
 </head>
 <body>
     <div class="game-wrapper">
@@ -955,16 +1028,19 @@ function endGame(message) {
 
 
 <script>
-  function resetGame() {
-    // Reset game state but do NOT clear Best Time or Firebase leaderboard entries
-    clearInterval(gameInterval); // Stop the game timer
-    gameInterval = null;
-    isPaused = false;
-    isGameOver = false;
-    gameTime = 0;
-    currentBlock = null;
-    nextBlock = null;
-    startGame(); // Restart the game logic
+  async function endGame(message, time) {
+    clearInterval(gameInterval);
+    const bestTime = await fetchBestTime();
+
+    if (!bestTime || time < bestTime) {
+      await saveBestTime(time); // Save the new Best Time to Firebase
+      await updateBestTimeDisplay(); // Update the Best Time display
+    }
+
+    if (message.includes("YOU DID IT")) {
+      const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
+      await addLeaderboardEntry(name.slice(0, 12), time); // Limit name to 12 characters and add to leaderboard
+    }
   }
 </script>
 
@@ -1163,16 +1239,19 @@ function endGame(message) {
 
 
 <script>
-  function resetGame() {
-    // Reset game state but do NOT clear Best Time or Firebase leaderboard entries
-    clearInterval(gameInterval); // Stop the game timer
-    gameInterval = null;
-    isPaused = false;
-    isGameOver = false;
-    gameTime = 0;
-    currentBlock = null;
-    nextBlock = null;
-    startGame(); // Restart the game logic
+  async function endGame(message, time) {
+    clearInterval(gameInterval);
+    const bestTime = await fetchBestTime();
+
+    if (!bestTime || time < bestTime) {
+      await saveBestTime(time); // Save the new Best Time to Firebase
+      await updateBestTimeDisplay(); // Update the Best Time display
+    }
+
+    if (message.includes("YOU DID IT")) {
+      const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
+      await addLeaderboardEntry(name.slice(0, 12), time); // Limit name to 12 characters and add to leaderboard
+    }
   }
 </script>
 
