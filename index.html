@@ -4,6 +4,30 @@
        <!DOCTYPE html>
 <html lang="en">
 <head>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+    authDomain: "leximax-96299.firebaseapp.com",
+    projectId: "leximax-96299",
+    storageBucket: "leximax-96299.firebasestorage.app",
+    messagingSenderId: "1067424610925",
+    appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+    measurementId: "G-R4QL2RYESM"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 <style>
     #timer, #best-time {
         font-family: Arial, sans-serif !important;
@@ -309,131 +333,6 @@
     });
 </script>
 
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, setDoc, doc, getDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-    authDomain: "leximax-96299.firebaseapp.com",
-    projectId: "leximax-96299",
-    storageBucket: "leximax-96299.appspot.com",
-    messagingSenderId: "1067424610925",
-    appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-    measurementId: "G-R4QL2RYESM"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  async function fetchBestTime() {
-    try {
-      const bestTimeDoc = doc(db, "gameData", "bestTime");
-      const docSnap = await getDoc(bestTimeDoc);
-      if (docSnap.exists()) {
-        console.log("Best Time fetched successfully:", docSnap.data().time);
-        return docSnap.data().time;
-      } else {
-        console.log("No Best Time found in Firebase. Document might not exist.");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching Best Time from Firebase:", error);
-      return null;
-    }
-  }
-
-  async function saveBestTime(newTime) {
-    try {
-      console.log("Attempting to save Best Time to Firebase:", newTime);
-      const bestTimeDoc = doc(db, "gameData", "bestTime");
-      await setDoc(bestTimeDoc, { time: newTime }, { merge: true });
-      console.log("Best Time saved successfully to Firebase.");
-    } catch (error) {
-      console.error("Error saving Best Time to Firebase:", error);
-    }
-  }
-
-  async function initializeBestTimeIfMissing() {
-    try {
-      const bestTimeDoc = doc(db, "gameData", "bestTime");
-      const docSnap = await getDoc(bestTimeDoc);
-      if (!docSnap.exists()) {
-        console.log("No Best Time document found in Firebase. Initializing with placeholder value.");
-        await setDoc(bestTimeDoc, { time: null }, { merge: true });
-        console.log("Placeholder Best Time document created in Firebase.");
-      }
-    } catch (error) {
-      console.error("Error initializing Best Time in Firebase:", error);
-    }
-  }
-
-  async function renderLeaderboard() {
-    try {
-      const leaderboardRef = collection(db, "leaderboard");
-      const q = query(leaderboardRef, orderBy("time", "asc"), limit(10));
-      const querySnapshot = await getDocs(q);
-      const tbody = document.querySelector("#leaderboard tbody");
-      tbody.innerHTML = "";
-      let rank = 1;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${rank++}</td>
-          <td>${data.name}</td>
-          <td>${formatTime(data.time)}</td>
-        `;
-        tbody.appendChild(row);
-      });
-      console.log("Leaderboard rendered successfully.");
-    } catch (error) {
-      console.error("Error rendering leaderboard from Firebase:", error);
-    }
-  }
-
-  async function addLeaderboardEntry(name, time) {
-    try {
-      const leaderboardRef = collection(db, "leaderboard");
-      await addDoc(leaderboardRef, { name, time });
-      console.log("Leaderboard entry added successfully.");
-      await renderLeaderboard();
-    } catch (error) {
-      console.error("Error adding leaderboard entry to Firebase:", error);
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    try {
-      console.log("Initializing Firebase data...");
-      await initializeBestTimeIfMissing(); // Ensure Best Time document exists in Firebase
-      await updateBestTimeDisplay(); // Display Best Time on page load
-      await renderLeaderboard(); // Display leaderboard on page load
-    } catch (error) {
-      console.error("Error during Firebase initialization:", error);
-    }
-  });
-
-  async function updateBestTimeDisplay() {
-    try {
-      const bestTime = await fetchBestTime();
-      const bestTimeDisplay = document.getElementById("best-time");
-      bestTimeDisplay.textContent = bestTime
-        ? `Best Time: ${formatTime(bestTime)}`
-        : "Best Time: --:--";
-    } catch (error) {
-      console.error("Error updating Best Time display:", error);
-    }
-  }
-
-  function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-  }
-</script>
-
 </head>
 <body>
     <div class="game-wrapper">
@@ -492,7 +391,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'MOB';
+            let targetWord = 'DOM';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -1014,40 +913,7 @@ function endGame(message) {
     });
 </script>
 
-
-<script>
-  async function endGame(message, time) {
-    try {
-      clearInterval(gameInterval);
-      const bestTime = await fetchBestTime();
-      if (!bestTime || time < bestTime) {
-        await saveBestTime(time);
-        await updateBestTimeDisplay();
-      }
-      if (message.includes("YOU DID IT")) {
-        const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
-        await addLeaderboardEntry(name.slice(0, 12), time);
-      }
-    } catch (error) {
-      console.error("Error in endGame logic:", error);
-    }
-  }
-
-  function resetGame() {
-    try {
-      clearInterval(gameInterval);
-      gameInterval = null;
-      isPaused = false;
-      isGameOver = false;
-      gameTime = 0;
-      startGame();
-    } catch (error) {
-      console.error("Error resetting game:", error);
-    }
-  }
-</script>
 </body>
-
 </html>
     </div>
 
@@ -1230,37 +1096,4 @@ function endGame(message) {
     });
 </script>
 
-
-<script>
-  async function endGame(message, time) {
-    try {
-      clearInterval(gameInterval);
-      const bestTime = await fetchBestTime();
-      if (!bestTime || time < bestTime) {
-        await saveBestTime(time);
-        await updateBestTimeDisplay();
-      }
-      if (message.includes("YOU DID IT")) {
-        const name = prompt("Enter your name for the leaderboard:", "Anonymous") || "Anonymous";
-        await addLeaderboardEntry(name.slice(0, 12), time);
-      }
-    } catch (error) {
-      console.error("Error in endGame logic:", error);
-    }
-  }
-
-  function resetGame() {
-    try {
-      clearInterval(gameInterval);
-      gameInterval = null;
-      isPaused = false;
-      isGameOver = false;
-      gameTime = 0;
-      startGame();
-    } catch (error) {
-      console.error("Error resetting game:", error);
-    }
-  }
-</script>
 </body>
-
