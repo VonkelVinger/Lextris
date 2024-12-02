@@ -413,7 +413,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'LOX';
+            let targetWord = 'JOY';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -808,26 +808,31 @@ function endGame(message) {
 
     function renderLeaderboard() {
         const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        // Removed localStorage-based loop logic.
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${formatTime(entry.time)}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
 
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
+function renderLeaderboard() {
+    const tbody = document.querySelector('#leaderboard tbody');
+    tbody.innerHTML = ''; // Clear previous entries
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // Removed localStorage render leaderboard logic.
+    leaderboardData.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.name}</td>
+            <td>${formatTime(entry.time)}</td>
+        `;
+        tbody.appendChild(row);
+    }); // Ensure this matches the forEach call
+} // Properly close the function
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderLeaderboard(); // Ensure proper call on DOMContentLoaded
+});
     });
 
     // Hooking into the existing game logic to add leaderboard functionality
@@ -991,26 +996,31 @@ function endGame(message) {
 
     function renderLeaderboard() {
         const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        // Removed localStorage-based loop logic.
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${formatTime(entry.time)}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
 
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
+function renderLeaderboard() {
+    const tbody = document.querySelector('#leaderboard tbody');
+    tbody.innerHTML = ''; // Clear previous entries
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // Removed localStorage render leaderboard logic.
+    leaderboardData.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.name}</td>
+            <td>${formatTime(entry.time)}</td>
+        `;
+        tbody.appendChild(row);
+    }); // Ensure this matches the forEach call
+} // Properly close the function
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderLeaderboard(); // Ensure proper call on DOMContentLoaded
+});
     });
 
     // Hooking into the existing game logic to add leaderboard functionality
