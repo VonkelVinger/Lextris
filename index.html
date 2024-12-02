@@ -23,7 +23,7 @@
 
   async function updateLeaderboard(name, time) {
     try {
-      await addDoc(collection(db, "leaderboard"), { name, time });
+      await addDoc(collection(db, "leaderboard"), { name, time }
       renderLeaderboard();
     } catch (e) {
       console.error("Error adding leaderboard entry: ", e);
@@ -34,11 +34,11 @@
     try {
       const q = query(collection(db, "leaderboard"), orderBy("time"), limit(10));
       const querySnapshot = await getDocs(q);
-      const tbody = document.querySelector("#leaderboard tbody");
+      const tbody = ddocument.querySelector("#leaderboard tbody");
       tbody.innerHTML = "";
       querySnapshot.forEach((doc, index) => {
         const data = doc.data();
-        const row = document.createElement("tr");
+        const row = ddocument.createElement("tr");
         row.innerHTML = `<td>${index + 1}</td><td>${data.name}</td><td>${formatTime(data.time)}</td>`;
         tbody.appendChild(row);
       }
@@ -47,7 +47,7 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", renderLeaderboard);
+  ddocument.addEventListener("DOMContentLoaded", renderLeaderboard);
 </script>
 
 <style>
@@ -347,7 +347,7 @@
 
 <script>
     // Reset the Best Time as a once-off
-    ocument.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         if (!localStorage.getItem('bestTimeReset')) {
             localStorage.setItem('bestTime', null); // Reset Best Time
             localStorage.setItem('bestTimeReset', 'true'); // Flag to prevent repeated resets
@@ -407,13 +407,13 @@
             <button id="pause-btn">PAUSE</button>
                 </div>
     <script>
-        ocument.addEventListener('DOMContentLoaded', () => {
+        ddocument.addEventListener('DOMContentLoaded', () => {
             const GRID_WIDTH = 8;
             const GRID_HEIGHT = 10;
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'ZUP';
+            let targetWord = 'RED';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -423,23 +423,23 @@
             let isGameOver = false;
             let bestTime = localStorage.getItem('bestTime') ? parseInt(localStorage.getItem('bestTime'), 10) : null;
 
-            const gameGrid = document.getElementById('game-grid');
-            const timerDisplay = document.getElementById('timer');
-            const bestTimeDisplay = document.getElementById('best-time');
-            const targetWordDisplay = document.getElementById('target-word');
-            const startBtn = document.getElementById('start-btn');
-            const pauseBtn = document.getElementById('pause-btn');
-            const restartBtn = document.getElementById('restart-btn');
-            const leftBtn = document.getElementById('left-btn');
-            const dropBtn = document.getElementById('drop-btn');
-            const rightBtn = document.getElementById('right-btn');
+            const gameGrid = ddocument.getElementById('game-grid');
+            const timerDisplay = ddocument.getElementById('timer');
+            const bestTimeDisplay = ddocument.getElementById('best-time');
+            const targetWordDisplay = ddocument.getElementById('target-word');
+            const startBtn = ddocument.getElementById('start-btn');
+            const pauseBtn = ddocument.getElementById('pause-btn');
+            const restartBtn = ddocument.getElementById('restart-btn');
+            const leftBtn = ddocument.getElementById('left-btn');
+            const dropBtn = ddocument.getElementById('drop-btn');
+            const rightBtn = ddocument.getElementById('right-btn');
 
             function initGrid() {
                 gameGrid.innerHTML = '';
                 grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
                 for (let y = 0; y < GRID_HEIGHT; y++) {
                     for (let x = 0; x < GRID_WIDTH; x++) {
-                        const cell = document.createElement('div');
+                        const cell = ddocument.createElement('div');
                         cell.className = 'grid-cell';
                         gameGrid.appendChild(cell);
                     }
@@ -612,7 +612,7 @@
             
 function endGame(message) {
     clearInterval(gameInterval);
-    const overlay = document.createElement('div');
+    const overlay = ddocument.createElement('div');
     overlay.className = message.includes('GAME OVER') ? 'game-over' : 'game-won';
     overlay.textContent = message;
     gameGrid.appendChild(overlay);
@@ -640,7 +640,7 @@ function endGame(message) {
             function displayTargetWord() {
                 targetWordDisplay.innerHTML = '';
                 for (const letter of targetWord) {
-                    const block = document.createElement('div');
+                    const block = ddocument.createElement('div');
                     block.className = 'block';
                     block.style.backgroundColor = COLORS[Math.floor(Math.random() * COLORS.length)];
                     block.textContent = letter;
@@ -697,7 +697,7 @@ function endGame(message) {
                 }
             }
 
-            document.addEventListener('keydown', (e) => {
+            ddocument.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') moveBlock(-1, 0);
                 if (e.key === 'ArrowRight') moveBlock(1, 0);
                 if (e.key === ' ') {
@@ -807,14 +807,14 @@ function endGame(message) {
     }
 
     function renderLeaderboard() {
-        const tbody = document.querySelector('#leaderboard tbody');
+        const tbody = ddocument.querySelector('#leaderboard tbody');
 
 function renderLeaderboard() {
-    const tbody = document.querySelector('#leaderboard tbody');
+    const tbody = ddocument.querySelector('#leaderboard tbody');
     tbody.innerHTML = ''; // Clear previous entries
 
     leaderboardData.forEach((entry, index) => {
-        const row = document.createElement('tr');
+        const row = ddocument.createElement('tr');
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${entry.name}</td>
@@ -830,21 +830,20 @@ function formatTime(seconds) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-ocument.addEventListener('DOMContentLoaded', () => {
+ddocument.addEventListener('DOMContentLoaded', () => {
     renderLeaderboard(); // Ensure proper call on DOMContentLoaded
 });
+    });
 
     // Hooking into the existing game logic to add leaderboard functionality
     function endGame(message) {
         clearInterval(gameInterval);
-        const overlay = document.createElement('div');
+        const overlay = ddocument.createElement('div');
         overlay.className = message.includes('GAME OVER') ? 'game-over' : 'game-won';
         overlay.textContent = message;
         gameGrid.appendChild(overlay);
         if (message.includes('YOU DID IT')) {
             const name = prompt('You made it to the leaderboard! Enter your name (max 12 characters):').slice(0, 12) || 'Anonymous';
-        }
-    }
             updateLeaderboard(name, gameTime);
         }
     }
@@ -852,7 +851,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    ocument.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is displayed as 0:00 if not set
         if (!localStorage.getItem('bestTimeReset')) {
             localStorage.setItem('bestTime', 0); // Reset Best Time to 0
@@ -869,7 +868,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
         function updateBestTimeDisplay() {
             const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
-            const bestTimeDisplay = document.getElementById('best-time');
+            const bestTimeDisplay = ddocument.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
 
@@ -881,7 +880,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    ocument.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         // Force reset the leaderboard to an empty state
         localStorage.removeItem('leaderboard'); // Remove the leaderboard data completely
         localStorage.setItem('leaderboard', JSON.stringify([])); // Initialize as an empty array
@@ -891,7 +890,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    ocument.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is initialized to 0 if not set
         if (!localStorage.getItem('bestTime') || isNaN(localStorage.getItem('bestTime'))) {
             localStorage.setItem('bestTime', 0); // Set Best Time to 0 if it's missing or invalid
@@ -906,7 +905,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
         function updateBestTimeDisplay() {
             const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
-            const bestTimeDisplay = document.getElementById('best-time');
+            const bestTimeDisplay = ddocument.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
 
@@ -917,7 +916,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    ocument.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         // Forcefully reset Best Time to 0
         localStorage.setItem('bestTime', 0); // Set Best Time to 0
         localStorage.setItem('leaderboard', JSON.stringify([])); // Clear the leaderboard data for consistency
@@ -931,7 +930,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
         function updateBestTimeDisplay() {
             const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
-            const bestTimeDisplay = document.getElementById('best-time');
+            const bestTimeDisplay = ddocument.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
 
@@ -996,14 +995,14 @@ ocument.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderLeaderboard() {
-        const tbody = document.querySelector('#leaderboard tbody');
+        const tbody = ddocument.querySelector('#leaderboard tbody');
 
 function renderLeaderboard() {
-    const tbody = document.querySelector('#leaderboard tbody');
+    const tbody = ddocument.querySelector('#leaderboard tbody');
     tbody.innerHTML = ''; // Clear previous entries
 
     leaderboardData.forEach((entry, index) => {
-        const row = document.createElement('tr');
+        const row = ddocument.createElement('tr');
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${entry.name}</td>
@@ -1019,21 +1018,20 @@ function formatTime(seconds) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-ocument.addEventListener('DOMContentLoaded', () => {
+ddocument.addEventListener('DOMContentLoaded', () => {
     renderLeaderboard(); // Ensure proper call on DOMContentLoaded
 });
+    });
 
     // Hooking into the existing game logic to add leaderboard functionality
     function endGame(message) {
         clearInterval(gameInterval);
-        const overlay = document.createElement('div');
+        const overlay = ddocument.createElement('div');
         overlay.className = message.includes('GAME OVER') ? 'game-over' : 'game-won';
         overlay.textContent = message;
         gameGrid.appendChild(overlay);
         if (message.includes('YOU DID IT')) {
             const name = prompt('You made it to the leaderboard! Enter your name (max 12 characters):').slice(0, 12) || 'Anonymous';
-        }
-    }
             updateLeaderboard(name, gameTime);
         }
     }
@@ -1041,7 +1039,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    ocument.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is displayed as 0:00 if not set
         if (!localStorage.getItem('bestTimeReset')) {
             localStorage.setItem('bestTime', 0); // Reset Best Time to 0
@@ -1058,7 +1056,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
         function updateBestTimeDisplay() {
             const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
-            const bestTimeDisplay = document.getElementById('best-time');
+            const bestTimeDisplay = ddocument.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
 
@@ -1070,7 +1068,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    ocument.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         // Force reset the leaderboard to an empty state
         localStorage.removeItem('leaderboard'); // Remove the leaderboard data completely
         localStorage.setItem('leaderboard', JSON.stringify([])); // Initialize as an empty array
@@ -1080,7 +1078,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    ocument.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is initialized to 0 if not set
         if (!localStorage.getItem('bestTime') || isNaN(localStorage.getItem('bestTime'))) {
             localStorage.setItem('bestTime', 0); // Set Best Time to 0 if it's missing or invalid
@@ -1095,7 +1093,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
         function updateBestTimeDisplay() {
             const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
-            const bestTimeDisplay = document.getElementById('best-time');
+            const bestTimeDisplay = ddocument.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
 
@@ -1106,7 +1104,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    ddocument.addEventListener('DOMContentLoaded', () => {
         // Forcefully reset Best Time to 0
         localStorage.setItem('bestTime', 0); // Set Best Time to 0
         localStorage.setItem('leaderboard', JSON.stringify([])); // Clear the leaderboard data for consistency
@@ -1120,7 +1118,7 @@ ocument.addEventListener('DOMContentLoaded', () => {
 
         function updateBestTimeDisplay() {
             const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
-            const bestTimeDisplay = document.getElementById('best-time');
+            const bestTimeDisplay = ddocument.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
 
