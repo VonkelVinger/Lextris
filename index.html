@@ -23,7 +23,7 @@
 
   async function updateLeaderboard(name, time) {
     try {
-      await addDoc(collection(db, "leaderboard"), { name, time }
+      await addDoc(collection(db, "leaderboard"), { name, time });
       renderLeaderboard();
     } catch (e) {
       console.error("Error adding leaderboard entry: ", e);
@@ -413,7 +413,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'POX';
+            let targetWord = 'POP';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -833,7 +833,6 @@ function formatTime(seconds) {
 document.addEventListener('DOMContentLoaded', () => {
     renderLeaderboard(); // Ensure proper call on DOMContentLoaded
 });
-    });
 
     // Hooking into the existing game logic to add leaderboard functionality
     function endGame(message) {
@@ -844,6 +843,8 @@ document.addEventListener('DOMContentLoaded', () => {
         gameGrid.appendChild(overlay);
         if (message.includes('YOU DID IT')) {
             const name = prompt('You made it to the leaderboard! Enter your name (max 12 characters):').slice(0, 12) || 'Anonymous';
+        }
+    }
             updateLeaderboard(name, gameTime);
         }
     }
@@ -1021,7 +1022,6 @@ function formatTime(seconds) {
 document.addEventListener('DOMContentLoaded', () => {
     renderLeaderboard(); // Ensure proper call on DOMContentLoaded
 });
-    });
 
     // Hooking into the existing game logic to add leaderboard functionality
     function endGame(message) {
@@ -1032,6 +1032,8 @@ document.addEventListener('DOMContentLoaded', () => {
         gameGrid.appendChild(overlay);
         if (message.includes('YOU DID IT')) {
             const name = prompt('You made it to the leaderboard! Enter your name (max 12 characters):').slice(0, 12) || 'Anonymous';
+        }
+    }
             updateLeaderboard(name, gameTime);
         }
     }
