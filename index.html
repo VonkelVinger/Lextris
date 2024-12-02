@@ -391,7 +391,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'TIT';
+            let targetWord = 'NAM';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -774,20 +774,20 @@ function endGame(message) {
 </table>
 
 <script>
-    // Removed redundant leaderboardData declaration.
+    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
     function updateLeaderboard(name, time) {
-        // Removed localStorage-based push logic.
-        // Removed localStorage-based sorting logic.
+        leaderboardData.push({ name, time });
+        leaderboardData.sort((a, b) => a.time - b.time);
         if (leaderboardData.length > 10) leaderboardData.pop();
-        // Removed localStorage-based leaderboard save logic.
-        // Removed localStorage-based render logic.
+        localStorage.setItem('leaderboard', JSON.stringify(leaderboardData));
+        renderLeaderboard();
     }
 
     function renderLeaderboard() {
         const tbody = document.querySelector('#leaderboard tbody');
         tbody.innerHTML = '';
-        // Removed localStorage-based loop logic.
+        leaderboardData.forEach((entry, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${index + 1}</td>
@@ -805,7 +805,7 @@ function endGame(message) {
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Removed localStorage-based render logic.
+        renderLeaderboard();
     });
 
     // Hooking into the existing game logic to add leaderboard functionality
@@ -847,7 +847,7 @@ function endGame(message) {
 
         // Ensure leaderboard is properly displayed
         updateBestTimeDisplay();
-        // Removed localStorage-based render logic.
+        renderLeaderboard();
     });
 </script>
 
@@ -857,7 +857,7 @@ function endGame(message) {
         // Force reset the leaderboard to an empty state
         localStorage.removeItem('leaderboard'); // Remove the leaderboard data completely
         localStorage.setItem('leaderboard', JSON.stringify([])); // Initialize as an empty array
-        // Removed localStorage-based render logic. // Re-render the cleared leaderboard to reflect the changes
+        renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
     });
 </script>
 
@@ -909,7 +909,7 @@ function endGame(message) {
 
         // Update Best Time and re-render the leaderboard
         updateBestTimeDisplay();
-        // Removed localStorage-based render logic.
+        renderLeaderboard();
     });
 </script>
 
@@ -957,20 +957,20 @@ function endGame(message) {
 
 
 <script>
-    // Removed redundant leaderboardData declaration.
+    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
     function updateLeaderboard(name, time) {
-        // Removed localStorage-based push logic.
-        // Removed localStorage-based sorting logic.
+        leaderboardData.push({ name, time });
+        leaderboardData.sort((a, b) => a.time - b.time);
         if (leaderboardData.length > 10) leaderboardData.pop();
-        // Removed localStorage-based leaderboard save logic.
-        // Removed localStorage-based render logic.
+        localStorage.setItem('leaderboard', JSON.stringify(leaderboardData));
+        renderLeaderboard();
     }
 
     function renderLeaderboard() {
         const tbody = document.querySelector('#leaderboard tbody');
         tbody.innerHTML = '';
-        // Removed localStorage-based loop logic.
+        leaderboardData.forEach((entry, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${index + 1}</td>
@@ -988,7 +988,7 @@ function endGame(message) {
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Removed localStorage-based render logic.
+        renderLeaderboard();
     });
 
     // Hooking into the existing game logic to add leaderboard functionality
@@ -1030,7 +1030,7 @@ function endGame(message) {
 
         // Ensure leaderboard is properly displayed
         updateBestTimeDisplay();
-        // Removed localStorage-based render logic.
+        renderLeaderboard();
     });
 </script>
 
@@ -1040,7 +1040,7 @@ function endGame(message) {
         // Force reset the leaderboard to an empty state
         localStorage.removeItem('leaderboard'); // Remove the leaderboard data completely
         localStorage.setItem('leaderboard', JSON.stringify([])); // Initialize as an empty array
-        // Removed localStorage-based render logic. // Re-render the cleared leaderboard to reflect the changes
+        renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
     });
 </script>
 
@@ -1092,7 +1092,7 @@ function endGame(message) {
 
         // Update Best Time and re-render the leaderboard
         updateBestTimeDisplay();
-        // Removed localStorage-based render logic.
+        renderLeaderboard();
     });
 </script>
 
