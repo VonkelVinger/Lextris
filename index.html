@@ -5,14 +5,9 @@
 <html lang="en">
 <head>
 <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
     authDomain: "leximax-96299.firebaseapp.com",
@@ -23,9 +18,36 @@
     measurementId: "G-R4QL2RYESM"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
+  async function updateLeaderboard(name, time) {
+    try {
+      await addDoc(collection(db, "leaderboard"), { name, time });
+      renderLeaderboard();
+    } catch (e) {
+      console.error("Error adding leaderboard entry: ", e);
+    }
+  }
+
+  async function renderLeaderboard() {
+    try {
+      const q = query(collection(db, "leaderboard"), orderBy("time"), limit(10));
+      const querySnapshot = await getDocs(q);
+      const tbody = document.querySelector("#leaderboard tbody");
+      tbody.innerHTML = "";
+      querySnapshot.forEach((doc, index) => {
+        const data = doc.data();
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${index + 1}</td><td>${data.name}</td><td>${formatTime(data.time)}</td>`;
+        tbody.appendChild(row);
+      });
+    } catch (e) {
+      console.error("Error fetching leaderboard data: ", e);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", renderLeaderboard);
 </script>
 
 <style>
@@ -391,7 +413,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'NOM';
+            let targetWord = 'MIN';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
