@@ -4,52 +4,6 @@
        <!DOCTYPE html>
 <html lang="en">
 <head>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-    authDomain: "leximax-96299.firebaseapp.com",
-    projectId: "leximax-96299",
-    storageBucket: "leximax-96299.firebasestorage.app",
-    messagingSenderId: "1067424610925",
-    appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-    measurementId: "G-R4QL2RYESM"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  async function updateLeaderboard(name, time) {
-    try {
-      await addDoc(collection(db, "leaderboard"), { name, time });
-      renderLeaderboard();
-    } catch (e) {
-      console.error("Error adding leaderboard entry: ", e);
-    }
-  }
-
-  async function renderLeaderboard() {
-    try {
-      const q = query(collection(db, "leaderboard"), orderBy("time"), limit(10));
-      const querySnapshot = await getDocs(q);
-      const tbody = document.querySelector("#leaderboard tbody");
-      tbody.innerHTML = "";
-      querySnapshot.forEach((doc, index) => {
-        const data = doc.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${index + 1}</td><td>${data.name}</td><td>${formatTime(data.time)}</td>`;
-        tbody.appendChild(row);
-      });
-    } catch (e) {
-      console.error("Error fetching leaderboard data: ", e);
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", renderLeaderboard);
-</script>
-
 <style>
     #timer, #best-time {
         font-family: Arial, sans-serif !important;
@@ -413,7 +367,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'LAP';
+            let targetWord = 'BASEBALL';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -796,43 +750,39 @@ function endGame(message) {
 </table>
 
 <script>
-    // Removed redundant leaderboardData declaration.
+    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
     function updateLeaderboard(name, time) {
-        // Removed localStorage-based push logic.
-        // Removed localStorage-based sorting logic.
+        leaderboardData.push({ name, time });
+        leaderboardData.sort((a, b) => a.time - b.time);
         if (leaderboardData.length > 10) leaderboardData.pop();
-        // Removed localStorage-based leaderboard save logic.
-        // Removed localStorage render leaderboard logic.
+        localStorage.setItem('leaderboard', JSON.stringify(leaderboardData));
+        renderLeaderboard();
     }
 
     function renderLeaderboard() {
         const tbody = document.querySelector('#leaderboard tbody');
+        tbody.innerHTML = '';
+        leaderboardData.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${entry.name}</td>
+                <td>${formatTime(entry.time)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
 
-function renderLeaderboard() {
-    const tbody = document.querySelector('#leaderboard tbody');
-    tbody.innerHTML = ''; // Clear previous entries
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
 
-    leaderboardData.forEach((entry, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.name}</td>
-            <td>${formatTime(entry.time)}</td>
-        `;
-        tbody.appendChild(row);
-    }); // Ensure this matches the forEach call
-} // Properly close the function
-
-function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderLeaderboard(); // Ensure proper call on DOMContentLoaded
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        renderLeaderboard();
+    });
 
     // Hooking into the existing game logic to add leaderboard functionality
     function endGame(message) {
@@ -846,14 +796,17 @@ document.addEventListener('DOMContentLoaded', () => {
             updateLeaderboard(name, gameTime);
         }
     }
-        }
-    }
-            updateLeaderboard(name, gameTime);
-        }
-    }
 </script>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ensure Best Time is displayed as 0:00 if not set
+        if (!localStorage.getItem('bestTimeReset')) {
+            localStorage.setItem('bestTime', 0); // Reset Best Time to 0
+            localStorage.setItem('leaderboard', JSON.stringify([])); // Clear the leaderboard data
+            localStorage.setItem('bestTimeReset', 'true'); // Flag to prevent repeated resets
+        }
         
         function formatTime(seconds) {
             if (!seconds || isNaN(seconds)) return '0:00'; // Display as 0:00 if null or invalid
@@ -870,7 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ensure leaderboard is properly displayed
         updateBestTimeDisplay();
-        // Removed localStorage render leaderboard logic.
+        renderLeaderboard();
     });
 </script>
 
@@ -880,7 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Force reset the leaderboard to an empty state
         localStorage.removeItem('leaderboard'); // Remove the leaderboard data completely
         localStorage.setItem('leaderboard', JSON.stringify([])); // Initialize as an empty array
-        // Removed localStorage render leaderboard logic. // Re-render the cleared leaderboard to reflect the changes
+        renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
     });
 </script>
 
@@ -932,7 +885,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update Best Time and re-render the leaderboard
         updateBestTimeDisplay();
-        // Removed localStorage render leaderboard logic.
+        renderLeaderboard();
     });
 </script>
 
@@ -980,43 +933,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-    // Removed redundant leaderboardData declaration.
+    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
     function updateLeaderboard(name, time) {
-        // Removed localStorage-based push logic.
-        // Removed localStorage-based sorting logic.
+        leaderboardData.push({ name, time });
+        leaderboardData.sort((a, b) => a.time - b.time);
         if (leaderboardData.length > 10) leaderboardData.pop();
-        // Removed localStorage-based leaderboard save logic.
-        // Removed localStorage render leaderboard logic.
+        localStorage.setItem('leaderboard', JSON.stringify(leaderboardData));
+        renderLeaderboard();
     }
 
     function renderLeaderboard() {
         const tbody = document.querySelector('#leaderboard tbody');
+        tbody.innerHTML = '';
+        leaderboardData.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${entry.name}</td>
+                <td>${formatTime(entry.time)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
 
-function renderLeaderboard() {
-    const tbody = document.querySelector('#leaderboard tbody');
-    tbody.innerHTML = ''; // Clear previous entries
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
 
-    leaderboardData.forEach((entry, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.name}</td>
-            <td>${formatTime(entry.time)}</td>
-        `;
-        tbody.appendChild(row);
-    }); // Ensure this matches the forEach call
-} // Properly close the function
-
-function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderLeaderboard(); // Ensure proper call on DOMContentLoaded
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        renderLeaderboard();
+    });
 
     // Hooking into the existing game logic to add leaderboard functionality
     function endGame(message) {
@@ -1030,14 +979,17 @@ document.addEventListener('DOMContentLoaded', () => {
             updateLeaderboard(name, gameTime);
         }
     }
-        }
-    }
-            updateLeaderboard(name, gameTime);
-        }
-    }
 </script>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ensure Best Time is displayed as 0:00 if not set
+        if (!localStorage.getItem('bestTimeReset')) {
+            localStorage.setItem('bestTime', 0); // Reset Best Time to 0
+            localStorage.setItem('leaderboard', JSON.stringify([])); // Clear the leaderboard data
+            localStorage.setItem('bestTimeReset', 'true'); // Flag to prevent repeated resets
+        }
         
         function formatTime(seconds) {
             if (!seconds || isNaN(seconds)) return '0:00'; // Display as 0:00 if null or invalid
@@ -1054,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ensure leaderboard is properly displayed
         updateBestTimeDisplay();
-        // Removed localStorage render leaderboard logic.
+        renderLeaderboard();
     });
 </script>
 
@@ -1064,7 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Force reset the leaderboard to an empty state
         localStorage.removeItem('leaderboard'); // Remove the leaderboard data completely
         localStorage.setItem('leaderboard', JSON.stringify([])); // Initialize as an empty array
-        // Removed localStorage render leaderboard logic. // Re-render the cleared leaderboard to reflect the changes
+        renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
     });
 </script>
 
@@ -1116,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update Best Time and re-render the leaderboard
         updateBestTimeDisplay();
-        // Removed localStorage render leaderboard logic.
+        renderLeaderboard();
     });
 </script>
 
