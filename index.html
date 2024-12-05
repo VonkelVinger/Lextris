@@ -302,9 +302,9 @@
 <script>
     // Reset the Best Time as a once-off
     document.addEventListener('DOMContentLoaded', () => {
-        if (!localStorage.getItem('bestTimeReset')) {
-            localStorage.setItem('bestTime', null); // Reset Best Time
-            localStorage.setItem('bestTimeReset', 'true'); // Flag to prevent repeated resets
+        if (!localStorage.getItem('bestTime')) {
+             // Reset Best Time
+             // Flag to prevent repeated resets
         }
     });
 </script>
@@ -802,10 +802,10 @@ function endGame(message) {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is displayed as 0:00 if not set
-        if (!localStorage.getItem('bestTimeReset')) {
-            localStorage.setItem('bestTime', 0); // Reset Best Time to 0
-            localStorage.setItem('leaderboard', JSON.stringify([])); // Clear the leaderboard data
-            localStorage.setItem('bestTimeReset', 'true'); // Flag to prevent repeated resets
+        if (!localStorage.getItem('bestTime')) {
+             // Reset Best Time to 0
+             // Clear the leaderboard data
+             // Flag to prevent repeated resets
         }
         
         function formatTime(seconds) {
@@ -816,7 +816,7 @@ function endGame(message) {
         }
 
         function updateBestTimeDisplay() {
-            const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
+            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
             const bestTimeDisplay = document.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
@@ -831,8 +831,8 @@ function endGame(message) {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Force reset the leaderboard to an empty state
-        localStorage.removeItem('leaderboard'); // Remove the leaderboard data completely
-        localStorage.setItem('leaderboard', JSON.stringify([])); // Initialize as an empty array
+         // Remove the leaderboard data completely
+         // Initialize as an empty array
         renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
     });
 </script>
@@ -842,7 +842,7 @@ function endGame(message) {
     document.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is initialized to 0 if not set
         if (!localStorage.getItem('bestTime') || isNaN(localStorage.getItem('bestTime'))) {
-            localStorage.setItem('bestTime', 0); // Set Best Time to 0 if it's missing or invalid
+             // Set Best Time to 0 if it's missing or invalid
         }
 
         function formatTime(seconds) {
@@ -853,7 +853,7 @@ function endGame(message) {
         }
 
         function updateBestTimeDisplay() {
-            const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
+            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
             const bestTimeDisplay = document.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
@@ -867,8 +867,8 @@ function endGame(message) {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Forcefully reset Best Time to 0
-        localStorage.setItem('bestTime', 0); // Set Best Time to 0
-        localStorage.setItem('leaderboard', JSON.stringify([])); // Clear the leaderboard data for consistency
+         // Set Best Time to 0
+         // Clear the leaderboard data for consistency
 
         function formatTime(seconds) {
             if (!seconds || isNaN(seconds)) return '0:00'; // Default to 0:00 if null or invalid
@@ -878,7 +878,7 @@ function endGame(message) {
         }
 
         function updateBestTimeDisplay() {
-            const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
+            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
             const bestTimeDisplay = document.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
@@ -985,10 +985,10 @@ function endGame(message) {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is displayed as 0:00 if not set
-        if (!localStorage.getItem('bestTimeReset')) {
-            localStorage.setItem('bestTime', 0); // Reset Best Time to 0
-            localStorage.setItem('leaderboard', JSON.stringify([])); // Clear the leaderboard data
-            localStorage.setItem('bestTimeReset', 'true'); // Flag to prevent repeated resets
+        if (!localStorage.getItem('bestTime')) {
+             // Reset Best Time to 0
+             // Clear the leaderboard data
+             // Flag to prevent repeated resets
         }
         
         function formatTime(seconds) {
@@ -999,7 +999,7 @@ function endGame(message) {
         }
 
         function updateBestTimeDisplay() {
-            const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
+            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
             const bestTimeDisplay = document.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
@@ -1014,8 +1014,8 @@ function endGame(message) {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Force reset the leaderboard to an empty state
-        localStorage.removeItem('leaderboard'); // Remove the leaderboard data completely
-        localStorage.setItem('leaderboard', JSON.stringify([])); // Initialize as an empty array
+         // Remove the leaderboard data completely
+         // Initialize as an empty array
         renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
     });
 </script>
@@ -1025,7 +1025,7 @@ function endGame(message) {
     document.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is initialized to 0 if not set
         if (!localStorage.getItem('bestTime') || isNaN(localStorage.getItem('bestTime'))) {
-            localStorage.setItem('bestTime', 0); // Set Best Time to 0 if it's missing or invalid
+             // Set Best Time to 0 if it's missing or invalid
         }
 
         function formatTime(seconds) {
@@ -1036,7 +1036,7 @@ function endGame(message) {
         }
 
         function updateBestTimeDisplay() {
-            const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
+            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
             const bestTimeDisplay = document.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
@@ -1050,8 +1050,8 @@ function endGame(message) {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Forcefully reset Best Time to 0
-        localStorage.setItem('bestTime', 0); // Set Best Time to 0
-        localStorage.setItem('leaderboard', JSON.stringify([])); // Clear the leaderboard data for consistency
+         // Set Best Time to 0
+         // Clear the leaderboard data for consistency
 
         function formatTime(seconds) {
             if (!seconds || isNaN(seconds)) return '0:00'; // Default to 0:00 if null or invalid
@@ -1061,7 +1061,7 @@ function endGame(message) {
         }
 
         function updateBestTimeDisplay() {
-            const bestTime = parseInt(localStorage.getItem('bestTime'), 10);
+            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
             const bestTimeDisplay = document.getElementById('best-time');
             bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
         }
