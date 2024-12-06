@@ -309,26 +309,6 @@
     });
 </script>
 
-
-<!-- Firebase App and Firestore SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script>
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-  authDomain: "leximax-96299.firebaseapp.com",
-  projectId: "leximax-96299",
-  storageBucket: "leximax-96299.appspot.com",
-  messagingSenderId: "1067424610925",
-  appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-  measurementId: "G-R4QL2RYESM"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-</script>
 </head>
 <body>
     <div class="game-wrapper">
@@ -395,12 +375,7 @@ const db = firebase.firestore();
             let gameTime = 0;
             let isPaused = false;
             let isGameOver = false;
-            let bestTime = 
-(async () => {
-    const snapshot = await db.collection('bestTime').doc('global').get();
-    return snapshot.exists ? snapshot.data().time : null;
-})();
-
+            let bestTime = localStorage.getItem('bestTime') ? parseInt(localStorage.getItem('bestTime'), 10) : null;
 
             const gameGrid = document.getElementById('game-grid');
             const timerDisplay = document.getElementById('timer');
@@ -579,9 +554,7 @@ const db = firebase.firestore();
                             isGameOver = true;
                             if (!bestTime || gameTime < bestTime) {
                                 bestTime = gameTime;
-                                
-db.collection('bestTime').doc('global').set({ time: bestTime });
-
+                                localStorage.setItem('bestTime', bestTime);
                                 updateBestTimeDisplay();
                             }
                             return;
@@ -778,19 +751,6 @@ function endGame(message) {
 
 <script>
     
-let leaderboardData = [];
-
-async function fetchLeaderboard() {
-    const snapshot = await db.collection('leaderboard').orderBy('time', 'asc').limit(10).get();
-    leaderboardData = snapshot.docs.map(doc => doc.data());
-    renderLeaderboard();
-}
-
-async function updateLeaderboard(name, time) {
-    await db.collection('leaderboard').add({ name, time });
-    await fetchLeaderboard();
-}
-
 
     function updateLeaderboard(name, time) {
         leaderboardData.push({ name, time });
@@ -973,20 +933,7 @@ async function updateLeaderboard(name, time) {
 
 
 <script>
-    
-let leaderboardData = [];
-
-async function fetchLeaderboard() {
-    const snapshot = await db.collection('leaderboard').orderBy('time', 'asc').limit(10).get();
-    leaderboardData = snapshot.docs.map(doc => doc.data());
-    renderLeaderboard();
-}
-
-async function updateLeaderboard(name, time) {
-    await db.collection('leaderboard').add({ name, time });
-    await fetchLeaderboard();
-}
-
+    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
     function updateLeaderboard(name, time) {
         leaderboardData.push({ name, time });
