@@ -367,7 +367,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'MAN';
+            let targetWord = 'CHAMPION';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -889,6 +889,88 @@ function endGame(message) {
     });
 </script>
 
+
+<script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js"></script>
+<script>
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+        authDomain: "leximax-96299.firebaseapp.com",
+        projectId: "leximax-96299",
+        storageBucket: "leximax-96299.firebasestorage.app",
+        messagingSenderId: "1067424610925",
+        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+        measurementId: "G-R4QL2RYESM"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    // Firestore collection for leaderboard
+    const leaderboardRef = db.collection('leaderboard');
+
+    async function updateLeaderboardFirestore(name, time) {
+        try {
+            // Add new entry to Firestore
+            await leaderboardRef.add({ name, time });
+
+            // Fetch and sort updated leaderboard data
+            const snapshot = await leaderboardRef.orderBy("time").limit(10).get();
+            const leaderboardData = snapshot.docs.map(doc => doc.data());
+
+            // Re-render leaderboard
+            renderLeaderboard(leaderboardData);
+        } catch (error) {
+            console.error("Error updating leaderboard:", error);
+        }
+    }
+
+    async function renderLeaderboardFirestore() {
+        try {
+            // Fetch and sort leaderboard data
+            const snapshot = await leaderboardRef.orderBy("time").limit(10).get();
+            const leaderboardData = snapshot.docs.map(doc => doc.data());
+
+            // Render leaderboard
+            const tbody = document.querySelector('#leaderboard tbody');
+            tbody.innerHTML = '';
+            leaderboardData.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td>${formatTime(entry.time)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update Best Time from top leaderboard entry
+            if (leaderboardData.length > 0) {
+                const topTime = leaderboardData[0].time;
+                updateBestTimeFirestore(topTime);
+            } else {
+                updateBestTimeFirestore(null);
+            }
+        } catch (error) {
+            console.error("Error rendering leaderboard:", error);
+        }
+    }
+
+    function updateBestTimeFirestore(topTime) {
+        const bestTimeDisplay = document.getElementById('best-time');
+        if (topTime !== null) {
+            bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(topTime)}</span>`;
+        } else {
+            bestTimeDisplay.innerHTML = '<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: --:--</span>';
+        }
+    }
+
+    // Initialize leaderboard on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        renderLeaderboardFirestore();
+    });
+</script>
+
 </body>
 </html>
     </div>
@@ -1069,6 +1151,88 @@ function endGame(message) {
         // Update Best Time and re-render the leaderboard
         updateBestTimeDisplay();
         renderLeaderboard();
+    });
+</script>
+
+
+<script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js"></script>
+<script>
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+        authDomain: "leximax-96299.firebaseapp.com",
+        projectId: "leximax-96299",
+        storageBucket: "leximax-96299.firebasestorage.app",
+        messagingSenderId: "1067424610925",
+        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+        measurementId: "G-R4QL2RYESM"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    // Firestore collection for leaderboard
+    const leaderboardRef = db.collection('leaderboard');
+
+    async function updateLeaderboardFirestore(name, time) {
+        try {
+            // Add new entry to Firestore
+            await leaderboardRef.add({ name, time });
+
+            // Fetch and sort updated leaderboard data
+            const snapshot = await leaderboardRef.orderBy("time").limit(10).get();
+            const leaderboardData = snapshot.docs.map(doc => doc.data());
+
+            // Re-render leaderboard
+            renderLeaderboard(leaderboardData);
+        } catch (error) {
+            console.error("Error updating leaderboard:", error);
+        }
+    }
+
+    async function renderLeaderboardFirestore() {
+        try {
+            // Fetch and sort leaderboard data
+            const snapshot = await leaderboardRef.orderBy("time").limit(10).get();
+            const leaderboardData = snapshot.docs.map(doc => doc.data());
+
+            // Render leaderboard
+            const tbody = document.querySelector('#leaderboard tbody');
+            tbody.innerHTML = '';
+            leaderboardData.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td>${formatTime(entry.time)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update Best Time from top leaderboard entry
+            if (leaderboardData.length > 0) {
+                const topTime = leaderboardData[0].time;
+                updateBestTimeFirestore(topTime);
+            } else {
+                updateBestTimeFirestore(null);
+            }
+        } catch (error) {
+            console.error("Error rendering leaderboard:", error);
+        }
+    }
+
+    function updateBestTimeFirestore(topTime) {
+        const bestTimeDisplay = document.getElementById('best-time');
+        if (topTime !== null) {
+            bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(topTime)}</span>`;
+        } else {
+            bestTimeDisplay.innerHTML = '<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: --:--</span>';
+        }
+    }
+
+    // Initialize leaderboard on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        renderLeaderboardFirestore();
     });
 </script>
 
