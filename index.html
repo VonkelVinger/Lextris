@@ -309,12 +309,6 @@
     });
 </script>
 
-
-<script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js?v=1.0.4"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js?v=1.0.4"></script>
-<script src="main.js?v=1.0.4"></script>
-<link rel="stylesheet" href="styles.css?v=1.0.4">
-
 </head>
 <body>
     <div class="game-wrapper">
@@ -373,7 +367,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'BLISSFUL';
+            let targetWord = 'MAN';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -897,7 +891,6 @@ function endGame(message) {
 
 
 <script>
-    // Initialize Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
         authDomain: "leximax-96299.firebaseapp.com",
@@ -911,77 +904,9 @@ function endGame(message) {
     const db = firebase.firestore(app);
     const leaderboardRef = db.collection('leaderboard');
 
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log('Attempting to write to Firestore:', { name, time });
-            await leaderboardRef.add({ name, time });
-            console.log('Successfully wrote to Firestore.');
-            renderLeaderboardFirestore(); // Re-render after update
-        } catch (error) {
-            console.error("Error updating leaderboard:", error);
-        }
-    }
-
-    async function renderLeaderboardFirestore() {
-        try {
-            console.log('Fetching leaderboard data from Firestore...');
-            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
-            const leaderboardData = snapshot.docs.map(doc => doc.data());
-            console.log('Fetched leaderboard data:', leaderboardData);
-
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-            leaderboardData.forEach((entry, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.name}</td>
-                    <td>${entry.time}</td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            if (leaderboardData.length > 0) {
-                const bestTimeDisplay = document.getElementById('best-time');
-                bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-            } else {
-                console.log("No data in leaderboard.");
-            }
-        } catch (error) {
-            console.error("Error rendering leaderboard:", error);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        renderLeaderboardFirestore(); // Ensure fresh data on page load
-    });
-</script>
-
-
-<script>
-    const currentVersion = "1.0.4"; // Increment this for each new deployment
-    const storedVersion = localStorage.getItem("appVersion");
-
-    if (storedVersion !== currentVersion) {
-        console.log("Version mismatch detected. Clearing localStorage...");
-        localStorage.clear();
-        localStorage.setItem("appVersion", currentVersion);
-    }
-
-    // Ensure Firestore always fetches fresh data
-    async function fetchLeaderboardData() {
-        console.log("Fetching leaderboard data from server...");
-        try {
-            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
-            return snapshot.docs.map(doc => doc.data());
-        } catch (error) {
-            console.error("Error fetching data from Firestore:", error);
-            return [];
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        const leaderboardData = await fetchLeaderboardData();
+    // Real-time listener for leaderboard data
+    leaderboardRef.orderBy("time").limit(10).onSnapshot((snapshot) => {
+        const leaderboardData = snapshot.docs.map(doc => doc.data());
         const tbody = document.querySelector('#leaderboard tbody');
         tbody.innerHTML = '';
         leaderboardData.forEach((entry, index) => {
@@ -1001,6 +926,16 @@ function endGame(message) {
             console.log("No leaderboard data found.");
         }
     });
+
+    async function updateLeaderboardFirestore(name, time) {
+        try {
+            console.log('Attempting to write to Firestore:', { name, time });
+            await leaderboardRef.add({ name, time });
+            console.log('Successfully wrote to Firestore.');
+        } catch (error) {
+            console.error("Error updating leaderboard:", error);
+        }
+    }
 </script>
 
 </body>
@@ -1188,7 +1123,6 @@ function endGame(message) {
 
 
 <script>
-    // Initialize Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
         authDomain: "leximax-96299.firebaseapp.com",
@@ -1202,77 +1136,9 @@ function endGame(message) {
     const db = firebase.firestore(app);
     const leaderboardRef = db.collection('leaderboard');
 
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log('Attempting to write to Firestore:', { name, time });
-            await leaderboardRef.add({ name, time });
-            console.log('Successfully wrote to Firestore.');
-            renderLeaderboardFirestore(); // Re-render after update
-        } catch (error) {
-            console.error("Error updating leaderboard:", error);
-        }
-    }
-
-    async function renderLeaderboardFirestore() {
-        try {
-            console.log('Fetching leaderboard data from Firestore...');
-            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
-            const leaderboardData = snapshot.docs.map(doc => doc.data());
-            console.log('Fetched leaderboard data:', leaderboardData);
-
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-            leaderboardData.forEach((entry, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.name}</td>
-                    <td>${entry.time}</td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            if (leaderboardData.length > 0) {
-                const bestTimeDisplay = document.getElementById('best-time');
-                bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-            } else {
-                console.log("No data in leaderboard.");
-            }
-        } catch (error) {
-            console.error("Error rendering leaderboard:", error);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        renderLeaderboardFirestore(); // Ensure fresh data on page load
-    });
-</script>
-
-
-<script>
-    const currentVersion = "1.0.4"; // Increment this for each new deployment
-    const storedVersion = localStorage.getItem("appVersion");
-
-    if (storedVersion !== currentVersion) {
-        console.log("Version mismatch detected. Clearing localStorage...");
-        localStorage.clear();
-        localStorage.setItem("appVersion", currentVersion);
-    }
-
-    // Ensure Firestore always fetches fresh data
-    async function fetchLeaderboardData() {
-        console.log("Fetching leaderboard data from server...");
-        try {
-            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
-            return snapshot.docs.map(doc => doc.data());
-        } catch (error) {
-            console.error("Error fetching data from Firestore:", error);
-            return [];
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        const leaderboardData = await fetchLeaderboardData();
+    // Real-time listener for leaderboard data
+    leaderboardRef.orderBy("time").limit(10).onSnapshot((snapshot) => {
+        const leaderboardData = snapshot.docs.map(doc => doc.data());
         const tbody = document.querySelector('#leaderboard tbody');
         tbody.innerHTML = '';
         leaderboardData.forEach((entry, index) => {
@@ -1292,6 +1158,16 @@ function endGame(message) {
             console.log("No leaderboard data found.");
         }
     });
+
+    async function updateLeaderboardFirestore(name, time) {
+        try {
+            console.log('Attempting to write to Firestore:', { name, time });
+            await leaderboardRef.add({ name, time });
+            console.log('Successfully wrote to Firestore.');
+        } catch (error) {
+            console.error("Error updating leaderboard:", error);
+        }
+    }
 </script>
 
 </body>
