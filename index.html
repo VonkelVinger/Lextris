@@ -309,6 +309,26 @@
     });
 </script>
 
+
+<!-- Firebase App and Firestore SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+  authDomain: "leximax-96299.firebaseapp.com",
+  projectId: "leximax-96299",
+  storageBucket: "leximax-96299.appspot.com",
+  messagingSenderId: "1067424610925",
+  appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+  measurementId: "G-R4QL2RYESM"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+</script>
 </head>
 <body>
     <div class="game-wrapper">
@@ -367,7 +387,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'QUESTION';
+            let targetWord = 'MAN';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -375,7 +395,12 @@
             let gameTime = 0;
             let isPaused = false;
             let isGameOver = false;
-            let bestTime = localStorage.getItem('bestTime') ? parseInt(localStorage.getItem('bestTime'), 10) : null;
+            let bestTime = 
+(async () => {
+    const snapshot = await db.collection('bestTime').doc('global').get();
+    return snapshot.exists ? snapshot.data().time : null;
+})();
+
 
             const gameGrid = document.getElementById('game-grid');
             const timerDisplay = document.getElementById('timer');
@@ -554,7 +579,9 @@
                             isGameOver = true;
                             if (!bestTime || gameTime < bestTime) {
                                 bestTime = gameTime;
-                                localStorage.setItem('bestTime', bestTime);
+                                
+db.collection('bestTime').doc('global').set({ time: bestTime });
+
                                 updateBestTimeDisplay();
                             }
                             return;
@@ -750,7 +777,20 @@ function endGame(message) {
 </table>
 
 <script>
-    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    
+let leaderboardData = [];
+
+async function fetchLeaderboard() {
+    const snapshot = await db.collection('leaderboard').orderBy('time', 'asc').limit(10).get();
+    leaderboardData = snapshot.docs.map(doc => doc.data());
+    renderLeaderboard();
+}
+
+async function updateLeaderboard(name, time) {
+    await db.collection('leaderboard').add({ name, time });
+    await fetchLeaderboard();
+}
+
 
     function updateLeaderboard(name, time) {
         leaderboardData.push({ name, time });
@@ -886,194 +926,6 @@ function endGame(message) {
         // Update Best Time and re-render the leaderboard
         updateBestTimeDisplay();
         renderLeaderboard();
-    });
-</script>
-
-
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
-
-<script>
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Update leaderboard in Firestore
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            const leaderboardRef = db.collection('leaderboard');
-            await leaderboardRef.add({ name, time, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            renderLeaderboardFirestore();
-        } catch (error) {
-            console.error("Error updating leaderboard: ", error);
-        }
-    }
-
-    // Render leaderboard from Firestore
-    async function renderLeaderboardFirestore() {
-        try {
-            const leaderboardRef = db.collection('leaderboard').orderBy('time', 'asc').limit(10);
-            const querySnapshot = await leaderboardRef.get();
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-
-            let rank = 1;
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${rank}</td><td>${data.name}</td><td>${formatTime(data.time)}</td>`;
-                tbody.appendChild(row);
-                rank++;
-            });
-        } catch (error) {
-            console.error("Error rendering leaderboard: ", error);
-        }
-    }
-
-    // Update best time in Firestore
-    async function updateBestTimeFirestore(time) {
-        try {
-            const bestTimeRef = db.collection('bestTime').doc('record');
-            const docSnapshot = await bestTimeRef.get();
-            if (!docSnapshot.exists || time < docSnapshot.data().time) {
-                await bestTimeRef.set({ time });
-                renderBestTimeFirestore();
-            }
-        } catch (error) {
-            console.error("Error updating best time: ", error);
-        }
-    }
-
-    // Render best time from Firestore
-    async function renderBestTimeFirestore() {
-        try {
-            const bestTimeRef = db.collection('bestTime').doc('record');
-            const docSnapshot = await bestTimeRef.get();
-            if (docSnapshot.exists) {
-                const bestTimeDisplay = document.getElementById('best-time');
-                bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(docSnapshot.data().time)}</span>`;
-            }
-        } catch (error) {
-            console.error("Error rendering best time: ", error);
-        }
-    }
-
-    // Integrate with game logic
-    document.addEventListener('DOMContentLoaded', () => {
-        renderLeaderboardFirestore();
-        renderBestTimeFirestore();
-
-        // Replace localStorage calls with Firestore updates
-        window.updateLeaderboard = updateLeaderboardFirestore;
-        window.updateBestTime = updateBestTimeFirestore;
-    });
-</script>
-
-
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
-
-<script>
-    // Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Helper functions
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-
-    // Firestore integration for Best Time
-    async function updateBestTimeFirestore(time) {
-        try {
-            const bestTimeRef = db.collection('bestTime').doc('record');
-            const docSnapshot = await bestTimeRef.get();
-            if (!docSnapshot.exists || time < docSnapshot.data().time) {
-                await bestTimeRef.set({ time });
-                renderBestTimeFirestore();
-            }
-        } catch (error) {
-            console.error("Error updating best time: ", error);
-        }
-    }
-
-    async function renderBestTimeFirestore() {
-        try {
-            const bestTimeRef = db.collection('bestTime').doc('record');
-            const docSnapshot = await bestTimeRef.get();
-            const bestTimeDisplay = document.getElementById('best-time');
-            if (docSnapshot.exists) {
-                bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(docSnapshot.data().time)}</span>`;
-            } else {
-                bestTimeDisplay.textContent = 'Best Time: --:--';
-            }
-        } catch (error) {
-            console.error("Error rendering best time: ", error);
-        }
-    }
-
-    // Firestore integration for Leaderboard
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            const leaderboardRef = db.collection('leaderboard');
-            await leaderboardRef.add({ name, time, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            renderLeaderboardFirestore();
-        } catch (error) {
-            console.error("Error updating leaderboard: ", error);
-        }
-    }
-
-    async function renderLeaderboardFirestore() {
-        try {
-            const leaderboardRef = db.collection('leaderboard').orderBy('time', 'asc').limit(10);
-            const querySnapshot = await leaderboardRef.get();
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-
-            let rank = 1;
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${rank}</td><td>${data.name}</td><td>${formatTime(data.time)}</td>`;
-                tbody.appendChild(row);
-                rank++;
-            });
-        } catch (error) {
-            console.error("Error rendering leaderboard: ", error);
-        }
-    }
-
-    // Hook into game logic
-    document.addEventListener('DOMContentLoaded', () => {
-        renderBestTimeFirestore();
-        renderLeaderboardFirestore();
-
-        // Update global references for game logic
-        window.updateBestTime = updateBestTimeFirestore;
-        window.updateLeaderboard = updateLeaderboardFirestore;
     });
 </script>
 
@@ -1121,7 +973,20 @@ function endGame(message) {
 
 
 <script>
-    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    
+let leaderboardData = [];
+
+async function fetchLeaderboard() {
+    const snapshot = await db.collection('leaderboard').orderBy('time', 'asc').limit(10).get();
+    leaderboardData = snapshot.docs.map(doc => doc.data());
+    renderLeaderboard();
+}
+
+async function updateLeaderboard(name, time) {
+    await db.collection('leaderboard').add({ name, time });
+    await fetchLeaderboard();
+}
+
 
     function updateLeaderboard(name, time) {
         leaderboardData.push({ name, time });
@@ -1257,194 +1122,6 @@ function endGame(message) {
         // Update Best Time and re-render the leaderboard
         updateBestTimeDisplay();
         renderLeaderboard();
-    });
-</script>
-
-
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
-
-<script>
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Update leaderboard in Firestore
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            const leaderboardRef = db.collection('leaderboard');
-            await leaderboardRef.add({ name, time, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            renderLeaderboardFirestore();
-        } catch (error) {
-            console.error("Error updating leaderboard: ", error);
-        }
-    }
-
-    // Render leaderboard from Firestore
-    async function renderLeaderboardFirestore() {
-        try {
-            const leaderboardRef = db.collection('leaderboard').orderBy('time', 'asc').limit(10);
-            const querySnapshot = await leaderboardRef.get();
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-
-            let rank = 1;
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${rank}</td><td>${data.name}</td><td>${formatTime(data.time)}</td>`;
-                tbody.appendChild(row);
-                rank++;
-            });
-        } catch (error) {
-            console.error("Error rendering leaderboard: ", error);
-        }
-    }
-
-    // Update best time in Firestore
-    async function updateBestTimeFirestore(time) {
-        try {
-            const bestTimeRef = db.collection('bestTime').doc('record');
-            const docSnapshot = await bestTimeRef.get();
-            if (!docSnapshot.exists || time < docSnapshot.data().time) {
-                await bestTimeRef.set({ time });
-                renderBestTimeFirestore();
-            }
-        } catch (error) {
-            console.error("Error updating best time: ", error);
-        }
-    }
-
-    // Render best time from Firestore
-    async function renderBestTimeFirestore() {
-        try {
-            const bestTimeRef = db.collection('bestTime').doc('record');
-            const docSnapshot = await bestTimeRef.get();
-            if (docSnapshot.exists) {
-                const bestTimeDisplay = document.getElementById('best-time');
-                bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(docSnapshot.data().time)}</span>`;
-            }
-        } catch (error) {
-            console.error("Error rendering best time: ", error);
-        }
-    }
-
-    // Integrate with game logic
-    document.addEventListener('DOMContentLoaded', () => {
-        renderLeaderboardFirestore();
-        renderBestTimeFirestore();
-
-        // Replace localStorage calls with Firestore updates
-        window.updateLeaderboard = updateLeaderboardFirestore;
-        window.updateBestTime = updateBestTimeFirestore;
-    });
-</script>
-
-
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
-
-<script>
-    // Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Helper functions
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-
-    // Firestore integration for Best Time
-    async function updateBestTimeFirestore(time) {
-        try {
-            const bestTimeRef = db.collection('bestTime').doc('record');
-            const docSnapshot = await bestTimeRef.get();
-            if (!docSnapshot.exists || time < docSnapshot.data().time) {
-                await bestTimeRef.set({ time });
-                renderBestTimeFirestore();
-            }
-        } catch (error) {
-            console.error("Error updating best time: ", error);
-        }
-    }
-
-    async function renderBestTimeFirestore() {
-        try {
-            const bestTimeRef = db.collection('bestTime').doc('record');
-            const docSnapshot = await bestTimeRef.get();
-            const bestTimeDisplay = document.getElementById('best-time');
-            if (docSnapshot.exists) {
-                bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(docSnapshot.data().time)}</span>`;
-            } else {
-                bestTimeDisplay.textContent = 'Best Time: --:--';
-            }
-        } catch (error) {
-            console.error("Error rendering best time: ", error);
-        }
-    }
-
-    // Firestore integration for Leaderboard
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            const leaderboardRef = db.collection('leaderboard');
-            await leaderboardRef.add({ name, time, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            renderLeaderboardFirestore();
-        } catch (error) {
-            console.error("Error updating leaderboard: ", error);
-        }
-    }
-
-    async function renderLeaderboardFirestore() {
-        try {
-            const leaderboardRef = db.collection('leaderboard').orderBy('time', 'asc').limit(10);
-            const querySnapshot = await leaderboardRef.get();
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-
-            let rank = 1;
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${rank}</td><td>${data.name}</td><td>${formatTime(data.time)}</td>`;
-                tbody.appendChild(row);
-                rank++;
-            });
-        } catch (error) {
-            console.error("Error rendering leaderboard: ", error);
-        }
-    }
-
-    // Hook into game logic
-    document.addEventListener('DOMContentLoaded', () => {
-        renderBestTimeFirestore();
-        renderLeaderboardFirestore();
-
-        // Update global references for game logic
-        window.updateBestTime = updateBestTimeFirestore;
-        window.updateLeaderboard = updateLeaderboardFirestore;
     });
 </script>
 
