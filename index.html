@@ -367,7 +367,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'SCHEDULE';
+            let targetWord = 'MAN';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -994,6 +994,75 @@ function endGame(message) {
     }
 </script>
 
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+        authDomain: "leximax-96299.firebaseapp.com",
+        projectId: "leximax-96299",
+        storageBucket: "leximax-96299.firebasestorage.app",
+        messagingSenderId: "1067424610925",
+        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+        measurementId: "G-R4QL2RYESM"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    // Log Firestore connection status
+    console.log("Initializing Firestore...");
+    const leaderboardRef = db.collection('leaderboard');
+
+    // Real-time listener with metadata logging
+    leaderboardRef.orderBy("time").limit(10).onSnapshot((snapshot) => {
+        console.log("Real-time listener triggered.");
+        console.log("Snapshot metadata:", snapshot.metadata);
+        const leaderboardData = snapshot.docs.map(doc => doc.data());
+        console.log("Fetched leaderboard data:", leaderboardData);
+
+        const tbody = document.querySelector('#leaderboard tbody');
+        tbody.innerHTML = '';
+        leaderboardData.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${entry.name}</td>
+                <td>${entry.time}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (leaderboardData.length > 0) {
+            const bestTimeDisplay = document.getElementById('best-time');
+            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
+        } else {
+            console.log("No leaderboard data found.");
+        }
+    });
+
+    async function updateLeaderboardFirestore(name, time) {
+        try {
+            console.log("Attempting to write to Firestore:", { name, time });
+            const response = await leaderboardRef.add({ name, time });
+            console.log("Write successful. Firestore response:", response);
+        } catch (error) {
+            console.error("Error updating Firestore:", error);
+        }
+    }
+
+    // Debugging Firestore writes
+    async function fetchLeaderboardData() {
+        try {
+            console.log("Forcing server fetch for leaderboard data...");
+            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
+            console.log("Fetched from server. Metadata:", snapshot.metadata);
+            return snapshot.docs.map(doc => doc.data());
+        } catch (error) {
+            console.error("Error fetching leaderboard data from server:", error);
+            return [];
+        }
+    }
+</script>
+
 </body>
 </html>
     </div>
@@ -1278,6 +1347,75 @@ function endGame(message) {
             console.log('Write successful.');
         } catch (error) {
             console.error("Error updating Firestore:", error);
+        }
+    }
+</script>
+
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+        authDomain: "leximax-96299.firebaseapp.com",
+        projectId: "leximax-96299",
+        storageBucket: "leximax-96299.firebasestorage.app",
+        messagingSenderId: "1067424610925",
+        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+        measurementId: "G-R4QL2RYESM"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    // Log Firestore connection status
+    console.log("Initializing Firestore...");
+    const leaderboardRef = db.collection('leaderboard');
+
+    // Real-time listener with metadata logging
+    leaderboardRef.orderBy("time").limit(10).onSnapshot((snapshot) => {
+        console.log("Real-time listener triggered.");
+        console.log("Snapshot metadata:", snapshot.metadata);
+        const leaderboardData = snapshot.docs.map(doc => doc.data());
+        console.log("Fetched leaderboard data:", leaderboardData);
+
+        const tbody = document.querySelector('#leaderboard tbody');
+        tbody.innerHTML = '';
+        leaderboardData.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${entry.name}</td>
+                <td>${entry.time}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (leaderboardData.length > 0) {
+            const bestTimeDisplay = document.getElementById('best-time');
+            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
+        } else {
+            console.log("No leaderboard data found.");
+        }
+    });
+
+    async function updateLeaderboardFirestore(name, time) {
+        try {
+            console.log("Attempting to write to Firestore:", { name, time });
+            const response = await leaderboardRef.add({ name, time });
+            console.log("Write successful. Firestore response:", response);
+        } catch (error) {
+            console.error("Error updating Firestore:", error);
+        }
+    }
+
+    // Debugging Firestore writes
+    async function fetchLeaderboardData() {
+        try {
+            console.log("Forcing server fetch for leaderboard data...");
+            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
+            console.log("Fetched from server. Metadata:", snapshot.metadata);
+            return snapshot.docs.map(doc => doc.data());
+        } catch (error) {
+            console.error("Error fetching leaderboard data from server:", error);
+            return [];
         }
     }
 </script>
