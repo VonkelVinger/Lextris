@@ -1063,6 +1063,80 @@ function endGame(message) {
     }
 </script>
 
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+        authDomain: "leximax-96299.firebaseapp.com",
+        projectId: "leximax-96299",
+        storageBucket: "leximax-96299.firebasestorage.app",
+        messagingSenderId: "1067424610925",
+        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+        measurementId: "G-R4QL2RYESM"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    // Force Firestore to enable network for synchronization
+    db.enableNetwork()
+        .then(() => console.log("Firestore network enabled."))
+        .catch(error => console.error("Error enabling Firestore network:", error));
+
+    const leaderboardRef = db.collection('leaderboard');
+
+    // Enhanced real-time listener with detailed logging
+    leaderboardRef.orderBy("time").limit(10).onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
+        console.log("Real-time listener triggered.");
+        console.log("Snapshot metadata:", snapshot.metadata);
+        const leaderboardData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        console.log("Fetched leaderboard data:", leaderboardData);
+
+        const tbody = document.querySelector('#leaderboard tbody');
+        tbody.innerHTML = '';
+        leaderboardData.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${entry.name}</td>
+                <td>${entry.time}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (leaderboardData.length > 0) {
+            const bestTimeDisplay = document.getElementById('best-time');
+            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
+        } else {
+            console.log("No leaderboard data found.");
+        }
+    });
+
+    async function updateLeaderboardFirestore(name, time) {
+        try {
+            console.log("Attempting to write to Firestore:", { name, time });
+            const response = await leaderboardRef.add({ name, time });
+            console.log("Write successful. Firestore response ID:", response.id);
+        } catch (error) {
+            console.error("Error updating Firestore:", error);
+        }
+    }
+
+    async function fetchLeaderboardData() {
+        try {
+            console.log("Forcing server fetch for leaderboard data...");
+            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
+            console.log("Fetched from server. Metadata:", snapshot.metadata);
+            return snapshot.docs.map(doc => doc.data());
+        } catch (error) {
+            console.error("Error fetching leaderboard data from server:", error);
+            return [];
+        }
+    }
+</script>
+
 </body>
 </html>
     </div>
@@ -1407,6 +1481,80 @@ function endGame(message) {
     }
 
     // Debugging Firestore writes
+    async function fetchLeaderboardData() {
+        try {
+            console.log("Forcing server fetch for leaderboard data...");
+            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
+            console.log("Fetched from server. Metadata:", snapshot.metadata);
+            return snapshot.docs.map(doc => doc.data());
+        } catch (error) {
+            console.error("Error fetching leaderboard data from server:", error);
+            return [];
+        }
+    }
+</script>
+
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+        authDomain: "leximax-96299.firebaseapp.com",
+        projectId: "leximax-96299",
+        storageBucket: "leximax-96299.firebasestorage.app",
+        messagingSenderId: "1067424610925",
+        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+        measurementId: "G-R4QL2RYESM"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    // Force Firestore to enable network for synchronization
+    db.enableNetwork()
+        .then(() => console.log("Firestore network enabled."))
+        .catch(error => console.error("Error enabling Firestore network:", error));
+
+    const leaderboardRef = db.collection('leaderboard');
+
+    // Enhanced real-time listener with detailed logging
+    leaderboardRef.orderBy("time").limit(10).onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
+        console.log("Real-time listener triggered.");
+        console.log("Snapshot metadata:", snapshot.metadata);
+        const leaderboardData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        console.log("Fetched leaderboard data:", leaderboardData);
+
+        const tbody = document.querySelector('#leaderboard tbody');
+        tbody.innerHTML = '';
+        leaderboardData.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${entry.name}</td>
+                <td>${entry.time}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (leaderboardData.length > 0) {
+            const bestTimeDisplay = document.getElementById('best-time');
+            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
+        } else {
+            console.log("No leaderboard data found.");
+        }
+    });
+
+    async function updateLeaderboardFirestore(name, time) {
+        try {
+            console.log("Attempting to write to Firestore:", { name, time });
+            const response = await leaderboardRef.add({ name, time });
+            console.log("Write successful. Firestore response ID:", response.id);
+        } catch (error) {
+            console.error("Error updating Firestore:", error);
+        }
+    }
+
     async function fetchLeaderboardData() {
         try {
             console.log("Forcing server fetch for leaderboard data...");
