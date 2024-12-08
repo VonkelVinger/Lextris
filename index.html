@@ -383,7 +383,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'MAX';
+            let targetWord = 'MIX';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -1083,6 +1083,84 @@ function endGame(message) {
             console.log("Using existing Firebase app instance.");
             firebase.app(); // Use existing app if already initialized
         }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const db = firebase.firestore();
+        const bestTimeRef = db.collection('bestTime').doc('global');
+        const leaderboardRef = db.collection('leaderboard');
+
+        // Function to update Best Time in Firestore
+        async function saveBestTime(time) {
+            try {
+                await bestTimeRef.set({ time }, { merge: true });
+                console.log("Best Time saved to Firestore:", time);
+            } catch (error) {
+                console.error("Error saving Best Time to Firestore:", error);
+            }
+        }
+
+        // Function to fetch Best Time from Firestore
+        async function fetchBestTime() {
+            try {
+                const doc = await bestTimeRef.get();
+                return doc.exists ? doc.data().time : null;
+            } catch (error) {
+                console.error("Error fetching Best Time from Firestore:", error);
+                return null;
+            }
+        }
+
+        // Real-time listener for Best Time
+        bestTimeRef.onSnapshot(doc => {
+            if (doc.exists) {
+                const time = doc.data().time;
+                document.getElementById('best-time').innerHTML = 
+                    `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(time)}</span>`;
+            }
+        });
+
+        // Function to update leaderboard in Firestore
+        async function updateLeaderboardFirestore(name, time) {
+            try {
+                await leaderboardRef.add({ name, time });
+                console.log("Leaderboard updated in Firestore for:", name, time);
+            } catch (error) {
+                console.error("Error updating leaderboard in Firestore:", error);
+            }
+        }
+
+        // Real-time listener for leaderboard
+        leaderboardRef.orderBy("time").limit(10).onSnapshot(snapshot => {
+            const leaderboardData = snapshot.docs.map(doc => doc.data());
+            const tbody = document.querySelector('#leaderboard tbody');
+            tbody.innerHTML = '';
+            leaderboardData.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${index + 1}</td><td>${entry.name}</td><td>${formatTime(entry.time)}</td>`;
+                tbody.appendChild(row);
+            });
+        });
+
+        // Format time for display
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        // Hook into game end logic for Firestore updates
+        document.addEventListener('gameEnd', (event) => {
+            const { name, time } = event.detail;
+            fetchBestTime().then(currentBest => {
+                if (!currentBest || time < currentBest) {
+                    saveBestTime(time);
+                }
+            });
+            updateLeaderboardFirestore(name, time);
+        });
     });
 </script>
 </body>
