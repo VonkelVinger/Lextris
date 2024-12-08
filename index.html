@@ -1,9 +1,29 @@
 <body>
-    
-    <div id="game-container">
-       <!DOCTYPE html>
+<script>
+    // Firebase configuration object
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+        authDomain: "leximax-96299.firebaseapp.com",
+        projectId: "leximax-96299",
+        storageBucket: "leximax-96299.appspot.com",
+        messagingSenderId: "1067424610925",
+        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
+        measurementId: "G-R4QL2RYESM"
+    };
+</script>
+
+
+<div id="game-container">
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
+<script defer="" src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script defer="" src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+
+
+
 <style>
     #timer, #best-time {
         font-family: Arial, sans-serif !important;
@@ -24,7 +44,6 @@
         color: #ffffff !important;
     }
 </style>
-
 <style>
     #timer {
         font-family: Arial, sans-serif !important;
@@ -44,7 +63,6 @@
         color: #ffffff !important;
     }
 </style>
-
 <style>
     #best-time {
         font-family: Arial, sans-serif !important;
@@ -64,11 +82,10 @@
         color: #ffffff !important;
     }
 </style>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
-    <title>LEXIMAX</title>
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=no, initial-scale=1.0, maximum-scale=1.0" name="viewport"/>
+<title>LEXIMAX</title>
+<style>
         * {
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
@@ -289,7 +306,6 @@
             margin-bottom: 8px;
         }
     </style>
-
 <style>
     #leaderboard {
         margin-top: 40px; /* Increased from 20px to 40px for extra whitespace */
@@ -298,7 +314,6 @@
         text-transform: uppercase; /* Ensure LEADERBOARD is displayed in uppercase */
     }
 </style>
-
 <script>
     // Reset the Best Time as a once-off
     document.addEventListener('DOMContentLoaded', () => {
@@ -310,153 +325,65 @@
 </script>
 
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script>
-    (function() {
-        // Ensure Firebase Configuration and Initialization is done only once
-        if (typeof window.firebaseConfig === 'undefined') {
-            window.firebaseConfig = {
-                apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-                authDomain: "leximax-96299.firebaseapp.com",
-                projectId: "leximax-96299",
-                storageBucket: "leximax-96299.appspot.com",
-                messagingSenderId: "1067424610925",
-                appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-                measurementId: "G-R4QL2RYESM"
-            };
-
-            // Initialize Firebase only if it hasn't been initialized
-            if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-                try {
-                    firebase.initializeApp(window.firebaseConfig);
-                } catch (e) {
-                    if (e.code !== "app/duplicate-app") {
-                        console.error("Firebase initialization error:", e);
-                    }
-                }
-            }
-        }
-
-        // Firestore reference, scoped locally within the function
-        let db;
-        if (typeof window.db === 'undefined') {
-            db = firebase.firestore();
-            window.db = db; // Store reference globally to prevent re-initialization
-        } else {
-            db = window.db;
-        }
-
-        const leaderboardRef = db.collection('leaderboard');
-
-        let bestTime = null;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const bestTimeDisplay = document.getElementById('best-time');
-
-            // Real-time listener for leaderboard data
-            leaderboardRef.orderBy("time").limit(10).onSnapshot(snapshot => {
-                const leaderboardData = snapshot.docs.map(doc => doc.data());
-                const tbody = document.querySelector('#leaderboard tbody');
-                tbody.innerHTML = '';
-                leaderboardData.forEach((entry, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${entry.name}</td>
-                        <td>${formatTime(entry.time)}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-
-                if (leaderboardData.length > 0) {
-                    bestTime = leaderboardData[0].time;
-                    bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-                }
-            });
-
-            // Hook into the existing game end logic
-            document.addEventListener('gameEnd', (event) => {
-                const { name, time } = event.detail;
-                updateLeaderboardFirestore(name, time);
-            });
-        });
-
-        async function updateLeaderboardFirestore(name, time) {
-            try {
-                await leaderboardRef.add({ name, time });
-            } catch (error) {
-                console.error("Error updating leaderboard:", error);
-            }
-        }
-
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-    })();
-</script>
 
 </head>
 <body>
-    <div class="game-wrapper">
-        <div id="leximax-title" class="title-blocks">
-            <div class="block" style="background-color: #0288d1;">L</div>
-            <div class="block" style="background-color: #e53935;">E</div>
-            <div class="block" style="background-color: #43a047;">X</div>
-            <div class="block" style="background-color: #ffb300;">I</div>
-            <div class="block" style="background-color: #8e24aa;">M</div>
-            <div class="block" style="background-color: #003366;">A</div>
-            <div class="block" style="background-color: #009688;">X</div>
-           
-        </div>
-        <div id="target-word-container">
-            <div id="target-word-label">TARGET WORD:</div>
-            <div id="target-word"></div>
-        </div>
-        <div id="game-container">
-            <div id="game-grid"></div>
-        </div>
-        <div id="mobile-controls">
-            <div class="mobile-btn" id="left-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M10 19l-7-7 7-7v4h11v6H10v4z"/>
-                </svg>
-            </div>
-            <div class="mobile-btn" id="drop-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M19 10l-7 7-7-7h4V3h6v7h4z"/>
-                </svg>
-            </div>
-            <div class="mobile-btn" id="right-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M14 5l7 7-7 7v-4H3v-6h11V5z"/>
-                </svg>
-            </div>
-        </div>
-        <div id="time-container" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 10px;">
-            <div id="timer" style="display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; font-size: 18px; background-color: #004d40; padding: 10px 15px; border-radius: 10px; color: #ffffff;">
-                <span style="font-size: 24px; color: #004d40;">⏱</span>
-                <span style="color: #004d40;">Time: 00:00</span>
-            </div>
-            <div id="best-time" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 18px; background-color: #ffebee; padding: 5px 10px; border-radius: 8px;">
-                <span style="font-size: 20px; color: #d32f2f;">🏆</span>
-                <span style="color: #d32f2f;">Best Time: --:--</span>
-            </div>
-        </div>
-        <div id="controls">
-            <button id="start-btn">START</button>
-            <button id="pause-btn">PAUSE</button>
-                </div>
-    <script>
+<div class="game-wrapper">
+<div class="title-blocks" id="leximax-title">
+<div class="block" style="background-color: #0288d1;">L</div>
+<div class="block" style="background-color: #e53935;">E</div>
+<div class="block" style="background-color: #43a047;">X</div>
+<div class="block" style="background-color: #ffb300;">I</div>
+<div class="block" style="background-color: #8e24aa;">M</div>
+<div class="block" style="background-color: #003366;">A</div>
+<div class="block" style="background-color: #009688;">X</div>
+</div>
+<div id="target-word-container">
+<div id="target-word-label">TARGET WORD:</div>
+<div id="target-word"></div>
+</div>
+<div id="game-container">
+<div id="game-grid"></div>
+</div>
+<div id="mobile-controls">
+<div class="mobile-btn" id="left-btn">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 19l-7-7 7-7v4h11v6H10v4z"></path>
+</svg>
+</div>
+<div class="mobile-btn" id="drop-btn">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 10l-7 7-7-7h4V3h6v7h4z"></path>
+</svg>
+</div>
+<div class="mobile-btn" id="right-btn">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M14 5l7 7-7 7v-4H3v-6h11V5z"></path>
+</svg>
+</div>
+</div>
+<div id="time-container" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 10px;">
+<div id="timer" style="display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; font-size: 18px; background-color: #004d40; padding: 10px 15px; border-radius: 10px; color: #ffffff;">
+<span style="font-size: 24px; color: #004d40;">⏱</span>
+<span style="color: #004d40;">Time: 00:00</span>
+</div>
+<div id="best-time" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 18px; background-color: #ffebee; padding: 5px 10px; border-radius: 8px;">
+<span style="font-size: 20px; color: #d32f2f;">🏆</span>
+<span style="color: #d32f2f;">Best Time: --:--</span>
+</div>
+</div>
+<div id="controls">
+<button id="start-btn">START</button>
+<button id="pause-btn">PAUSE</button>
+</div>
+<script>
         document.addEventListener('DOMContentLoaded', () => {
             const GRID_WIDTH = 8;
             const GRID_HEIGHT = 10;
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'MAN';
+            let targetWord = 'MAX';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -786,7 +713,6 @@ function endGame(message) {
             updateBestTimeDisplay();
         });
     </script>
-
 <style>
     #leaderboard {
         width: 100%;
@@ -823,21 +749,19 @@ function endGame(message) {
         background-color: #ddd;
     }
 </style>
-
 <table id="leaderboard">
-    <caption>Leaderboard</caption>
-    <thead>
-        <tr>
-            <th>Rank</th>
-            <th>Name</th>
-            <th>Time</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Leaderboard rows will be populated dynamically -->
-    </tbody>
+<caption>Leaderboard</caption>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Name</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<!-- Leaderboard rows will be populated dynamically -->
+</tbody>
 </table>
-
 <script>
     
 
@@ -886,8 +810,6 @@ function endGame(message) {
         }
     }
 </script>
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is displayed as 0:00 if not set
@@ -915,8 +837,6 @@ function endGame(message) {
         renderLeaderboard();
     });
 </script>
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Force reset the leaderboard to an empty state
@@ -925,8 +845,6 @@ function endGame(message) {
         renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
     });
 </script>
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is initialized to 0 if not set
@@ -951,8 +869,6 @@ function endGame(message) {
         updateBestTimeDisplay();
     });
 </script>
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Forcefully reset Best Time to 0
@@ -979,257 +895,11 @@ function endGame(message) {
 </script>
 
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-    const leaderboardRef = db.collection('leaderboard');
-
-    // Real-time listener for leaderboard data
-    leaderboardRef.orderBy("time").limit(10).onSnapshot((snapshot) => {
-        const leaderboardData = snapshot.docs.map(doc => doc.data());
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.time}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (leaderboardData.length > 0) {
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-        } else {
-            console.log("No leaderboard data found.");
-        }
-    });
-
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log('Attempting to write to Firestore:', { name, time });
-            await leaderboardRef.add({ name, time });
-            console.log('Successfully wrote to Firestore.');
-        } catch (error) {
-            console.error("Error updating leaderboard:", error);
-        }
-    }
-</script>
 
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Disable Firestore persistence for testing synchronization
-    db.disableNetwork()
-        .then(() => console.log("Network disabled to avoid cache conflicts during testing."))
-        .catch((error) => console.error("Error disabling network:", error));
-
-    const leaderboardRef = db.collection('leaderboard');
-
-    // Real-time listener with forced server reads
-    leaderboardRef.orderBy("time").limit(10).onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
-        console.log("Real-time listener triggered.");
-        const leaderboardData = snapshot.docs.map(doc => doc.data());
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.time}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (leaderboardData.length > 0) {
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-        } else {
-            console.log("No leaderboard data found.");
-        }
-    });
-
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log('Writing to Firestore:', { name, time });
-            await leaderboardRef.add({ name, time });
-            console.log('Write successful.');
-        } catch (error) {
-            console.error("Error updating Firestore:", error);
-        }
-    }
-</script>
-
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Log Firestore connection status
-    console.log("Initializing Firestore...");
-    const leaderboardRef = db.collection('leaderboard');
-
-    // Real-time listener with metadata logging
-    leaderboardRef.orderBy("time").limit(10).onSnapshot((snapshot) => {
-        console.log("Real-time listener triggered.");
-        console.log("Snapshot metadata:", snapshot.metadata);
-        const leaderboardData = snapshot.docs.map(doc => doc.data());
-        console.log("Fetched leaderboard data:", leaderboardData);
-
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.time}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (leaderboardData.length > 0) {
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-        } else {
-            console.log("No leaderboard data found.");
-        }
-    });
-
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log("Attempting to write to Firestore:", { name, time });
-            const response = await leaderboardRef.add({ name, time });
-            console.log("Write successful. Firestore response:", response);
-        } catch (error) {
-            console.error("Error updating Firestore:", error);
-        }
-    }
-
-    // Debugging Firestore writes
-    async function fetchLeaderboardData() {
-        try {
-            console.log("Forcing server fetch for leaderboard data...");
-            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
-            console.log("Fetched from server. Metadata:", snapshot.metadata);
-            return snapshot.docs.map(doc => doc.data());
-        } catch (error) {
-            console.error("Error fetching leaderboard data from server:", error);
-            return [];
-        }
-    }
-</script>
-
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Force Firestore to enable network for synchronization
-    db.enableNetwork()
-        .then(() => console.log("Firestore network enabled."))
-        .catch(error => console.error("Error enabling Firestore network:", error));
-
-    const leaderboardRef = db.collection('leaderboard');
-
-    // Enhanced real-time listener with detailed logging
-    leaderboardRef.orderBy("time").limit(10).onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
-        console.log("Real-time listener triggered.");
-        console.log("Snapshot metadata:", snapshot.metadata);
-        const leaderboardData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-        console.log("Fetched leaderboard data:", leaderboardData);
-
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.time}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (leaderboardData.length > 0) {
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-        } else {
-            console.log("No leaderboard data found.");
-        }
-    });
-
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log("Attempting to write to Firestore:", { name, time });
-            const response = await leaderboardRef.add({ name, time });
-            console.log("Write successful. Firestore response ID:", response.id);
-        } catch (error) {
-            console.error("Error updating Firestore:", error);
-        }
-    }
-
-    async function fetchLeaderboardData() {
-        try {
-            console.log("Forcing server fetch for leaderboard data...");
-            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
-            console.log("Fetched from server. Metadata:", snapshot.metadata);
-            return snapshot.docs.map(doc => doc.data());
-        } catch (error) {
-            console.error("Error fetching leaderboard data from server:", error);
-            return [];
-        }
-    }
-</script>
-
-</body>
+</div></body>
 </html>
-    </div>
-
+</div>
 <style>
     #leaderboard {
         width: 100%;
@@ -1266,9 +936,6 @@ function endGame(message) {
         background-color: #ddd;
     }
 </style>
-
-
-
 <script>
     const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
@@ -1317,8 +984,6 @@ function endGame(message) {
         }
     }
 </script>
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is displayed as 0:00 if not set
@@ -1346,8 +1011,6 @@ function endGame(message) {
         renderLeaderboard();
     });
 </script>
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Force reset the leaderboard to an empty state
@@ -1356,8 +1019,6 @@ function endGame(message) {
         renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
     });
 </script>
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Ensure Best Time is initialized to 0 if not set
@@ -1382,8 +1043,6 @@ function endGame(message) {
         updateBestTimeDisplay();
     });
 </script>
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Forcefully reset Best Time to 0
@@ -1410,251 +1069,20 @@ function endGame(message) {
 </script>
 
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-    const leaderboardRef = db.collection('leaderboard');
 
-    // Real-time listener for leaderboard data
-    leaderboardRef.orderBy("time").limit(10).onSnapshot((snapshot) => {
-        const leaderboardData = snapshot.docs.map(doc => doc.data());
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.time}</td>
-            `;
-            tbody.appendChild(row);
-        });
 
-        if (leaderboardData.length > 0) {
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-        } else {
-            console.log("No leaderboard data found.");
-        }
-    });
 
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log('Attempting to write to Firestore:', { name, time });
-            await leaderboardRef.add({ name, time });
-            console.log('Successfully wrote to Firestore.');
-        } catch (error) {
-            console.error("Error updating leaderboard:", error);
-        }
-    }
-</script>
 
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Disable Firestore persistence for testing synchronization
-    db.disableNetwork()
-        .then(() => console.log("Network disabled to avoid cache conflicts during testing."))
-        .catch((error) => console.error("Error disabling network:", error));
-
-    const leaderboardRef = db.collection('leaderboard');
-
-    // Real-time listener with forced server reads
-    leaderboardRef.orderBy("time").limit(10).onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
-        console.log("Real-time listener triggered.");
-        const leaderboardData = snapshot.docs.map(doc => doc.data());
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.time}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (leaderboardData.length > 0) {
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
+    document.addEventListener('DOMContentLoaded', function () {
+        // Firebase initialization with duplicate app check
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         } else {
-            console.log("No leaderboard data found.");
+            console.log("Using existing Firebase app instance.");
+            firebase.app(); // Use existing app if already initialized
         }
     });
-
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log('Writing to Firestore:', { name, time });
-            await leaderboardRef.add({ name, time });
-            console.log('Write successful.');
-        } catch (error) {
-            console.error("Error updating Firestore:", error);
-        }
-    }
 </script>
-
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Log Firestore connection status
-    console.log("Initializing Firestore...");
-    const leaderboardRef = db.collection('leaderboard');
-
-    // Real-time listener with metadata logging
-    leaderboardRef.orderBy("time").limit(10).onSnapshot((snapshot) => {
-        console.log("Real-time listener triggered.");
-        console.log("Snapshot metadata:", snapshot.metadata);
-        const leaderboardData = snapshot.docs.map(doc => doc.data());
-        console.log("Fetched leaderboard data:", leaderboardData);
-
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.time}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (leaderboardData.length > 0) {
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-        } else {
-            console.log("No leaderboard data found.");
-        }
-    });
-
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log("Attempting to write to Firestore:", { name, time });
-            const response = await leaderboardRef.add({ name, time });
-            console.log("Write successful. Firestore response:", response);
-        } catch (error) {
-            console.error("Error updating Firestore:", error);
-        }
-    }
-
-    // Debugging Firestore writes
-    async function fetchLeaderboardData() {
-        try {
-            console.log("Forcing server fetch for leaderboard data...");
-            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
-            console.log("Fetched from server. Metadata:", snapshot.metadata);
-            return snapshot.docs.map(doc => doc.data());
-        } catch (error) {
-            console.error("Error fetching leaderboard data from server:", error);
-            return [];
-        }
-    }
-</script>
-
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.firebasestorage.app",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-        measurementId: "G-R4QL2RYESM"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Force Firestore to enable network for synchronization
-    db.enableNetwork()
-        .then(() => console.log("Firestore network enabled."))
-        .catch(error => console.error("Error enabling Firestore network:", error));
-
-    const leaderboardRef = db.collection('leaderboard');
-
-    // Enhanced real-time listener with detailed logging
-    leaderboardRef.orderBy("time").limit(10).onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
-        console.log("Real-time listener triggered.");
-        console.log("Snapshot metadata:", snapshot.metadata);
-        const leaderboardData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-        console.log("Fetched leaderboard data:", leaderboardData);
-
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${entry.time}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        if (leaderboardData.length > 0) {
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.textContent = `Best Time: ${leaderboardData[0].time}`;
-        } else {
-            console.log("No leaderboard data found.");
-        }
-    });
-
-    async function updateLeaderboardFirestore(name, time) {
-        try {
-            console.log("Attempting to write to Firestore:", { name, time });
-            const response = await leaderboardRef.add({ name, time });
-            console.log("Write successful. Firestore response ID:", response.id);
-        } catch (error) {
-            console.error("Error updating Firestore:", error);
-        }
-    }
-
-    async function fetchLeaderboardData() {
-        try {
-            console.log("Forcing server fetch for leaderboard data...");
-            const snapshot = await leaderboardRef.orderBy("time").limit(10).get({ source: "server" });
-            console.log("Fetched from server. Metadata:", snapshot.metadata);
-            return snapshot.docs.map(doc => doc.data());
-        } catch (error) {
-            console.error("Error fetching leaderboard data from server:", error);
-            return [];
-        }
-    }
-</script>
-
 </body>
