@@ -4,7 +4,7 @@
     <script type="module">
         // Import necessary Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -18,25 +18,47 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
+        const app = initializeApp(firebaseConfig);	
 
         // Initialize Firestore
-        const db = getFirestore(app);
-
-        // Function to write to Firestore
-        async function writeToFirestore() {
-            try {
-                await setDoc(doc(db, "bestTimes", "sampleDoc"), {
-                    name: "John Doe",
-                    bestTime: 120 // Example best time in seconds
-                });
-                console.log('Document successfully written!');
-            } catch (error) {
-                console.error('Error writing document: ', error);
+        const db = getFirestore(app);		
+		
+	// Function to fetch the best time from Firestore
+function fetchBestTime() {
+    return getDoc(doc(db, 'bestTimes', 'sampleDoc')) // Use getDoc to fetch document
+        .then((docSnap) => {
+            if (docSnap.exists()) {
+                console.log('Current best time: ', docSnap.data().bestTime);
+                return docSnap.data().bestTime; // Return the current best time.
+            } else {
+                console.log('No best time found!');
+                return null; // No best time stored yet.
             }
-        }
+        })
+        .catch((error) => {
+            console.error('Error fetching best time: ', error);
+            return null;
+        });
+}
 
-        // Call the function to write to Firestore
+// Call fetchBestTime() to test if it's working properly
+fetchBestTime();
+
+// Function to write to Firestore
+async function writeToFirestore() {
+    try {
+        await setDoc(doc(db, "bestTimes", "sampleDoc"), {
+            name: "John Doe",
+            bestTime: 120 // Example best time in seconds
+        });
+        console.log('Document successfully written!');
+    } catch (error) {
+        console.error('Error writing document: ', error);
+    }
+}
+
+// Call the function to write to Firestore
+writeToFirestore();
         writeToFirestore();
     </script>
 </head>
@@ -120,17 +142,17 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f3f4f6;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            touch-action: manipulation;
-        }
+       body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0; /* Optional background color */
+    display: flex;
+    flex-direction: column;   /* Stacks the elements vertically */
+    align-items: center;      /* Centers horizontally */
+    height: 100vh;            /* Full height of the viewport */
+    box-sizing: border-box;
+}
 
         .game-wrapper {
             display: flex;
@@ -165,45 +187,50 @@
         }
 
         #target-word-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 5px;  /* Decrease this to reduce space */
+}
 
         #target-word-label {
-            font-weight: bold;
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 8px;
-        }
+    font-weight: bold;
+    font-size: 26px;
+    color: #666;
+    margin-bottom: 1px;  /* Reduce this margin for less vertical spacing */
+}
 
         #target-word {
-            display: flex;
-            justify-content: center;
-        }
+    display: flex;
+    justify-content: center;
+}
 
         #target-word .block {
-            width: 30px;
-            height: 30px;
-            margin: 0 3px;
-            font-size: 16px;
-            background-color: #0288d1;
-            color: white;
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-        }
+    width: 30px;
+    height: 30px;
+    margin: 0 3px;
+    font-size: 16px;
+    background-color: #0288d1;
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+	
+}
 
         #game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-        }
+    margin-top: 10px;  /* Adjust the space above */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;  /* Reduce the gap between target word and the grid */
+    max-width: 1200px;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
 
         #game-grid {
             width: 90vw;
@@ -242,7 +269,7 @@
             justify-content: space-between;
             width: 100%;
             max-width: 320px;
-            margin-top: 15px;
+            margin-top: 5px;
         }
 
         .mobile-btn {
@@ -273,10 +300,10 @@
 
 
         #controls {
-            margin-top: 20px;
+            margin-top: 10px;
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
@@ -413,7 +440,7 @@
             const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'MUD';
+            let targetWord = 'MOT';
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
