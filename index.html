@@ -1,446 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LEXIMAX</title>
+    
     <script type="module">
-        // Import necessary Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            collection, 
+            addDoc, 
+            query, 
+            orderBy, 
+            limit, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
             projectId: "leximax-96299",
             storageBucket: "leximax-96299.appspot.com",
             messagingSenderId: "1067424610925",
-            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64",
-            measurementId: "G-R4QL2RYESM"
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);	
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        // Initialize Firestore
-        const db = getFirestore(app);		
-		
-	// Function to fetch the best time from Firestore
-function fetchBestTime() {
-    return getDoc(doc(db, 'bestTimes', 'sampleDoc')) // Use getDoc to fetch document
-        .then((docSnap) => {
-            if (docSnap.exists()) {
-                console.log('Current best time: ', docSnap.data().bestTime);
-                return docSnap.data().bestTime; // Return the current best time.
-            } else {
-                console.log('No best time found!');
-                return null; // No best time stored yet.
+        // Initialize Firebase operations
+        window.firebaseOps = {
+            async getBestTime() {
+                try {
+                    const docSnap = await getDoc(doc(db, "bestTimes", "global"));
+                    if (docSnap.exists()) {
+                        console.log("Current best time:", docSnap.data().time);
+                        return docSnap.data().time;
+                    }
+                    return null;
+                } catch (error) {
+                    console.error("Error fetching best time:", error);
+                    return null;
+                }
+            },
+            
+            async updateBestTime(newTime) {
+                try {
+                    const currentBest = await this.getBestTime();
+                    console.log("Comparing times:", { current: currentBest, new: newTime });
+                    if (!currentBest || newTime < currentBest) {
+                        await setDoc(doc(db, "bestTimes", "global"), { 
+                            time: newTime,
+                            updatedAt: new Date().toISOString()
+                        });
+                        console.log("Best time updated to:", newTime);
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    console.error("Error updating best time:", error);
+                    return false;
+                }
+            },
+            
+            async addLeaderboardEntry(name, time) {
+                try {
+                    const entry = {
+                        name: name.slice(0, 12),
+                        time: time,
+                        timestamp: new Date().toISOString()
+                    };
+                    console.log("Adding leaderboard entry:", entry);
+                    await addDoc(collection(db, "leaderboard"), entry);
+                    return true;
+                } catch (error) {
+                    console.error("Error adding leaderboard entry:", error);
+                    return false;
+                }
             }
-        })
-        .catch((error) => {
-            console.error('Error fetching best time: ', error);
-            return null;
+        };
+
+        // Set up real-time listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Best time listener
+            onSnapshot(doc(db, "bestTimes", "global"), (doc) => {
+                if (doc.exists()) {
+                    const bestTime = doc.data().time;
+                    const display = document.querySelector('#best-time-container');
+                    if (display) {
+                        display.innerHTML = `Best Time:<br>${formatTime(bestTime)}`;
+                    }
+                }
+            });
+
+            // Leaderboard listener
+            const leaderboardQuery = query(
+                collection(db, "leaderboard"),
+                orderBy("time"),
+                limit(5)
+            );
+
+            onSnapshot(leaderboardQuery, (snapshot) => {
+                const tbody = document.querySelector('#leaderboard tbody');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    let rank = 1;
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${rank++}</td>
+                            <td>${data.name}</td>
+                            <td>${formatTime(data.time)}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            });
         });
-}
 
-// Call fetchBestTime() to test if it's working properly
-fetchBestTime();
-
-// Function to write to Firestore
-async function writeToFirestore() {
-    try {
-        await setDoc(doc(db, "bestTimes", "sampleDoc"), {
-            name: "John Doe",
-            bestTime: 120 // Example best time in seconds
-        });
-        console.log('Document successfully written!');
-    } catch (error) {
-        console.error('Error writing document: ', error);
-    }
-}
-
-// Call the function to write to Firestore
-writeToFirestore();
-        writeToFirestore();
+        // Make formatTime available globally for Firebase listeners
+        window.formatTime = function(seconds) {
+            if (!seconds && seconds !== 0) return '--:--';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        };
     </script>
-</head>
-
-<body>
-    <div id="game-container">
-        <!-- Your game content goes here -->
-    </div>
-</body>
-</html>
-
-
-
-<style>
-    #timer, #best-time {
-        font-family: Arial, sans-serif !important;
-        color: #ffffff !important;
-        background-color: #004d40 !important;
-        border-radius: 10px;
-        padding: 10px 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        font-weight: bold;
-        font-size: 18px;
-        height: 50px; /* Ensure equal height */
-    }
-
-    #timer span, #best-time span {
-        color: #ffffff !important;
-    }
-</style>
-
-<style>
-    #timer {
-        font-family: Arial, sans-serif !important;
-        color: #ffffff !important;
-        background-color: #004d40 !important;
-        border-radius: 10px;
-        padding: 10px 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        font-weight: bold;
-        font-size: 18px;
-    }
-
-    #timer span {
-        color: #ffffff !important;
-    }
-</style>
-
-<style>
-    #best-time {
-        font-family: Arial, sans-serif !important;
-        color: #ffffff !important;
-        background-color: #004d40 !important;
-        border-radius: 10px;
-        padding: 10px 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        font-weight: bold;
-        font-size: 18px;
-    }
-
-    #best-time span {
-        color: #ffffff !important;
-    }
-</style>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
-    <title>LEXIMAX</title>
-    <style>
+	<style>
         * {
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
         }
 
-       body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0; /* Optional background color */
-    display: flex;
-    flex-direction: column;   /* Stacks the elements vertically */
-    align-items: center;      /* Centers horizontally */
-    height: 100vh;            /* Full height of the viewport */
-    box-sizing: border-box;
-}
-
-        .game-wrapper {
+        body {
+            background-color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #ffffff;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            width: 90vw;
-            max-width: 500px;
-            margin: 20px;
+            min-height: 100vh;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            max-width: 320px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
         }
 
         #leximax-title {
             display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
+            gap: 0;
+            margin-bottom: 8px;
         }
 
-        .title-blocks .block {
-            width: 40px;
-            height: 40px;
-            margin: 4px;
+        .title-block {
+            width: 30px;
+            height: 30px;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 20px;
             font-weight: bold;
-            font-size: 37px;
-            border-radius: 5px;
             color: white;
         }
 
         #target-word-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 5px;  /* Decrease this to reduce space */
-}
+            text-align: center;
+            margin-bottom: 8px;
+        }
 
         #target-word-label {
-    font-weight: bold;
-    font-size: 26px;
-    color: #666;
-    margin-bottom: 1px;  /* Reduce this margin for less vertical spacing */
-}
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
 
         #target-word {
-    display: flex;
-    justify-content: center;
-}
+            display: flex;
+            gap: 0;
+            justify-content: center;
+        }
 
-        #target-word .block {
-    width: 30px;
-    height: 30px;
-    margin: 0 3px;
-    font-size: 16px;
-    background-color: #0288d1;
-    color: white;
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-	
-}
-
-        #game-container {
-    margin-top: 10px;  /* Adjust the space above */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;  /* Reduce the gap between target word and the grid */
-    max-width: 1200px;
-    width: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-}
+        .target-letter {
+            width: 25px;
+            height: 25px;
+            background-color: #2196f3;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
 
         #game-grid {
-            width: 90vw;
-            max-width: 320px;
-            height: 55vh;
-            max-height: 450px;
-            border: 2px solid #00796b;
+            width: 100%;
+            aspect-ratio: 8/10;
+            background-color: white;
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(10, 1fr);
-            gap: 2px;
-            background-color: #e0f7fa;
-            border-radius: 10px;
+            gap: 1px;
+            border: 1px solid #004d40;
+            padding: 1px;
+            margin-bottom: 8px;
         }
 
         .grid-cell {
             background-color: #004d40;
-            border: 1px solid #004d40;
-            border-radius: 3px;
+            position: relative;
         }
 
-        .block {
-            width: 100%;
-            height: 100%;
+        .grid-cell::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .grid-cell.filled {
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 18px;
-            color: #ffffff;
-            border-radius: 3px;
+            color: white;
+            font-size: 16px;
         }
 
         #mobile-controls {
-            display: flex;
-            justify-content: space-between;
             width: 100%;
-            max-width: 320px;
-            margin-top: 5px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .mobile-btn {
-            width: 75px;
-            height: 75px;
-            border-radius: 10px; /* Changed to rounded corners */
+            aspect-ratio: 1;
             background-color: #003366;
+            border: none;
+            border-radius: 2px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            -webkit-user-select: none;
-            user-select: none;
-            transition: background-color 0.2s;
         }
 
-        .mobile-btn svg {
-            width: 50px;
-            height: 50px;
-            fill: #ffffff; /* Arrow color */
-            stroke: #ffffff; /* Outline color */
-            stroke-width: 2; /* Adjust thickness */
-        }
-
-        .mobile-btn:active {
-            background-color: #00332f;
-        }
-
-
-
-        #controls {
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        button {
-            font-size: 14px;
-            padding: 10px 20px;
-            cursor: pointer;
-            background-color: #003366;
-            color: #ffffff;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        button:hover {
-            background-color: #00332f;
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        .game-over, .game-won {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #ffffff;
-            color: rgba(0, 77, 64, 0.9);
-            padding: 25px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            border-radius: 10px;
-        }
-
-        .game-rules {
-            margin-top: 25px;
-            font-size: 15px;
-            text-align: center;
-            color: #333;
-            max-width: 90%;
-        }
-
-        .game-rules h2 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .game-rules ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .game-rules li {
+        #time-display {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
             margin-bottom: 8px;
         }
-    </style>
 
-<style>
-    #leaderboard {
-        margin-top: 40px; /* Increased from 20px to 40px for extra whitespace */
-    }
-    #leaderboard caption {
-        text-transform: uppercase; /* Ensure LEADERBOARD is displayed in uppercase */
-    }
-</style>
-
-<script>
-    // Reset the Best Time as a once-off
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!localStorage.getItem('bestTime')) {
-             // Reset Best Time
-             // Flag to prevent repeated resets
+        .time-container {
+            padding: 6px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            line-height: 1.2;
+            border-radius: 2px;
         }
-    });
-</script>
 
+        #timer-container {
+            background-color: #004d40;
+        }
+
+        #best-time-container {
+            background-color: #d32f2f;
+        }
+
+        #game-buttons {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .game-btn {
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            padding: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        #leaderboard {
+            width: 100%;
+            max-width: 320px;
+            margin-top: 15px;
+            border-collapse: collapse;
+            background-color: #003366;
+            color: white;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #leaderboard caption {
+            background-color: #003366;
+            color: white;
+            padding: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        #leaderboard th, #leaderboard td {
+            padding: 6px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
     <div class="game-wrapper">
-        <div id="leximax-title" class="title-blocks">
-            <div class="block" style="background-color: #0288d1;">L</div>
-            <div class="block" style="background-color: #e53935;">E</div>
-            <div class="block" style="background-color: #43a047;">X</div>
-            <div class="block" style="background-color: #ffb300;">I</div>
-            <div class="block" style="background-color: #8e24aa;">M</div>
-            <div class="block" style="background-color: #003366;">A</div>
-            <div class="block" style="background-color: #009688;">X</div>
-           
+        <div id="leximax-title">
+            <div class="title-block" style="background-color: #2196f3;">L</div>
+            <div class="title-block" style="background-color: #f44336;">E</div>
+            <div class="title-block" style="background-color: #4caf50;">X</div>
+            <div class="title-block" style="background-color: #ffc107;">I</div>
+            <div class="title-block" style="background-color: #9c27b0;">M</div>
+            <div class="title-block" style="background-color: #003366;">A</div>
+            <div class="title-block" style="background-color: #009688;">X</div>
         </div>
+
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
-            <div id="target-word"></div>
-        </div>
-        <div id="game-container">
-            <div id="game-grid"></div>
-        </div>
-        <div id="mobile-controls">
-            <div class="mobile-btn" id="left-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M10 19l-7-7 7-7v4h11v6H10v4z"/>
-                </svg>
-            </div>
-            <div class="mobile-btn" id="drop-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M19 10l-7 7-7-7h4V3h6v7h4z"/>
-                </svg>
-            </div>
-            <div class="mobile-btn" id="right-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M14 5l7 7-7 7v-4H3v-6h11V5z"/>
-                </svg>
+            <div id="target-word">
+                <div class="target-letter">T</div>
+                <div class="target-letter">O</div>
+                <div class="target-letter">T</div>
             </div>
         </div>
-        <div id="time-container" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 10px;">
-            <div id="timer" style="display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; font-size: 18px; background-color: #004d40; padding: 10px 15px; border-radius: 10px; color: #ffffff;">
-                <span style="font-size: 24px; color: #004d40;">⏱</span>
-                <span style="color: #004d40;">Time: 00:00</span>
-            </div>
-            <div id="best-time" style="display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 18px; background-color: #ffebee; padding: 5px 10px; border-radius: 8px;">
-                <span style="font-size: 20px; color: #d32f2f;">🏆</span>
-                <span style="color: #d32f2f;">Best Time: --:--</span>
-            </div>
-        </div>
+
+        <div id="game-grid"></div>
+
         <div id="controls">
-            <button id="start-btn">START</button>
-            <button id="pause-btn">PAUSE</button>
+            <div id="mobile-controls">
+                <button class="mobile-btn" id="left-btn">◀</button>
+                <button class="mobile-btn" id="down-btn">▼</button>
+                <button class="mobile-btn" id="right-btn">▶</button>
+            </div>
+
+            <div id="time-display">
+                <div id="timer-container" class="time-container">
+                    Time:<br>00:00
                 </div>
-    <script>
+                <div id="best-time-container" class="time-container">
+                    Best Time:<br>--:--
+                </div>
+            </div>
+
+            <div id="game-buttons">
+                <button class="game-btn" id="start-btn">START</button>
+                <button class="game-btn" id="pause-btn">PAUSE</button>
+            </div>
+        </div>
+    </div>
+
+    <table id="leaderboard">
+        <caption>LEADERBOARD</caption>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+	<script>
         document.addEventListener('DOMContentLoaded', () => {
             const GRID_WIDTH = 8;
             const GRID_HEIGHT = 10;
-            const COLORS = ['#0288d1', '#e53935', '#43a047', '#ffb300', '#8e24aa', '#003366', '#009688'];
+            const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            let targetWord = 'PANORAMA';
+            const TARGET_WORD = 'TOT';
+
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -448,22 +409,34 @@ writeToFirestore();
             let gameTime = 0;
             let isPaused = false;
             let isGameOver = false;
-            let bestTime = localStorage.getItem('bestTime') ? parseInt(localStorage.getItem('bestTime'), 10) : null;
 
-            const gameGrid = document.getElementById('game-grid');
-            const timerDisplay = document.getElementById('timer');
-            const bestTimeDisplay = document.getElementById('best-time');
-            const targetWordDisplay = document.getElementById('target-word');
+            // Initialize DOM elements
             const startBtn = document.getElementById('start-btn');
             const pauseBtn = document.getElementById('pause-btn');
-            const restartBtn = document.getElementById('restart-btn');
             const leftBtn = document.getElementById('left-btn');
-            const dropBtn = document.getElementById('drop-btn');
+            const downBtn = document.getElementById('down-btn');
             const rightBtn = document.getElementById('right-btn');
+            const timerDisplay = document.querySelector('#timer-container');
+            const bestTimeDisplay = document.querySelector('#best-time-container');
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+
+            function updateTimer() {
+                if (!isPaused && !isGameOver) {
+                    gameTime++;
+                    timerDisplay.innerHTML = `Time:<br>${formatTime(gameTime)}`;
+                }
+            }
 
             function initGrid() {
+                const gameGrid = document.getElementById('game-grid');
                 gameGrid.innerHTML = '';
                 grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
+                
                 for (let y = 0; y < GRID_HEIGHT; y++) {
                     for (let x = 0; x < GRID_WIDTH; x++) {
                         const cell = document.createElement('div');
@@ -483,67 +456,76 @@ writeToFirestore();
 
             function drawBlock(block) {
                 if (!block) return;
-                const cell = gameGrid.children[block.y * GRID_WIDTH + block.x];
-                cell.innerHTML = `<div class="block" style="background-color: ${block.color};">${block.letter}</div>`;
+                const index = block.y * GRID_WIDTH + block.x;
+                const cell = document.querySelector(`#game-grid .grid-cell:nth-child(${index + 1})`);
+                if (cell) {
+                    cell.className = 'grid-cell filled';
+                    cell.style.backgroundColor = block.color;
+                    cell.textContent = block.letter;
+                }
             }
 
             function clearBlock(block) {
                 if (!block) return;
-                const cell = gameGrid.children[block.y * GRID_WIDTH + block.x];
-                cell.innerHTML = '';
+                const index = block.y * GRID_WIDTH + block.x;
+                const cell = document.querySelector(`#game-grid .grid-cell:nth-child(${index + 1})`);
+                if (cell) {
+                    cell.className = 'grid-cell';
+                    cell.style.backgroundColor = '';
+                    cell.textContent = '';
+                }
             }
 
             function isCollision(block) {
-                if (!block) return false;
-                return block.y >= GRID_HEIGHT || 
-                    block.x < 0 || 
-                    block.x >= GRID_WIDTH || 
-                    (block.y >= 0 && grid[block.y][block.x] !== null);
+                if (!block) return true;
+                // Check boundaries first
+                if (block.x < 0 || block.x >= GRID_WIDTH) return true;
+                if (block.y >= GRID_HEIGHT) return true;
+                // Only check collision with other blocks if within valid y range
+                if (block.y >= 0 && grid[block.y][block.x] !== null) return true;
+                return false;
             }
-
-            function moveBlock(dx, dy) {
+	function moveBlock(dx, dy) {
                 if (!currentBlock || isPaused || isGameOver) return;
                 clearBlock(currentBlock);
+                
                 const newX = currentBlock.x + dx;
                 const newY = currentBlock.y + dy;
                 const testBlock = { ...currentBlock, x: newX, y: newY };
-
+                
                 if (!isCollision(testBlock)) {
                     currentBlock.x = newX;
                     currentBlock.y = newY;
+                    drawBlock(currentBlock);
                 } else if (dy > 0) {
                     placeBlock();
-                    currentBlock = nextBlock;
-                    nextBlock = createBlock();
                 }
+            }
 
+            function placeBlock() {
+                if (!currentBlock || currentBlock.y < 0) return;
+                grid[currentBlock.y][currentBlock.x] = { ...currentBlock };
+                drawBlock(currentBlock);
+                checkMatches();
+                checkGameOver();
+                checkWin();
+                currentBlock = nextBlock;
+                nextBlock = createBlock();
                 if (currentBlock) drawBlock(currentBlock);
             }
 
             function dropBlock() {
                 if (!currentBlock || isPaused || isGameOver) return;
                 clearBlock(currentBlock);
-                while (!isCollision({ ...currentBlock, y: currentBlock.y + 1 })) {
+                while (currentBlock.y < GRID_HEIGHT - 1 && !isCollision({ ...currentBlock, y: currentBlock.y + 1 })) {
                     currentBlock.y++;
                 }
                 placeBlock();
-                currentBlock = nextBlock;
-                nextBlock = createBlock();
-                drawBlock(currentBlock);
-            }
-
-            function placeBlock() {
-                if (!currentBlock) return;
-                grid[currentBlock.y][currentBlock.x] = currentBlock;
-                drawBlock(currentBlock);
-                checkMatches();
-                checkGameOver();
-                checkWin();
             }
 
             function checkMatches() {
                 const toRemove = new Set();
-
+                
                 for (let y = 0; y < GRID_HEIGHT; y++) {
                     for (let x = 0; x < GRID_WIDTH; x++) {
                         if (grid[y][x] && !isPartOfTargetWord(grid[y][x].letter)) {
@@ -551,37 +533,41 @@ writeToFirestore();
                         }
                     }
                 }
+                
+                if (toRemove.size > 0) {
+                    toRemove.forEach(pos => {
+                        const [x, y] = pos.split(',').map(Number);
+                        grid[y][x] = null;
+                        clearBlock({ x, y });
+                    });
+                    
+                    dropColumns();
+                }
+            }
 
-                toRemove.forEach(pos => {
-                    const [x, y] = pos.split(',').map(Number);
-                    grid[y][x] = null;
-                    clearBlock({ x, y });
-                });
-
-                dropColumns();
+            function isPartOfTargetWord(letter) {
+                return TARGET_WORD.includes(letter);
             }
 
             function checkNeighbors(x, y, toRemove) {
-                const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
                 const current = grid[y][x];
-
-                for (const [dx, dy] of directions) {
+                if (!current) return;
+                
+                const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+                
+                directions.forEach(([dx, dy]) => {
                     const nx = x + dx;
                     const ny = y + dy;
-
-                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT && grid[ny][nx]) {
+                    
+                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
                         const neighbor = grid[ny][nx];
-                        if ((current.letter === neighbor.letter || current.color === neighbor.color) &&
+                        if (neighbor && (current.letter === neighbor.letter || current.color === neighbor.color) &&
                             !isPartOfTargetWord(current.letter) && !isPartOfTargetWord(neighbor.letter)) {
                             toRemove.add(`${x},${y}`);
                             toRemove.add(`${nx},${ny}`);
                         }
                     }
-                }
-            }
-
-            function isPartOfTargetWord(letter) {
-                return targetWord.includes(letter);
+                });
             }
 
             function dropColumns() {
@@ -600,549 +586,226 @@ writeToFirestore();
                     }
                 }
             }
-
-            function checkGameOver() {
-                if (nextBlock && isCollision(nextBlock)) {
-                    endGame('GAME OVER!');
-                    isGameOver = true;
+	function moveBlock(dx, dy) {
+                if (!currentBlock || isPaused || isGameOver) return;
+                clearBlock(currentBlock);
+                
+                const newX = currentBlock.x + dx;
+                const newY = currentBlock.y + dy;
+                const testBlock = { ...currentBlock, x: newX, y: newY };
+                
+                if (!isCollision(testBlock)) {
+                    currentBlock.x = newX;
+                    currentBlock.y = newY;
+                    drawBlock(currentBlock);
+                } else if (dy > 0) {
+                    placeBlock();
                 }
             }
 
-            function checkWin() {
+            function placeBlock() {
+                if (!currentBlock || currentBlock.y < 0) return;
+                grid[currentBlock.y][currentBlock.x] = { ...currentBlock };
+                drawBlock(currentBlock);
+                checkMatches();
+                checkGameOver();
+                checkWin();
+                currentBlock = nextBlock;
+                nextBlock = createBlock();
+                if (currentBlock) drawBlock(currentBlock);
+            }
+
+            function dropBlock() {
+                if (!currentBlock || isPaused || isGameOver) return;
+                clearBlock(currentBlock);
+                while (currentBlock.y < GRID_HEIGHT - 1 && !isCollision({ ...currentBlock, y: currentBlock.y + 1 })) {
+                    currentBlock.y++;
+                }
+                placeBlock();
+            }
+
+            function checkMatches() {
+                const toRemove = new Set();
+                
                 for (let y = 0; y < GRID_HEIGHT; y++) {
-                    for (let x = 0; x <= GRID_WIDTH - targetWord.length; x++) {
-                        let foundWord = '';
-                        let isConsecutive = true;
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        if (grid[y][x] && !isPartOfTargetWord(grid[y][x].letter)) {
+                            checkNeighbors(x, y, toRemove);
+                        }
+                    }
+                }
+                
+                if (toRemove.size > 0) {
+                    toRemove.forEach(pos => {
+                        const [x, y] = pos.split(',').map(Number);
+                        grid[y][x] = null;
+                        clearBlock({ x, y });
+                    });
+                    
+                    dropColumns();
+                }
+            }
+
+            function isPartOfTargetWord(letter) {
+                return TARGET_WORD.includes(letter);
+            }
+
+            function checkNeighbors(x, y, toRemove) {
+                const current = grid[y][x];
+                if (!current) return;
+                
+                const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+                
+                directions.forEach(([dx, dy]) => {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    
+                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && (current.letter === neighbor.letter || current.color === neighbor.color) &&
+                            !isPartOfTargetWord(current.letter) && !isPartOfTargetWord(neighbor.letter)) {
+                            toRemove.add(`${x},${y}`);
+                            toRemove.add(`${nx},${ny}`);
+                        }
+                    }
+                });
+            }
+
+            function dropColumns() {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    let writeY = GRID_HEIGHT - 1;
+                    for (let y = GRID_HEIGHT - 1; y >= 0; y--) {
+                        if (grid[y][x] !== null) {
+                            if (y !== writeY) {
+                                grid[writeY][x] = grid[y][x];
+                                grid[y][x] = null;
+                                clearBlock({ x, y });
+                                drawBlock({ ...grid[writeY][x], x, y: writeY });
+                            }
+                            writeY--;
+                        }
+                    }
+                }
+            }
+	async function checkGameOver() {
+                if (nextBlock && isCollision(nextBlock)) {
+                    endGame('GAME OVER!');
+                }
+            }
+
+            async function checkWin() {
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
+                        let word = '';
+                        let isValid = true;
                         
-                        for (let i = 0; i < targetWord.length; i++) {
+                        for (let i = 0; i < TARGET_WORD.length; i++) {
                             if (!grid[y][x + i]) {
-                                isConsecutive = false;
+                                isValid = false;
                                 break;
                             }
-                            foundWord += grid[y][x + i].letter;
+                            word += grid[y][x + i].letter;
                         }
                         
-                        if (isConsecutive && foundWord === targetWord) {
-                            endGame(`YOU DID IT IN ${formatTime(gameTime)}!`);
+                        if (isValid && word === TARGET_WORD) {
                             isGameOver = true;
-                            if (!bestTime || gameTime < bestTime) {
-                                bestTime = gameTime;
-                                localStorage.setItem('bestTime', bestTime);
-                                updateBestTimeDisplay();
+                            clearInterval(gameInterval);
+                            
+                            try {
+                                // Update best time first
+                                await firebaseOps.updateBestTime(gameTime);
+                                
+                                // Then get player name and update leaderboard
+                                const name = prompt('You won! Enter your name:') || 'Anonymous';
+                                await firebaseOps.addLeaderboardEntry(name, gameTime);
+                                
+                                console.log('Score updates completed successfully');
+                            } catch (error) {
+                                console.error('Error updating scores:', error);
                             }
+                            
+                            endGame('YOU WIN!');
                             return;
                         }
                     }
                 }
             }
 
-            
-function endGame(message) {
-    clearInterval(gameInterval);
-    const overlay = document.createElement('div');
-    overlay.className = message.includes('GAME OVER') ? 'game-over' : 'game-won';
-    overlay.textContent = message;
-    gameGrid.appendChild(overlay);
-
-    if (message.includes('YOU DID IT')) {
-        const name = prompt('You made it to the leaderboard! Enter your name (max 12 characters):').slice(0, 12) || 'Anonymous';
-        updateLeaderboard(name, gameTime);
-    }
-}
-
-
-            function updateTimer() {
-                if (!isPaused && !isGameOver) {
-                    gameTime++;
-                    timerDisplay.innerHTML = `<span style="font-size: 20px; color: #004d40;">⏱</span><span style="color: #004d40;"> Time: ${formatTime(gameTime)}</span>`;
-                }
-            }
-
-            function formatTime(seconds) {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-            }
-
-            function displayTargetWord() {
-                targetWordDisplay.innerHTML = '';
-                for (const letter of targetWord) {
-                    const block = document.createElement('div');
-                    block.className = 'block';
-                    block.style.backgroundColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-                    block.textContent = letter;
-                    targetWordDisplay.appendChild(block);
-                }
+            function endGame(message) {
+                clearInterval(gameInterval);
+                isGameOver = true;
+                
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '50%';
+                overlay.style.left = '50%';
+                overlay.style.transform = 'translate(-50%, -50%)';
+                overlay.style.backgroundColor = 'white';
+                overlay.style.padding = '20px';
+                overlay.style.borderRadius = '8px';
+                overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                overlay.style.zIndex = '100';
+                overlay.style.fontWeight = 'bold';
+                overlay.textContent = message;
+                document.body.appendChild(overlay);
             }
 
             function startGame() {
+                // Remove any existing overlay
+                const overlay = document.querySelector('div[style*="position: fixed"]');
+                if (overlay) overlay.remove();
+                
+                // Clear any existing game state
+                clearInterval(gameInterval);
                 isGameOver = false;
                 isPaused = false;
-                clearInterval(gameInterval);
                 gameTime = 0;
+                
+                // Initialize the game
+                initGrid();
                 currentBlock = createBlock();
                 nextBlock = createBlock();
-                initGrid();
-                displayTargetWord();
+                drawBlock(currentBlock);
+                
+                // Update display
+                timerDisplay.innerHTML = 'Time:<br>00:00';
+                pauseBtn.textContent = 'PAUSE';
+                
+                // Start the game loop
                 gameInterval = setInterval(() => {
                     if (!isPaused && !isGameOver) {
                         moveBlock(0, 1);
                         updateTimer();
                     }
                 }, 1000);
-                updateBestTimeDisplay();
             }
 
-            function pauseGame() {
+            function togglePause() {
+                if (isGameOver) return;
                 isPaused = !isPaused;
                 pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
-                if (isPaused) {
-                    clearInterval(gameInterval);
-                } else {
-                    gameInterval = setInterval(() => {
-                        if (!isPaused && !isGameOver) {
-                            moveBlock(0, 1);
-                            updateTimer();
-                        }
-                    }, 1000);
-                }
             }
 
-            function updateBestTimeDisplay() {
-                if (bestTime !== null) {
-                    bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-                } else {
-                    bestTimeDisplay.textContent = 'Best Time: --:--';
-                }
-            }
-
-            function updateBestTime(newTime) {
-                if (!bestTime || newTime < bestTime) {
-                    bestTime = newTime;
-                    localStorage.setItem('bestTime', newTime);
-                    updateBestTimeDisplay();
-                }
-            }
+            // Event Listeners
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', togglePause);
+            leftBtn.addEventListener('click', () => moveBlock(-1, 0));
+            rightBtn.addEventListener('click', () => moveBlock(1, 0));
+            downBtn.addEventListener('click', dropBlock);
 
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') moveBlock(-1, 0);
                 if (e.key === 'ArrowRight') moveBlock(1, 0);
+                if (e.key === 'ArrowDown') moveBlock(0, 1);
                 if (e.key === ' ') {
                     e.preventDefault();
                     dropBlock();
                 }
             });
 
-            leftBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                moveBlock(-1, 0);
-            });
-            rightBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                moveBlock(1, 0);
-            });
-            dropBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                dropBlock();
-            });
-
-            startBtn.addEventListener('click', () => {
-                if (isGameOver) {
-                    // Reset game state and start a new game
-                    clearInterval(gameInterval);
-                    gameInterval = null;
-                    isPaused = false;
-                    isGameOver = false;
-                    gameTime = 0;
-                    currentBlock = null;
-                    nextBlock = null;
-                    startGame();
-                } else if (!gameInterval) {
-                    // Start a new game if none is in progress
-                    startGame();
-                }
-            });
-            pauseBtn.addEventListener('click', pauseGame);
-
-
+            // Initialize the game board
             initGrid();
-            displayTargetWord();
-            updateBestTimeDisplay();
         });
     </script>
-
-<style>
-    #leaderboard {
-        width: 100%;
-        max-width: 500px;
-        margin: 20px auto;
-        border-collapse: collapse;
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        font-family: Arial, sans-serif;
-    }
-    #leaderboard caption {
-        font-size: 18px;
-        font-weight: bold;
-        padding: 10px;
-        background-color: #004d40;
-        color: #ffffff;
-        text-align: center;
-    }
-    #leaderboard th, #leaderboard td {
-        text-align: center;
-        padding: 10px;
-        border-bottom: 1px solid #dddddd;
-    }
-    #leaderboard th {
-        background-color: #003366;
-        color: #ffffff;
-    }
-    #leaderboard tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-    #leaderboard tr:hover {
-        background-color: #ddd;
-    }
-</style>
-
-<table id="leaderboard">
-    <caption>Leaderboard</caption>
-    <thead>
-        <tr>
-            <th>Rank</th>
-            <th>Name</th>
-            <th>Time</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Leaderboard rows will be populated dynamically -->
-    </tbody>
-</table>
-
-<script>
-    
-
-    function updateLeaderboard(name, time) {
-        leaderboardData.push({ name, time });
-        leaderboardData.sort((a, b) => a.time - b.time);
-        if (leaderboardData.length > 10) leaderboardData.pop();
-        localStorage.setItem('leaderboard', JSON.stringify(leaderboardData));
-        renderLeaderboard();
-    }
-
-    function renderLeaderboard() {
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${formatTime(entry.time)}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        renderLeaderboard();
-    });
-
-    // Hooking into the existing game logic to add leaderboard functionality
-    function endGame(message) {
-        clearInterval(gameInterval);
-        const overlay = document.createElement('div');
-        overlay.className = message.includes('GAME OVER') ? 'game-over' : 'game-won';
-        overlay.textContent = message;
-        gameGrid.appendChild(overlay);
-        if (message.includes('YOU DID IT')) {
-            const name = prompt('You made it to the leaderboard! Enter your name (max 12 characters):').slice(0, 12) || 'Anonymous';
-            updateLeaderboard(name, gameTime);
-        }
-    }
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Ensure Best Time is displayed as 0:00 if not set
-        if (!localStorage.getItem('bestTime')) {
-             // Reset Best Time to 0
-             // Clear the leaderboard data
-             // Flag to prevent repeated resets
-        }
-        
-        function formatTime(seconds) {
-            if (!seconds || isNaN(seconds)) return '0:00'; // Display as 0:00 if null or invalid
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(1, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateBestTimeDisplay() {
-            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-        }
-
-        // Ensure leaderboard is properly displayed
-        updateBestTimeDisplay();
-        renderLeaderboard();
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Force reset the leaderboard to an empty state
-         // Remove the leaderboard data completely
-         // Initialize as an empty array
-        renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Ensure Best Time is initialized to 0 if not set
-        if (!localStorage.getItem('bestTime') || isNaN(localStorage.getItem('bestTime'))) {
-             // Set Best Time to 0 if it's missing or invalid
-        }
-
-        function formatTime(seconds) {
-            if (!seconds || isNaN(seconds)) return '0:00'; // Default to 0:00 if null or invalid
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(1, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateBestTimeDisplay() {
-            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-        }
-
-        // Ensure Best Time is displayed correctly
-        updateBestTimeDisplay();
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Forcefully reset Best Time to 0
-         // Set Best Time to 0
-         // Clear the leaderboard data for consistency
-
-        function formatTime(seconds) {
-            if (!seconds || isNaN(seconds)) return '0:00'; // Default to 0:00 if null or invalid
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(1, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateBestTimeDisplay() {
-            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-        }
-
-        // Update Best Time and re-render the leaderboard
-        updateBestTimeDisplay();
-        renderLeaderboard();
-    });
-</script>
-
 </body>
 </html>
-    </div>
-
-<style>
-    #leaderboard {
-        width: 100%;
-        max-width: 500px;
-        margin: 20px auto;
-        border-collapse: collapse;
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        font-family: Arial, sans-serif;
-    }
-    #leaderboard caption {
-        font-size: 18px;
-        font-weight: bold;
-        padding: 10px;
-        background-color: #004d40;
-        color: #ffffff;
-        text-align: center;
-    }
-    #leaderboard th, #leaderboard td {
-        text-align: center;
-        padding: 10px;
-        border-bottom: 1px solid #dddddd;
-    }
-    #leaderboard th {
-        background-color: #003366;
-        color: #ffffff;
-    }
-    #leaderboard tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-    #leaderboard tr:hover {
-        background-color: #ddd;
-    }
-</style>
-
-
-
-<script>
-    const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
-
-    function updateLeaderboard(name, time) {
-        leaderboardData.push({ name, time });
-        leaderboardData.sort((a, b) => a.time - b.time);
-        if (leaderboardData.length > 10) leaderboardData.pop();
-        localStorage.setItem('leaderboard', JSON.stringify(leaderboardData));
-        renderLeaderboard();
-    }
-
-    function renderLeaderboard() {
-        const tbody = document.querySelector('#leaderboard tbody');
-        tbody.innerHTML = '';
-        leaderboardData.forEach((entry, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${entry.name}</td>
-                <td>${formatTime(entry.time)}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        renderLeaderboard();
-    });
-
-    // Hooking into the existing game logic to add leaderboard functionality
-    function endGame(message) {
-        clearInterval(gameInterval);
-        const overlay = document.createElement('div');
-        overlay.className = message.includes('GAME OVER') ? 'game-over' : 'game-won';
-        overlay.textContent = message;
-        gameGrid.appendChild(overlay);
-        if (message.includes('YOU DID IT')) {
-            const name = prompt('You made it to the leaderboard! Enter your name (max 12 characters):').slice(0, 12) || 'Anonymous';
-            updateLeaderboard(name, gameTime);
-        }
-    }
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Ensure Best Time is displayed as 0:00 if not set
-        if (!localStorage.getItem('bestTime')) {
-             // Reset Best Time to 0
-             // Clear the leaderboard data
-             // Flag to prevent repeated resets
-        }
-        
-        function formatTime(seconds) {
-            if (!seconds || isNaN(seconds)) return '0:00'; // Display as 0:00 if null or invalid
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(1, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateBestTimeDisplay() {
-            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-        }
-
-        // Ensure leaderboard is properly displayed
-        updateBestTimeDisplay();
-        renderLeaderboard();
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Force reset the leaderboard to an empty state
-         // Remove the leaderboard data completely
-         // Initialize as an empty array
-        renderLeaderboard(); // Re-render the cleared leaderboard to reflect the changes
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Ensure Best Time is initialized to 0 if not set
-        if (!localStorage.getItem('bestTime') || isNaN(localStorage.getItem('bestTime'))) {
-             // Set Best Time to 0 if it's missing or invalid
-        }
-
-        function formatTime(seconds) {
-            if (!seconds || isNaN(seconds)) return '0:00'; // Default to 0:00 if null or invalid
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(1, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateBestTimeDisplay() {
-            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-        }
-
-        // Ensure Best Time is displayed correctly
-        updateBestTimeDisplay();
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Forcefully reset Best Time to 0
-         // Set Best Time to 0
-         // Clear the leaderboard data for consistency
-
-        function formatTime(seconds) {
-            if (!seconds || isNaN(seconds)) return '0:00'; // Default to 0:00 if null or invalid
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(1, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateBestTimeDisplay() {
-            const bestTime = localStorage.getItem('bestTime') !== null ? parseInt(localStorage.getItem('bestTime'), 10) : null;
-            const bestTimeDisplay = document.getElementById('best-time');
-            bestTimeDisplay.innerHTML = `<span style="font-size: 20px; color: #d32f2f;">🏆</span><span style="color: #d32f2f;"> Best Time: ${formatTime(bestTime)}</span>`;
-        }
-
-        // Update Best Time and re-render the leaderboard
-        updateBestTimeDisplay();
-        renderLeaderboard();
-    });
-</script>
-
-</body>
