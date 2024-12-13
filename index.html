@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
-
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
@@ -33,7 +32,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Initialize Firebase operations
         window.firebaseOps = {
             async getBestTime() {
                 try {
@@ -85,9 +83,7 @@
             }
         };
 
-        // Set up real-time listeners
         document.addEventListener('DOMContentLoaded', () => {
-            // Best time listener
             onSnapshot(doc(db, "bestTimes", "global"), (doc) => {
                 if (doc.exists()) {
                     const bestTime = doc.data().time;
@@ -98,7 +94,6 @@
                 }
             });
 
-            // Leaderboard listener
             const leaderboardQuery = query(
                 collection(db, "leaderboard"),
                 orderBy("time"),
@@ -124,7 +119,6 @@
             });
         });
 
-        // Make formatTime available globally for Firebase listeners
         window.formatTime = function(seconds) {
             if (!seconds && seconds !== 0) return '--:--';
             const minutes = Math.floor(seconds / 60);
@@ -182,12 +176,12 @@
             margin-bottom: 8px;
         }
 
-       #target-word-label {
-    font-size: 22px;
-    margin-bottom: 4px;
-    font-weight: bold;
-    color: #666666;  /* lighter grey */
-}
+        #target-word-label {
+            font-size: 22px;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #666666;
+        }
 
         #target-word {
             display: flex;
@@ -198,7 +192,7 @@
         .target-letter {
             width: 25px;
             height: 25px;
-            background-color: #4caf50;
+            background-color: #004d40;
             color: white;
             display: flex;
             justify-content: center;
@@ -245,42 +239,43 @@
             font-size: 16px;
         }
 
-      #mobile-controls {
-    width: 100%;
-    max-width: 320px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 16px;
-}
+        #mobile-controls {
+            width: 100%;
+            max-width: 320px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
 
-.mobile-btn {
-    aspect-ratio: 1;
-    width: calc((320px - 16px) / 3);
-    background-color: #003366;
-    border: none;
-    border-radius: 12px;    /* changed from 2px to 8px - we can adjust this value */
-    color: white;
-    font-size: 45px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-	
-}
+        .mobile-btn {
+            aspect-ratio: 1;
+            width: calc((320px - 16px) / 3);
+            background-color: #003366;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 45px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
         #time-display {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;  /* increase from whatever it was (probably 4px) to 8px */
-    margin-bottom: 8px;
-}
-#controls {
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* Add spacing between rows */
-}
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        #controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .time-container {
             padding: 6px;
             text-align: center;
@@ -343,7 +338,7 @@
             text-align: left;
             border-bottom: 1px solid #cccccc;
             font-size: 14px;
-        }1px solid #cccccc
+        }
     </style>
 </head>
 <body>
@@ -361,40 +356,41 @@
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
             <div id="target-word">
-                <div class="target-letter">C</div>
-				<div class="target-letter">A</div>
-				<div class="target-letter">U</div>
-				<div class="target-letter">T</div>
-				<div class="target-letter">I</div>
-				<div class="target-letter">O</div>
-				<div class="target-letter">U</div>
-				<div class="target-letter">S</div>
+                <div class="target-letter">S</div>
+                <div class="target-letter">T</div>
+                <div class="target-letter">R</div>
+                <div class="target-letter">E</div>
+                <div class="target-letter">N</div>
+                <div class="target-letter">G</div>
+                <div class="target-letter">T</div>
+                <div class="target-letter">H</div>
             </div>
         </div>
 
         <div id="game-grid"></div>
 
-       <div id="controls">
-    <div id="mobile-controls">
-        <button class="mobile-btn" id="left-btn">◀</button>
-        <button class="mobile-btn" id="down-btn">▼</button>
-        <button class="mobile-btn" id="right-btn">▶</button>
-    </div>
+        <div id="controls">
+            <div id="mobile-controls">
+                <button class="mobile-btn" id="left-btn">◀</button>
+                <button class="mobile-btn" id="down-btn">▼</button>
+                <button class="mobile-btn" id="right-btn">▶</button>
+            </div>
 
-    <div id="game-buttons">
-        <button class="game-btn" id="start-btn">START</button>
-        <button class="game-btn" id="pause-btn">PAUSE</button>
-    </div>
+            <div id="game-buttons">
+                <button class="game-btn" id="start-btn">START</button>
+                <button class="game-btn" id="pause-btn">PAUSE</button>
+            </div>
 
-    <div id="time-display">
-        <div id="timer-container" class="time-container">
-            Time:<br>00:00
-        </div>
-        <div id="best-time-container" class="time-container">
-            Best Time:<br>--:--
+            <div id="time-display">
+                <div id="timer-container" class="time-container">
+                    Time:<br>00:00
+                </div>
+                <div id="best-time-container" class="time-container">
+                    Best Time:<br>--:--
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
     <table id="leaderboard">
         <caption>LEADERBOARD</caption>
@@ -414,7 +410,7 @@
             const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            const TARGET_WORD = 'CAUTIOUS';
+            const TARGET_WORD = 'STRENGTH';
 
             let grid = [];
             let currentBlock = null;
@@ -492,14 +488,13 @@
 
             function isCollision(block) {
                 if (!block) return true;
-                // Check boundaries first
                 if (block.x < 0 || block.x >= GRID_WIDTH) return true;
                 if (block.y >= GRID_HEIGHT) return true;
-                // Only check collision with other blocks if within valid y range
                 if (block.y >= 0 && grid[block.y][block.x] !== null) return true;
                 return false;
             }
-	function moveBlock(dx, dy) {
+
+            function moveBlock(dx, dy) {
                 if (!currentBlock || isPaused || isGameOver) return;
                 clearBlock(currentBlock);
                 
@@ -515,8 +510,7 @@
                     placeBlock();
                 }
             }
-
-            function placeBlock() {
+			function placeBlock() {
                 if (!currentBlock || currentBlock.y < 0) return;
                 grid[currentBlock.y][currentBlock.x] = { ...currentBlock };
                 drawBlock(currentBlock);
@@ -600,108 +594,8 @@
                     }
                 }
             }
-	function moveBlock(dx, dy) {
-                if (!currentBlock || isPaused || isGameOver) return;
-                clearBlock(currentBlock);
-                
-                const newX = currentBlock.x + dx;
-                const newY = currentBlock.y + dy;
-                const testBlock = { ...currentBlock, x: newX, y: newY };
-                
-                if (!isCollision(testBlock)) {
-                    currentBlock.x = newX;
-                    currentBlock.y = newY;
-                    drawBlock(currentBlock);
-                } else if (dy > 0) {
-                    placeBlock();
-                }
-            }
 
-            function placeBlock() {
-                if (!currentBlock || currentBlock.y < 0) return;
-                grid[currentBlock.y][currentBlock.x] = { ...currentBlock };
-                drawBlock(currentBlock);
-                checkMatches();
-                checkGameOver();
-                checkWin();
-                currentBlock = nextBlock;
-                nextBlock = createBlock();
-                if (currentBlock) drawBlock(currentBlock);
-            }
-
-            function dropBlock() {
-                if (!currentBlock || isPaused || isGameOver) return;
-                clearBlock(currentBlock);
-                while (currentBlock.y < GRID_HEIGHT - 1 && !isCollision({ ...currentBlock, y: currentBlock.y + 1 })) {
-                    currentBlock.y++;
-                }
-                placeBlock();
-            }
-
-            function checkMatches() {
-                const toRemove = new Set();
-                
-                for (let y = 0; y < GRID_HEIGHT; y++) {
-                    for (let x = 0; x < GRID_WIDTH; x++) {
-                        if (grid[y][x] && !isPartOfTargetWord(grid[y][x].letter)) {
-                            checkNeighbors(x, y, toRemove);
-                        }
-                    }
-                }
-                
-                if (toRemove.size > 0) {
-                    toRemove.forEach(pos => {
-                        const [x, y] = pos.split(',').map(Number);
-                        grid[y][x] = null;
-                        clearBlock({ x, y });
-                    });
-                    
-                    dropColumns();
-                }
-            }
-
-            function isPartOfTargetWord(letter) {
-                return TARGET_WORD.includes(letter);
-            }
-
-            function checkNeighbors(x, y, toRemove) {
-                const current = grid[y][x];
-                if (!current) return;
-                
-                const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-                
-                directions.forEach(([dx, dy]) => {
-                    const nx = x + dx;
-                    const ny = y + dy;
-                    
-                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
-                        const neighbor = grid[ny][nx];
-                        if (neighbor && (current.letter === neighbor.letter || current.color === neighbor.color) &&
-                            !isPartOfTargetWord(current.letter) && !isPartOfTargetWord(neighbor.letter)) {
-                            toRemove.add(`${x},${y}`);
-                            toRemove.add(`${nx},${ny}`);
-                        }
-                    }
-                });
-            }
-
-            function dropColumns() {
-                for (let x = 0; x < GRID_WIDTH; x++) {
-                    let writeY = GRID_HEIGHT - 1;
-                    for (let y = GRID_HEIGHT - 1; y >= 0; y--) {
-                        if (grid[y][x] !== null) {
-                            if (y !== writeY) {
-                                grid[writeY][x] = grid[y][x];
-                                grid[y][x] = null;
-                                clearBlock({ x, y });
-                                drawBlock({ ...grid[writeY][x], x, y: writeY });
-                            }
-                            writeY--;
-                        }
-                    }
-                }
-            }
-	async function checkGameOver() {
+            async function checkGameOver() {
                 if (nextBlock && isCollision(nextBlock)) {
                     endGame('GAME OVER!');
                 }
@@ -726,13 +620,9 @@
                             clearInterval(gameInterval);
                             
                             try {
-                                // Update best time first
                                 await firebaseOps.updateBestTime(gameTime);
-                                
-                                // Then get player name and update leaderboard
                                 const name = prompt('You won! Enter your name:') || 'Anonymous';
                                 await firebaseOps.addLeaderboardEntry(name, gameTime);
-                                
                                 console.log('Score updates completed successfully');
                             } catch (error) {
                                 console.error('Error updating scores:', error);
@@ -765,27 +655,22 @@
             }
 
             function startGame() {
-                // Remove any existing overlay
                 const overlay = document.querySelector('div[style*="position: fixed"]');
                 if (overlay) overlay.remove();
                 
-                // Clear any existing game state
                 clearInterval(gameInterval);
                 isGameOver = false;
                 isPaused = false;
                 gameTime = 0;
                 
-                // Initialize the game
                 initGrid();
                 currentBlock = createBlock();
                 nextBlock = createBlock();
                 drawBlock(currentBlock);
                 
-                // Update display
                 timerDisplay.innerHTML = 'Time:<br>00:00';
                 pauseBtn.textContent = 'PAUSE';
                 
-                // Start the game loop
                 gameInterval = setInterval(() => {
                     if (!isPaused && !isGameOver) {
                         moveBlock(0, 1);
@@ -800,7 +685,6 @@
                 pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
             }
 
-            // Event Listeners
             startBtn.addEventListener('click', startGame);
             pauseBtn.addEventListener('click', togglePause);
             leftBtn.addEventListener('click', () => moveBlock(-1, 0));
@@ -817,7 +701,6 @@
                 }
             });
 
-            // Initialize the game board
             initGrid();
         });
     </script>
