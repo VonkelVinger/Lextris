@@ -101,7 +101,7 @@
             const leaderboardQuery = query(
                 collection(db, "leaderboard"),
                 orderBy("time"),
-                limit(5)
+                limit(10)
             );
 
             onSnapshot(leaderboardQuery, (snapshot) => {
