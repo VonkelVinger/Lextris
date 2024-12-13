@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
+
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
@@ -216,7 +217,7 @@
             gap: 1px;
             border: 1px solid #004d40;
             padding: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 1px;
         }
 
         .grid-cell {
@@ -244,37 +245,42 @@
             font-size: 16px;
         }
 
-        #mobile-controls {
+      #mobile-controls {
     width: 100%;
-    max-width: 320px;  /* same as game grid max-width */
+    max-width: 320px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 16px;
 }
 
 .mobile-btn {
     aspect-ratio: 1;
-    width: calc((320px - 8px) / 3);  /* total width minus gaps, divided by 3 */
+    width: calc((320px - 16px) / 3);
     background-color: #003366;
     border: none;
-    border-radius: 2px;
+    border-radius: 12px;    /* changed from 2px to 8px - we can adjust this value */
     color: white;
     font-size: 45px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
+	
 }
 
         #time-display {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;  /* increase from whatever it was (probably 4px) to 8px */
+    margin-bottom: 8px;
+}
+#controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Add spacing between rows */
+}
         .time-container {
             padding: 6px;
             text-align: center;
@@ -337,7 +343,7 @@
             text-align: left;
             border-bottom: 1px solid #cccccc;
             font-size: 14px;
-        }
+        }1px solid #cccccc
     </style>
 </head>
 <body>
@@ -355,41 +361,40 @@
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
             <div id="target-word">
-                <div class="target-letter">S</div>
-		<div class="target-letter">T</div>
-		<div class="target-letter">R</div>
-		<div class="target-letter">E</div>
-		<div class="target-letter">N</div>
-		<div class="target-letter">G</div>
-		<div class="target-letter">T</div>
-		<div class="target-letter">H</div>
+                <div class="target-letter">C</div>
+				<div class="target-letter">A</div>
+				<div class="target-letter">U</div>
+				<div class="target-letter">T</div>
+				<div class="target-letter">I</div>
+				<div class="target-letter">O</div>
+				<div class="target-letter">U</div>
+				<div class="target-letter">S</div>
             </div>
         </div>
 
         <div id="game-grid"></div>
 
-        <div id="controls">
-            <div id="mobile-controls">
-                <button class="mobile-btn" id="left-btn">◀</button>
-                <button class="mobile-btn" id="down-btn">▼</button>
-                <button class="mobile-btn" id="right-btn">▶</button>
-            </div>
+       <div id="controls">
+    <div id="mobile-controls">
+        <button class="mobile-btn" id="left-btn">◀</button>
+        <button class="mobile-btn" id="down-btn">▼</button>
+        <button class="mobile-btn" id="right-btn">▶</button>
+    </div>
 
-            <div id="time-display">
-                <div id="timer-container" class="time-container">
-                    Time:<br>00:00
-                </div>
-                <div id="best-time-container" class="time-container">
-                    Best Time:<br>--:--
-                </div>
-            </div>
+    <div id="game-buttons">
+        <button class="game-btn" id="start-btn">START</button>
+        <button class="game-btn" id="pause-btn">PAUSE</button>
+    </div>
 
-            <div id="game-buttons">
-                <button class="game-btn" id="start-btn">START</button>
-                <button class="game-btn" id="pause-btn">PAUSE</button>
-            </div>
+    <div id="time-display">
+        <div id="timer-container" class="time-container">
+            Time:<br>00:00
+        </div>
+        <div id="best-time-container" class="time-container">
+            Best Time:<br>--:--
         </div>
     </div>
+</div>
 
     <table id="leaderboard">
         <caption>LEADERBOARD</caption>
@@ -409,7 +414,7 @@
             const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            const TARGET_WORD = 'STRENGTH';
+            const TARGET_WORD = 'CAUTIOUS';
 
             let grid = [];
             let currentBlock = null;
