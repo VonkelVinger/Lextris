@@ -99,29 +99,40 @@
 
             // Leaderboard listener
             const leaderboardQuery = query(
-                collection(db, "leaderboard"),
-                orderBy("time"),
-                limit(5)
-            );
+    collection(db, "leaderboard"),
+    orderBy("time"),
+    limit(10)
+);
 
-            onSnapshot(leaderboardQuery, (snapshot) => {
-                const tbody = document.querySelector('#leaderboard tbody');
-                if (tbody) {
-                    tbody.innerHTML = '';
-                    let rank = 1;
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${rank++}</td>
-                            <td>${data.name}</td>
-                            <td>${formatTime(data.time)}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                }
-            });
+onSnapshot(leaderboardQuery, (snapshot) => {
+    const tbody = document.querySelector('#leaderboard tbody');
+    if (tbody) {
+        tbody.innerHTML = '';
+        let rank = 1;
+        // Get the best time from the first entry
+        if (!snapshot.empty) {
+            const bestTime = snapshot.docs[0].data().time;
+            // Update best time display
+            const bestTimeDisplay = document.querySelector('#best-time-container');
+            if (bestTimeDisplay) {
+                bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(bestTime)}`;
+            }
+            // Update best time in Firebase
+            firebaseOps.updateBestTime(bestTime);
+        }
+        // Continue with leaderboard display
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${rank++}</td>
+                <td>${data.name}</td>
+                <td>${formatTime(data.time)}</td>
+            `;
+            tbody.appendChild(row);
         });
+    }
+});
 
         // Make formatTime available globally for Firebase listeners
         window.formatTime = function(seconds) {
@@ -355,14 +366,14 @@
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
             <div id="target-word">
-                <div class="target-letter">S</div>
+                <div class="target-letter">C</div>
+				<div class="target-letter">A</div>
 				<div class="target-letter">T</div>
-				<div class="target-letter">R</div>
-				<div class="target-letter">E</div>
-				<div class="target-letter">N</div>
-				<div class="target-letter">G</div>
-				<div class="target-letter">T</div>
-				<div class="target-letter">H</div>
+					<!-- <div class="target-letter">E</div> -->
+					<!-- <div class="target-letter">N</div> -->
+					<!-- <div class="target-letter">G</div> -->
+					<!-- <div class="target-letter">T</div> -->
+					<!-- <div class="target-letter">H</div> -->
             </div>
         </div>
 
@@ -409,7 +420,7 @@
             const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            const TARGET_WORD = 'STRENGTH';
+            const TARGET_WORD = 'CAT';
 
             let grid = [];
             let currentBlock = null;
