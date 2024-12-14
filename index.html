@@ -2,32 +2,707 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leximax - Play of the Day</title>
-    <link rel="stylesheet" href="/assets/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LEXIMAX</title>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            collection, 
+            addDoc, 
+            query, 
+            orderBy, 
+            limit, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.firebaseOps = {
+            async getBestTime() {
+                try {
+                    const docSnap = await getDoc(doc(db, "bestTimes", "global"));
+                    if (docSnap.exists()) {
+                        console.log("Current best time:", docSnap.data().time);
+                        return docSnap.data().time;
+                    }
+                    return null;
+                } catch (error) {
+                    console.error("Error fetching best time:", error);
+                    return null;
+                }
+            },
+            
+            async updateBestTime(newTime) {
+                try {
+                    const currentBest = await this.getBestTime();
+                    console.log("Comparing times:", { current: currentBest, new: newTime });
+                    if (!currentBest || newTime < currentBest) {
+                        await setDoc(doc(db, "bestTimes", "global"), { 
+                            time: newTime,
+                            updatedAt: new Date().toISOString()
+                        });
+                        console.log("Best time updated to:", newTime);
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    console.error("Error updating best time:", error);
+                    return false;
+                }
+            },
+            
+            async addLeaderboardEntry(name, time) {
+                try {
+                    const entry = {
+                        name: name.slice(0, 12),
+                        time: time,
+                        timestamp: new Date().toISOString()
+                    };
+                    console.log("Adding leaderboard entry:", entry);
+                    await addDoc(collection(db, "leaderboard"), entry);
+                    return true;
+                } catch (error) {
+                    console.error("Error adding leaderboard entry:", error);
+                    return false;
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onSnapshot(doc(db, "bestTimes", "global"), (doc) => {
+                if (doc.exists()) {
+                    const bestTime = doc.data().time;
+                    const display = document.querySelector('#best-time-container');
+                    if (display) {
+                        display.innerHTML = `Best Time:<br>${formatTime(bestTime)}`;
+                    }
+                }
+            });
+
+            const leaderboardQuery = query(
+                collection(db, "leaderboard"),
+                orderBy("time"),
+                limit(10)
+            );
+
+            onSnapshot(leaderboardQuery, (snapshot) => {
+                const tbody = document.querySelector('#leaderboard tbody');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    let rank = 1;
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${rank++}</td>
+                            <td>${data.name}</td>
+                            <td>${formatTime(data.time)}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            });
+        });
+
+        window.formatTime = function(seconds) {
+            if (!seconds && seconds !== 0) return '--:--';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        };
+    </script>
+	<style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            max-width: 320px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #leximax-title {
+            display: flex;
+            gap: 0;
+            margin-bottom: 8px;
+        }
+
+        .title-block {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            font-weight: bold;
+            color: white;
+        }
+
+        #target-word-container {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        #target-word-label {
+            font-size: 22px;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #666666;
+        }
+
+        #target-word {
+            display: flex;
+            gap: 0;
+            justify-content: center;
+        }
+
+        .target-letter {
+            width: 25px;
+            height: 25px;
+            background-color: #004d40;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #game-grid {
+            width: 100%;
+            aspect-ratio: 8/10;
+            background-color: white;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 1px;
+            border: 1px solid #004d40;
+            padding: 1px;
+            margin-bottom: 1px;
+        }
+
+        .grid-cell {
+            background-color: #004d40;
+            position: relative;
+        }
+
+        .grid-cell::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .grid-cell.filled {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+
+        #mobile-controls {
+            width: 100%;
+            max-width: 320px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .mobile-btn {
+            aspect-ratio: 1;
+            width: calc((320px - 16px) / 3);
+            background-color: #003366;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 45px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #time-display {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        #controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .time-container {
+            padding: 6px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            line-height: 1.2;
+            border-radius: 2px;
+        }
+
+        #timer-container {
+            background-color: #004d40;
+        }
+
+        #best-time-container {
+            background-color: #d32f2f;
+        }
+
+        #game-buttons {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .game-btn {
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            padding: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        #leaderboard {
+            width: 100%;
+            max-width: 320px;
+            margin-top: 15px;
+            border-collapse: collapse;
+            background-color: #f0f0f0;
+            color: #000000;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #leaderboard caption {
+            background-color: #003366;
+            color: white;
+            padding: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        #leaderboard th, #leaderboard td {
+            padding: 6px 12px;
+            text-align: left;
+            border-bottom: 1px solid #cccccc;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <img src="/assets/LeximaxLogo.JPG" alt="Leximax Logo" id="logo">
-        <nav>
-            <a href="/">Home</a>
-            <a href="/how-to-play.html">How to Play</a>
-            <a href="/games/">Past Games</a>
-        </nav>
-    </header>
-    <main>
-        <h1>Play of the Day</h1>
-        <div id="game-container">
-            <!-- Dynamically load today's game -->
-            <iframe src="/game.html?date=2024-12-14" id="game-frame"></iframe>
+    <div class="game-wrapper">
+        <div id="leximax-title">
+            <div class="title-block" style="background-color: #2196f3;">L</div>
+            <div class="title-block" style="background-color: #f44336;">E</div>
+            <div class="title-block" style="background-color: #4caf50;">X</div>
+            <div class="title-block" style="background-color: #ffc107;">I</div>
+            <div class="title-block" style="background-color: #9c27b0;">M</div>
+            <div class="title-block" style="background-color: #0066FF;">A</div>
+            <div class="title-block" style="background-color: #900C3F;">X</div>
         </div>
-        <div id="ad-zone">
-            <!-- Placeholder for ads -->
-            <p>Ad Space</p>
+
+        <div id="target-word-container">
+            <div id="target-word-label">TARGET WORD:</div>
+            <div id="target-word">
+                <div class="target-letter">S</div>
+                <div class="target-letter">T</div>
+                <div class="target-letter">R</div>
+                <div class="target-letter">E</div>
+                <div class="target-letter">N</div>
+                <div class="target-letter">G</div>
+                <div class="target-letter">T</div>
+                <div class="target-letter">H</div>
+            </div>
         </div>
-    </main>
-    <footer>
-        <p>&copy; 2024 Leximax. All rights reserved.</p>
-    </footer>
+
+        <div id="game-grid"></div>
+
+        <div id="controls">
+            <div id="mobile-controls">
+                <button class="mobile-btn" id="left-btn">◀</button>
+                <button class="mobile-btn" id="down-btn">▼</button>
+                <button class="mobile-btn" id="right-btn">▶</button>
+            </div>
+
+            <div id="game-buttons">
+                <button class="game-btn" id="start-btn">START</button>
+                <button class="game-btn" id="pause-btn">PAUSE</button>
+            </div>
+
+            <div id="time-display">
+                <div id="timer-container" class="time-container">
+                    Time:<br>00:00
+                </div>
+                <div id="best-time-container" class="time-container">
+                    Best Time:<br>--:--
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table id="leaderboard">
+        <caption>LEADERBOARD</caption>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+	<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const GRID_WIDTH = 8;
+            const GRID_HEIGHT = 10;
+            const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
+            const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
+            const VOWELS = 'AEIOUY';
+            const TARGET_WORD = 'STRENGTH';
+
+            let grid = [];
+            let currentBlock = null;
+            let nextBlock = null;
+            let gameInterval = null;
+            let gameTime = 0;
+            let isPaused = false;
+            let isGameOver = false;
+
+            // Initialize DOM elements
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const leftBtn = document.getElementById('left-btn');
+            const downBtn = document.getElementById('down-btn');
+            const rightBtn = document.getElementById('right-btn');
+            const timerDisplay = document.querySelector('#timer-container');
+            const bestTimeDisplay = document.querySelector('#best-time-container');
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+
+            function updateTimer() {
+                if (!isPaused && !isGameOver) {
+                    gameTime++;
+                    timerDisplay.innerHTML = `Time:<br>${formatTime(gameTime)}`;
+                }
+            }
+
+            function initGrid() {
+                const gameGrid = document.getElementById('game-grid');
+                gameGrid.innerHTML = '';
+                grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
+                
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'grid-cell';
+                        gameGrid.appendChild(cell);
+                    }
+                }
+            }
+
+            function createBlock() {
+                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                const letter = Math.random() < 0.3 ? 
+                    VOWELS[Math.floor(Math.random() * VOWELS.length)] :
+                    LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                return { color, letter, x: Math.floor(GRID_WIDTH / 2), y: 0 };
+            }
+
+            function drawBlock(block) {
+                if (!block) return;
+                const index = block.y * GRID_WIDTH + block.x;
+                const cell = document.querySelector(`#game-grid .grid-cell:nth-child(${index + 1})`);
+                if (cell) {
+                    cell.className = 'grid-cell filled';
+                    cell.style.backgroundColor = block.color;
+                    cell.textContent = block.letter;
+                }
+            }
+
+            function clearBlock(block) {
+                if (!block) return;
+                const index = block.y * GRID_WIDTH + block.x;
+                const cell = document.querySelector(`#game-grid .grid-cell:nth-child(${index + 1})`);
+                if (cell) {
+                    cell.className = 'grid-cell';
+                    cell.style.backgroundColor = '';
+                    cell.textContent = '';
+                }
+            }
+
+            function isCollision(block) {
+                if (!block) return true;
+                if (block.x < 0 || block.x >= GRID_WIDTH) return true;
+                if (block.y >= GRID_HEIGHT) return true;
+                if (block.y >= 0 && grid[block.y][block.x] !== null) return true;
+                return false;
+            }
+
+            function moveBlock(dx, dy) {
+                if (!currentBlock || isPaused || isGameOver) return;
+                clearBlock(currentBlock);
+                
+                const newX = currentBlock.x + dx;
+                const newY = currentBlock.y + dy;
+                const testBlock = { ...currentBlock, x: newX, y: newY };
+                
+                if (!isCollision(testBlock)) {
+                    currentBlock.x = newX;
+                    currentBlock.y = newY;
+                    drawBlock(currentBlock);
+                } else if (dy > 0) {
+                    placeBlock();
+                }
+            }
+			function placeBlock() {
+                if (!currentBlock || currentBlock.y < 0) return;
+                grid[currentBlock.y][currentBlock.x] = { ...currentBlock };
+                drawBlock(currentBlock);
+                checkMatches();
+                checkGameOver();
+                checkWin();
+                currentBlock = nextBlock;
+                nextBlock = createBlock();
+                if (currentBlock) drawBlock(currentBlock);
+            }
+
+            function dropBlock() {
+                if (!currentBlock || isPaused || isGameOver) return;
+                clearBlock(currentBlock);
+                while (currentBlock.y < GRID_HEIGHT - 1 && !isCollision({ ...currentBlock, y: currentBlock.y + 1 })) {
+                    currentBlock.y++;
+                }
+                placeBlock();
+            }
+
+            function checkMatches() {
+                const toRemove = new Set();
+                
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        if (grid[y][x] && !isPartOfTargetWord(grid[y][x].letter)) {
+                            checkNeighbors(x, y, toRemove);
+                        }
+                    }
+                }
+                
+                if (toRemove.size > 0) {
+                    toRemove.forEach(pos => {
+                        const [x, y] = pos.split(',').map(Number);
+                        grid[y][x] = null;
+                        clearBlock({ x, y });
+                    });
+                    
+                    dropColumns();
+                }
+            }
+
+            function isPartOfTargetWord(letter) {
+                return TARGET_WORD.includes(letter);
+            }
+
+            function checkNeighbors(x, y, toRemove) {
+                const current = grid[y][x];
+                if (!current) return;
+                
+                const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+                
+                directions.forEach(([dx, dy]) => {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    
+                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && (current.letter === neighbor.letter || current.color === neighbor.color) &&
+                            !isPartOfTargetWord(current.letter) && !isPartOfTargetWord(neighbor.letter)) {
+                            toRemove.add(`${x},${y}`);
+                            toRemove.add(`${nx},${ny}`);
+                        }
+                    }
+                });
+            }
+
+            function dropColumns() {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    let writeY = GRID_HEIGHT - 1;
+                    for (let y = GRID_HEIGHT - 1; y >= 0; y--) {
+                        if (grid[y][x] !== null) {
+                            if (y !== writeY) {
+                                grid[writeY][x] = grid[y][x];
+                                grid[y][x] = null;
+                                clearBlock({ x, y });
+                                drawBlock({ ...grid[writeY][x], x, y: writeY });
+                            }
+                            writeY--;
+                        }
+                    }
+                }
+            }
+
+            async function checkGameOver() {
+                if (nextBlock && isCollision(nextBlock)) {
+                    endGame('GAME OVER!');
+                }
+            }
+
+            async function checkWin() {
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
+                        let word = '';
+                        let isValid = true;
+                        
+                        for (let i = 0; i < TARGET_WORD.length; i++) {
+                            if (!grid[y][x + i]) {
+                                isValid = false;
+                                break;
+                            }
+                            word += grid[y][x + i].letter;
+                        }
+                        
+                        if (isValid && word === TARGET_WORD) {
+                            isGameOver = true;
+                            clearInterval(gameInterval);
+                            
+                            try {
+                                await firebaseOps.updateBestTime(gameTime);
+                                const name = prompt('You won! Enter your name:') || 'Anonymous';
+                                await firebaseOps.addLeaderboardEntry(name, gameTime);
+                                console.log('Score updates completed successfully');
+                            } catch (error) {
+                                console.error('Error updating scores:', error);
+                            }
+                            
+                            endGame('YOU WIN!');
+                            return;
+                        }
+                    }
+                }
+            }
+
+            function endGame(message) {
+                clearInterval(gameInterval);
+                isGameOver = true;
+                
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '50%';
+                overlay.style.left = '50%';
+                overlay.style.transform = 'translate(-50%, -50%)';
+                overlay.style.backgroundColor = 'white';
+                overlay.style.padding = '20px';
+                overlay.style.borderRadius = '8px';
+                overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                overlay.style.zIndex = '100';
+                overlay.style.fontWeight = 'bold';
+                overlay.textContent = message;
+                document.body.appendChild(overlay);
+            }
+
+            function startGame() {
+                const overlay = document.querySelector('div[style*="position: fixed"]');
+                if (overlay) overlay.remove();
+                
+                clearInterval(gameInterval);
+                isGameOver = false;
+                isPaused = false;
+                gameTime = 0;
+                
+                initGrid();
+                currentBlock = createBlock();
+                nextBlock = createBlock();
+                drawBlock(currentBlock);
+                
+                timerDisplay.innerHTML = 'Time:<br>00:00';
+                pauseBtn.textContent = 'PAUSE';
+                
+                gameInterval = setInterval(() => {
+                    if (!isPaused && !isGameOver) {
+                        moveBlock(0, 1);
+                        updateTimer();
+                    }
+                }, 1000);
+            }
+
+            function togglePause() {
+                if (isGameOver) return;
+                isPaused = !isPaused;
+                pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+            }
+
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', togglePause);
+            leftBtn.addEventListener('click', () => moveBlock(-1, 0));
+            rightBtn.addEventListener('click', () => moveBlock(1, 0));
+            downBtn.addEventListener('click', dropBlock);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
+                if (e.key === 'ArrowRight') moveBlock(1, 0);
+                if (e.key === 'ArrowDown') moveBlock(0, 1);
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    dropBlock();
+                }
+            });
+
+            initGrid();
+        });
+    </script>
 </body>
 </html>
