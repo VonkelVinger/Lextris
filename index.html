@@ -464,8 +464,7 @@
             const downBtn = document.getElementById('down-btn');
             const rightBtn = document.getElementById('right-btn');
             const timerDisplay = document.querySelector('#timer-container');
-
-            function formatTime(seconds) {
+			function formatTime(seconds) {
                 const minutes = Math.floor(seconds / 60);
                 const remainingSeconds = seconds % 60;
                 return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
@@ -597,6 +596,11 @@
                     dropColumns();
                 }
             }
+			function checkGameOver() {
+                if (nextBlock && isCollision(nextBlock)) {
+                    endGame('GAME OVER');
+                }
+            }
 
             function isPartOfTargetWord(letter) {
                 return TARGET_WORD.includes(letter);
@@ -658,29 +662,22 @@
                             isGameOver = true;
                             clearInterval(gameInterval);
                             
-                            try {
-                                await window.firebaseOps.updateBestTime(gameTime);
-                                const name = prompt('You won! Enter your name:') || 'Anonymous';
-                                await window.firebaseOps.addLeaderboardEntry(name, gameTime);
-                                console.log('Score updates completed successfully');
-                            } catch (error) {
-                                console.error('Error updating scores:', error);
-                            }
+                            // Check if it's a new record
+                            const currentBest = await window.firebaseOps.getBestTime();
+                            const isRecord = !currentBest || gameTime < currentBest;
+                            const timeStr = formatTime(gameTime);
+                            const message = isRecord ? 
+                                `YOU DID IT IN ${timeStr}, A NEW RECORD!` : 
+                                `YOU DID IT IN ${timeStr}!`;
                             
-                            endGame('YOU WIN!');
+                            endGame(message, true);
                             return;
                         }
                     }
                 }
             }
 
-            function checkGameOver() {
-                if (nextBlock && isCollision(nextBlock)) {
-                    endGame('GAME OVER');
-                }
-            }
-
-            function endGame(message) {
+            function endGame(message, isWin = false) {
                 clearInterval(gameInterval);
                 isGameOver = true;
                 
@@ -695,7 +692,39 @@
                 overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
                 overlay.style.zIndex = '100';
                 overlay.style.fontWeight = 'bold';
-                overlay.textContent = message;
+                overlay.style.textAlign = 'center';
+
+                if (isWin) {
+                    overlay.innerHTML = `
+                        <div style="margin-bottom: 15px;">${message}</div>
+                        <form id="leaderboard-form" style="display: flex; flex-direction: column; gap: 10px;">
+                            <input type="text" id="player-name" 
+                                   maxlength="12" 
+                                   placeholder="Enter your name"
+                                   style="padding: 5px; border: 1px solid #004d40; border-radius: 4px;"
+                            >
+                        </form>
+                    `;
+
+                    const form = overlay.querySelector('#leaderboard-form');
+                    const input = overlay.querySelector('#player-name');
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const name = input.value.trim() || 'Anonymous';
+                        try {
+                            await window.firebaseOps.updateBestTime(gameTime);
+                            await window.firebaseOps.addLeaderboardEntry(name, gameTime);
+                        } catch (error) {
+                            console.error('Error updating scores:', error);
+                        }
+                        overlay.remove();
+                    });
+
+                    input.focus();
+                } else {
+                    overlay.textContent = message;
+                }
+                
                 document.body.appendChild(overlay);
             }
 
@@ -751,3 +780,5 @@
             initGrid();
         });
     </script>
+</body>
+</html>
