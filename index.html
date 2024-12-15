@@ -83,42 +83,6 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            onSnapshot(doc(db, "bestTimes", "global"), (doc) => {
-                if (doc.exists()) {
-                    const bestTime = doc.data().time;
-                    const display = document.querySelector('#best-time-container');
-                    if (display) {
-                        display.innerHTML = `Best Time:<br>${formatTime(bestTime)}`;
-                    }
-                }
-            });
-
-            const leaderboardQuery = query(
-                collection(db, "leaderboard"),
-                orderBy("time"),
-                limit(10)
-            );
-
-            onSnapshot(leaderboardQuery, (snapshot) => {
-                const tbody = document.querySelector('#leaderboard tbody');
-                if (tbody) {
-                    tbody.innerHTML = '';
-                    let rank = 1;
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${rank++}</td>
-                            <td>${data.name}</td>
-                            <td>${formatTime(data.time)}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                }
-            });
-        });
-
         window.formatTime = function(seconds) {
             if (!seconds && seconds !== 0) return '--:--';
             const minutes = Math.floor(seconds / 60);
@@ -152,6 +116,7 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
+            overflow: hidden;
         }
 
         #leximax-title {
@@ -185,8 +150,11 @@
 
         #target-word {
             display: flex;
-            gap: 0;
+            gap: 1px;
             justify-content: center;
+            background-color: white;
+            padding: 1px;
+            border: 1px solid #004d40;
         }
 
         .target-letter {
@@ -199,6 +167,18 @@
             align-items: center;
             font-weight: bold;
             font-size: 16px;
+            position: relative;
+        }
+
+        .target-letter::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
         }
 
         #game-grid {
@@ -212,11 +192,15 @@
             border: 1px solid #004d40;
             padding: 1px;
             margin-bottom: 1px;
+            position: relative;
+            overflow: hidden;
         }
 
         .grid-cell {
             background-color: #004d40;
             position: relative;
+            width: 100%;
+            height: 100%;
         }
 
         .grid-cell::after {
@@ -237,6 +221,7 @@
             font-weight: bold;
             color: white;
             font-size: 16px;
+            transition: transform 0.1s ease-out;
         }
 
         #mobile-controls {
@@ -340,7 +325,7 @@
             font-size: 14px;
         }
     </style>
-</head>
+	</head>
 <body>
     <div class="game-wrapper">
         <div id="leximax-title">
@@ -356,14 +341,14 @@
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
             <div id="target-word">
-                <div class="target-letter">S</div>
-                <div class="target-letter">T</div>
-                <div class="target-letter">R</div>
                 <div class="target-letter">E</div>
                 <div class="target-letter">N</div>
                 <div class="target-letter">G</div>
-                <div class="target-letter">T</div>
-                <div class="target-letter">H</div>
+                <div class="target-letter">I</div>
+                <div class="target-letter">N</div>
+                <div class="target-letter">E</div>
+                <div class="target-letter">E</div>
+                <div class="target-letter">R</div>
             </div>
         </div>
 
@@ -404,14 +389,65 @@
         <tbody></tbody>
     </table>
 	<script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Import Firebase functions
+            const { 
+                getFirestore, 
+                collection, 
+                query, 
+                orderBy, 
+                limit, 
+                onSnapshot, 
+                doc 
+            } = await import("https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js");
+            
+            const db = getFirestore();
+            
+            // Firebase leaderboard listener
+            const leaderboardQuery = query(
+                collection(db, "leaderboard"),
+                orderBy("time"),
+                limit(10)
+            );
+
+            onSnapshot(leaderboardQuery, (snapshot) => {
+                const tbody = document.querySelector('#leaderboard tbody');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    let rank = 1;
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${rank++}</td>
+                            <td>${data.name}</td>
+                            <td>${formatTime(data.time)}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            });
+
+            // Best time listener
+            onSnapshot(doc(db, "bestTimes", "global"), (doc) => {
+                if (doc.exists()) {
+                    const bestTime = doc.data().time;
+                    const display = document.querySelector('#best-time-container');
+                    if (display) {
+                        display.innerHTML = `Best Time:<br>${formatTime(bestTime)}`;
+                    }
+                }
+            });
+
+            // Game constants
             const GRID_WIDTH = 8;
             const GRID_HEIGHT = 10;
             const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            const TARGET_WORD = 'STRENGTH';
+            const TARGET_WORD = 'ENGINEER';
 
+            // Game state variables
             let grid = [];
             let currentBlock = null;
             let nextBlock = null;
@@ -419,6 +455,7 @@
             let gameTime = 0;
             let isPaused = false;
             let isGameOver = false;
+            let isMoving = false;
 
             // Initialize DOM elements
             const startBtn = document.getElementById('start-btn');
@@ -427,7 +464,6 @@
             const downBtn = document.getElementById('down-btn');
             const rightBtn = document.getElementById('right-btn');
             const timerDisplay = document.querySelector('#timer-container');
-            const bestTimeDisplay = document.querySelector('#best-time-container');
 
             function formatTime(seconds) {
                 const minutes = Math.floor(seconds / 60);
@@ -451,6 +487,8 @@
                     for (let x = 0; x < GRID_WIDTH; x++) {
                         const cell = document.createElement('div');
                         cell.className = 'grid-cell';
+                        cell.setAttribute('data-x', x);
+                        cell.setAttribute('data-y', y);
                         gameGrid.appendChild(cell);
                     }
                 }
@@ -465,9 +503,8 @@
             }
 
             function drawBlock(block) {
-                if (!block) return;
-                const index = block.y * GRID_WIDTH + block.x;
-                const cell = document.querySelector(`#game-grid .grid-cell:nth-child(${index + 1})`);
+                if (!block || block.x < 0 || block.x >= GRID_WIDTH || block.y < 0 || block.y >= GRID_HEIGHT) return;
+                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
                 if (cell) {
                     cell.className = 'grid-cell filled';
                     cell.style.backgroundColor = block.color;
@@ -476,9 +513,8 @@
             }
 
             function clearBlock(block) {
-                if (!block) return;
-                const index = block.y * GRID_WIDTH + block.x;
-                const cell = document.querySelector(`#game-grid .grid-cell:nth-child(${index + 1})`);
+                if (!block || block.x < 0 || block.x >= GRID_WIDTH || block.y < 0 || block.y >= GRID_HEIGHT) return;
+                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
                 if (cell) {
                     cell.className = 'grid-cell';
                     cell.style.backgroundColor = '';
@@ -494,8 +530,10 @@
                 return false;
             }
 
-            function moveBlock(dx, dy) {
-                if (!currentBlock || isPaused || isGameOver) return;
+            async function moveBlock(dx, dy) {
+                if (!currentBlock || isPaused || isGameOver || isMoving) return;
+                
+                isMoving = true;
                 clearBlock(currentBlock);
                 
                 const newX = currentBlock.x + dx;
@@ -505,12 +543,19 @@
                 if (!isCollision(testBlock)) {
                     currentBlock.x = newX;
                     currentBlock.y = newY;
+                    await new Promise(resolve => setTimeout(resolve, 0));
                     drawBlock(currentBlock);
                 } else if (dy > 0) {
+                    drawBlock(currentBlock);
                     placeBlock();
+                } else {
+                    drawBlock(currentBlock);
                 }
+                
+                isMoving = false;
             }
-			function placeBlock() {
+
+            function placeBlock() {
                 if (!currentBlock || currentBlock.y < 0) return;
                 grid[currentBlock.y][currentBlock.x] = { ...currentBlock };
                 drawBlock(currentBlock);
@@ -595,12 +640,6 @@
                 }
             }
 
-            async function checkGameOver() {
-                if (nextBlock && isCollision(nextBlock)) {
-                    endGame('GAME OVER!');
-                }
-            }
-
             async function checkWin() {
                 for (let y = 0; y < GRID_HEIGHT; y++) {
                     for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
@@ -620,9 +659,9 @@
                             clearInterval(gameInterval);
                             
                             try {
-                                await firebaseOps.updateBestTime(gameTime);
+                                await window.firebaseOps.updateBestTime(gameTime);
                                 const name = prompt('You won! Enter your name:') || 'Anonymous';
-                                await firebaseOps.addLeaderboardEntry(name, gameTime);
+                                await window.firebaseOps.addLeaderboardEntry(name, gameTime);
                                 console.log('Score updates completed successfully');
                             } catch (error) {
                                 console.error('Error updating scores:', error);
@@ -632,6 +671,12 @@
                             return;
                         }
                     }
+                }
+            }
+
+            function checkGameOver() {
+                if (nextBlock && isCollision(nextBlock)) {
+                    endGame('GAME OVER');
                 }
             }
 
@@ -685,6 +730,7 @@
                 pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
             }
 
+            // Event listeners
             startBtn.addEventListener('click', startGame);
             pauseBtn.addEventListener('click', togglePause);
             leftBtn.addEventListener('click', () => moveBlock(-1, 0));
@@ -701,8 +747,7 @@
                 }
             });
 
+            // Initialize the game
             initGrid();
         });
     </script>
-</body>
-</html>
