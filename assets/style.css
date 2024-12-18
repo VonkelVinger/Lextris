@@ -1,1 +1,111 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+header {
+    text-align: center;
+    background-color: #004d40; /* Dark green */
+    padding: 20px 0;
+}
+
+#game-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.title-block {
+    width: 50px;
+    height: 50px;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Main Content */
+main {
+    padding: 20px;
+}
+
+.play-today, .past-games, .ads {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.play-today h2, .past-games h2, .ads h2 {
+    color: #0066FF; /* Blue */
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0066FF;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.button:hover {
+    background-color: #004d40;
+}
+
+.past-games ul {
+    list-style: none;
+    padding: 0;
+}
+
+.past-games li a {
+    text-decoration: none;
+    color: #0066FF;
+}
+
+.past-games li a:hover {
+    text-decoration: underline;
+}
+
+/* Ads Section */
+.ad-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.ad-placeholder {
+    width: 300px;
+    height: 250px;
+    background-color: #e0e0e0;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    border: 1px dashed #aaa;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background-color: #004d40;
+    color: white;
+}
+
+footer a {
+    color: #ffc107;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
 
