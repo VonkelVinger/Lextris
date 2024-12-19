@@ -70,14 +70,16 @@ main {
 }
 
 .center-list {
-    list-style: disc; /* Changes the asterisks to bullets */
-    padding-left: 20px; /* Adds some indentation for bullets */
+    list-style: disc; /* Bullet points */
+    padding: 0;
+    text-align: center; /* Centers the entire list */
 }
 
 .center-list li {
-    margin: 10px 0;
-    color: #FFC107; /* Gold color for the dates */
-    font-weight: bold; /* Optional: makes the text bold */
+    margin: 10px 0; /* Adds spacing between list items */
+    color: #FFC107; /* Gold color */
+    font-weight: bold; /* Makes the text bold */
+    display: inline-block; /* Centers each item within the list */
 }
 
 .center-list a {
