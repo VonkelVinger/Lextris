@@ -1,108 +1,19 @@
-/* General Styles */
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
-}
-
-header {
-    text-align: center;
-    background-color: #004d40; /* Dark green */
-    padding: 20px 0;
-}
-
-#game-title {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-}
-
-.title-block {
-    width: 50px;
-    height: 50px;
-    color: white;
-    font-size: 32px;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Button Styles */
-.buttons-container {
-    display: flex;
-    flex-direction: column; /* Arrange buttons vertically */
-    align-items: center;    /* Center the buttons */
-    gap: 20px;              /* Space between buttons */
-    margin: 20px 0;         /* Space around the buttons */
-}
-
 .button {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #FFC107; /* Gold */
-    color: #004d40;           /* Dark green */
+    background-color: #004d40; /* Dark green */
+    color: #FFC107;           /* Gold */
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
     text-align: center;
     transition: background-color 0.3s ease, color 0.3s ease;
-    border: 2px solid #004d40; /* Green border for consistency */
+    border: 2px solid #FFC107; /* Gold border for consistency */
     width: 200px;             /* Ensure consistent button width */
 }
 
 .button:hover {
-    background-color: #004d40; /* Dark green */
-    color: #FFC107;           /* Gold */
-    border: 2px solid #FFC107; /* Gold border on hover */
-}
-
-/* Main Content */
-main {
-    padding: 20px;
-}
-
-.ads h2 {
-    font-size: 18px; /* Adjust size if needed */
-    text-align: center;
-    margin-bottom: 15px;
-    color: #004d40; /* Dark green */
-}
-
-.ad-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.ad-placeholder {
-    width: 300px;
-    height: 250px;
-    background-color: #e0e0e0;
-    color: #666;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 16px;
-    border: 1px dashed #aaa;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 10px 0;
-    background-color: #004d40; /* Dark green */
-    color: white;
-}
-
-footer a {
-    color: #FFC107; /* Gold */
-    text-decoration: none;
-    margin: 0 10px;
-}
-
-footer a:hover {
-    text-decoration: underline;
+    background-color: #FFC107; /* Gold */
+    color: #004d40;           /* Dark green */
+    border: 2px solid #004d40; /* Green border on hover */
 }
