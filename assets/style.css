@@ -33,27 +33,29 @@ header {
 /* Button Styles */
 .buttons-container {
     display: flex;
-    justify-content: center;
-    gap: 20px; /* Space between buttons */
-    margin: 20px 0; /* Space around the buttons */
+    flex-direction: column; /* Arrange buttons vertically */
+    align-items: center;    /* Center the buttons */
+    gap: 20px;              /* Space between buttons */
+    margin: 20px 0;         /* Space around the buttons */
 }
 
 .button {
     display: inline-block;
     padding: 10px 20px;
     background-color: #FFC107; /* Gold */
-    color: #004d40; /* Dark green */
+    color: #004d40;           /* Dark green */
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
     text-align: center;
     transition: background-color 0.3s ease, color 0.3s ease;
     border: 2px solid #004d40; /* Green border for consistency */
+    width: 200px;             /* Ensure consistent button width */
 }
 
 .button:hover {
     background-color: #004d40; /* Dark green */
-    color: #FFC107; /* Gold */
+    color: #FFC107;           /* Gold */
     border: 2px solid #FFC107; /* Gold border on hover */
 }
 
@@ -96,4 +98,11 @@ footer {
 }
 
 footer a {
-    co
+    color: #FFC107; /* Gold */
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
