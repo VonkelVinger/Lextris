@@ -39,16 +39,26 @@ main {
 
 /* Centered List */
 .center-list {
-    list-style: disc; /* Use bullet points */
+    list-style: disc; /* Bullet points */
     padding: 0;
     margin: 0 auto; /* Centers the list horizontally */
-    display: inline-block; /* Ensures proper centering */
+    display: inline-block; /* Ensures proper alignment */
 }
 
 .center-list li {
     margin: 10px 0; /* Adds spacing between list items */
     color: #FFC107; /* Gold color */
     font-weight: bold; /* Makes the text bold */
+}
+
+.center-list a {
+    text-decoration: none; /* Removes underline */
+    color: #FFC107; /* Gold color */
+}
+
+.center-list a:hover {
+    text-decoration: underline; /* Underline on hover */
+    color: #004d40; /* Dark green on hover */
 }
 
 /* Button Styles */
