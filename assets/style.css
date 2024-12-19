@@ -42,21 +42,21 @@ header {
 .button {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #FFC107; /* Gold */
-    color: #004d40;           /* Dark green */
+    background-color: #004d40; /* Dark green */
+    color: #FFC107;           /* Gold */
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
     text-align: center;
     transition: background-color 0.3s ease, color 0.3s ease;
-    border: 2px solid #004d40; /* Green border for consistency */
-    width: 200px;             /* Ensure consistent button width */
+    border: 2px solid #FFC107; /* Gold border */
+    width: 200px;             /* Consistent button width */
 }
 
 .button:hover {
-    background-color: #004d40; /* Dark green */
-    color: #FFC107;           /* Gold */
-    border: 2px solid #FFC107; /* Gold border on hover */
+    background-color: #FFC107; /* Gold */
+    color: #004d40;           /* Dark green */
+    border: 2px solid #004d40; /* Green border */
 }
 
 /* Main Content */
