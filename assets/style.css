@@ -44,18 +44,27 @@ main {
     color: #0066FF; /* Blue */
 }
 
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Space between buttons */
+    margin: 20px 0; /* Space around the buttons */
+}
+
 .button {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #0066FF;
+    background-color: #0066FF; /* Same color as current button */
     color: #fff;
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s ease;
 }
 
 .button:hover {
-    background-color: #004d40;
+    background-color: #004d40; /* Hover effect in dark green */
 }
 
 .past-games ul {
