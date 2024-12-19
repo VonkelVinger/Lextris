@@ -93,7 +93,11 @@ main {
 .dark-green {
     color: #004d40;
 }
-
+i.fa {
+    font-family: "Font Awesome 5 Free"; /* Ensures Font Awesome is used */
+    font-weight: 900;
+    margin-right: 5px; /* Space between icon and text */
+}
 /* Advertisement Section */
 .ads h2 {
     font-size: 18px;
