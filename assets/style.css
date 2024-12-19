@@ -106,3 +106,59 @@ footer a {
 footer a:hover {
     text-decoration: underline;
 }
+/* Center the header and list */
+.center-text {
+    text-align: center;
+}
+
+.center-list {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+}
+
+.center-list li {
+    margin: 10px 0;
+}
+
+.center-list a {
+    color: #004d40; /* Dark green for links */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.center-list a:hover {
+    text-decoration: underline;
+}
+
+/* Dark green for the header */
+.dark-green {
+    color: #004d40;
+}
+
+/* Advertisement Section */
+.ads h2 {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #004d40; /* Dark green */
+}
+
+.ad-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.ad-placeholder {
+    width: 300px;
+    height: 250px;
+    background-color: #e0e0e0;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    border: 1px dashed #aaa;
+}
+
