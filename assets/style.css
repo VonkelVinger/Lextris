@@ -6,6 +6,7 @@ body {
     color: #333;
 }
 
+/* Header */
 header {
     text-align: center;
     background-color: #004d40; /* Dark green */
@@ -28,6 +29,26 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+/* Main Content */
+main {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Centered List */
+.center-list {
+    list-style: disc; /* Use bullet points */
+    padding: 0;
+    margin: 0 auto; /* Centers the list horizontally */
+    display: inline-block; /* Ensures proper centering */
+}
+
+.center-list li {
+    margin: 10px 0; /* Adds spacing between list items */
+    color: #FFC107; /* Gold color */
+    font-weight: bold; /* Makes the text bold */
 }
 
 /* Button Styles */
@@ -59,51 +80,27 @@ header {
     border: 2px solid #004d40; /* Green border */
 }
 
-/* Main Content */
-main {
-    padding: 20px;
-}
-
-/* Center the header and list */
-.center-text {
+/* Footer */
+footer {
     text-align: center;
+    padding: 10px 0;
+    background-color: #004d40; /* Dark green */
+    color: white;
 }
 
-.center-list {
-    list-style: disc; /* Bullet points */
-    padding: 0;
-    text-align: center; /* Centers the entire list */
-}
-
-.center-list li {
-    margin: 10px 0; /* Adds spacing between list items */
-    color: #FFC107; /* Gold color */
-    font-weight: bold; /* Makes the text bold */
-    display: inline-block; /* Centers each item within the list */
-}
-
-.center-list a {
-    color: #004d40; /* Dark green for links */
+footer a {
+    color: #FFC107; /* Gold */
     text-decoration: none;
-    font-weight: bold;
+    margin: 0 10px;
 }
 
-.center-list a:hover {
+footer a:hover {
     text-decoration: underline;
 }
 
-/* Dark green for the header */
-.dark-green {
-    color: #004d40;
-}
-i.fa {
-    font-family: "Font Awesome 5 Free"; /* Ensures Font Awesome is used */
-    font-weight: 900;
-    margin-right: 5px; /* Space between icon and text */
-}
 /* Advertisement Section */
 .ads h2 {
-    font-size: 18px;
+    font-size: 18px; /* Adjust size if needed */
     text-align: center;
     margin-bottom: 15px;
     color: #004d40; /* Dark green */
@@ -127,20 +124,14 @@ i.fa {
     border: 1px dashed #aaa;
 }
 
-/* Footer */
-footer {
-    text-align: center;
-    padding: 10px 0;
-    background-color: #004d40; /* Dark green */
-    color: white;
+/* Dark green for the header */
+.dark-green {
+    color: #004d40;
 }
 
-footer a {
-    color: #FFC107; /* Gold */
-    text-decoration: none;
-    margin: 0 10px;
-}
-
-footer a:hover {
-    text-decoration: underline;
+/* Font Awesome Styling */
+i.fa {
+    font-family: "Font Awesome 5 Free"; /* Ensures Font Awesome is used */
+    font-weight: 900;
+    margin-right: 5px; /* Space between icon and text */
 }
