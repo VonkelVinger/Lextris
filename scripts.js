@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     const cookieBanner = document.getElementById("cookie-banner");
     const acceptButton = document.getElementById("accept-cookies");
+    const customizeButton = document.getElementById("customize-cookies");
 
-    // Check if cookies were previously accepted
+    // Check if cookies have already been accepted
     if (localStorage.getItem("cookiesAccepted") === "true") {
         cookieBanner.style.display = "none";
     }
@@ -13,11 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cookieBanner.style.display = "none";
     });
 
-    // Optionally add functionality for "Customize" button
-    const customizeButton = document.getElementById("customize-cookies");
+    // Customize cookie options (future implementation)
     customizeButton.addEventListener("click", () => {
         alert("Customize cookie options coming soon!");
-        // Future implementation for more granular controls
     });
 });
-
