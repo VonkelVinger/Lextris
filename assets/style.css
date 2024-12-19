@@ -146,13 +146,16 @@ i.fa {
     margin-right: 5px; /* Space between icon and text */
 }
 .instructions {
-    max-width: 800px;
-    margin: 0 auto;
+    max-width: 800px; /* Adjust to match the playing grid's width */
+    margin: 0 auto; /* Center the content horizontally */
     padding: 20px;
     line-height: 1.6;
     text-align: left;
     color: #333; /* Neutral color for readability */
     font-size: 16px;
+    border: 1px solid #e0e0e0; /* Optional border for visual structure */
+    background-color: #fff; /* Optional background for contrast */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for focus */
 }
 
 .instructions strong {
@@ -162,4 +165,3 @@ i.fa {
 .instructions p {
     margin-bottom: 20px; /* Spacing between paragraphs */
 }
-
