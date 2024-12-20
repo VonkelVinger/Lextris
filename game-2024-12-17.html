@@ -430,7 +430,7 @@
             });
 
             // Best time listener
-            onSnapshot(doc(db, "Game2024-12-20-bestTimes", "global"), (doc) => {
+            onSnapshot(doc(db, "Game2024-12-17-bestTimes", "global"), (doc) => {
                 if (doc.exists()) {
                     const bestTime = doc.data().time;
                     const display = document.querySelector('#best-time-container');
