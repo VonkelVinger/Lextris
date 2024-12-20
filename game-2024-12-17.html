@@ -75,7 +75,7 @@
                         timestamp: new Date().toISOString()
                     };
                     console.log("Adding leaderboard entry:", entry);
-                    await addDoc(collection(db, "Game2024-12-20-leaderboard"), entry);
+                    await addDoc(collection(db, "Game2024-12-17-leaderboard"), entry);
                     return true;
                 } catch (error) {
                     console.error("Error adding leaderboard entry:", error);
@@ -406,7 +406,7 @@
             
             // Firebase leaderboard listener
             const leaderboardQuery = query(
-                collection(db, "Game2024-12-20-leaderboard"),
+                collection(db, "Game2024-12-17-leaderboard"),
                 orderBy("time"),
                 limit(10)
             );
