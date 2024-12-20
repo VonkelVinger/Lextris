@@ -35,7 +35,7 @@
         window.firebaseOps = {
             async getBestTime() {
                 try {
-                    const docSnap = await getDoc(doc(db, "bestTimes", "global"));
+                    const docSnap = await getDoc(doc(db, "Game2024-12-19-bestTimes", "global"));
                     if (docSnap.exists()) {
                         console.log("Current best time:", docSnap.data().time);
                         return docSnap.data().time;
@@ -52,7 +52,7 @@
                     const currentBest = await this.getBestTime();
                     console.log("Comparing times:", { current: currentBest, new: newTime });
                     if (!currentBest || newTime < currentBest) {
-                        await setDoc(doc(db, "bestTimes", "global"), { 
+                        await setDoc(doc(db, "Game2024-12-19-bestTimes", "global"), { 
                             time: newTime,
                             updatedAt: new Date().toISOString()
                         });
@@ -74,7 +74,7 @@
                         timestamp: new Date().toISOString()
                     };
                     console.log("Adding leaderboard entry:", entry);
-                    await addDoc(collection(db, "leaderboard"), entry);
+                    await addDoc(collection(db, "Game2024-12-19-leaderboard"), entry);
                     return true;
                 } catch (error) {
                     console.error("Error adding leaderboard entry:", error);
@@ -405,7 +405,7 @@
             
             // Firebase leaderboard listener
             const leaderboardQuery = query(
-                collection(db, "leaderboard"),
+                collection(db, "Game2024-12-19-leaderboard"),
                 orderBy("time"),
                 limit(10)
             );
@@ -429,7 +429,7 @@
             });
 
             // Best time listener
-            onSnapshot(doc(db, "bestTimes", "global"), (doc) => {
+            onSnapshot(doc(db, "Game2024-12-19-bestTimes", "global"), (doc) => {
                 if (doc.exists()) {
                     const bestTime = doc.data().time;
                     const display = document.querySelector('#best-time-container');
