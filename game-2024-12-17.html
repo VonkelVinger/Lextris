@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,7 +36,7 @@
         window.firebaseOps = {
             async getBestTime() {
                 try {
-                    const docSnap = await getDoc(doc(db, "bestTimes", "global"));
+                    const docSnap = await getDoc(doc(db, "Game2024-12-17-bestTimes", "global"));
                     if (docSnap.exists()) {
                         console.log("Current best time:", docSnap.data().time);
                         return docSnap.data().time;
@@ -52,7 +53,7 @@
                     const currentBest = await this.getBestTime();
                     console.log("Comparing times:", { current: currentBest, new: newTime });
                     if (!currentBest || newTime < currentBest) {
-                        await setDoc(doc(db, "bestTimes", "global"), { 
+                        await setDoc(doc(db, "Game2024-12-17-bestTimes", "global"), { 
                             time: newTime,
                             updatedAt: new Date().toISOString()
                         });
@@ -74,7 +75,7 @@
                         timestamp: new Date().toISOString()
                     };
                     console.log("Adding leaderboard entry:", entry);
-                    await addDoc(collection(db, "leaderboard"), entry);
+                    await addDoc(collection(db, "Game2024-12-20-leaderboard"), entry);
                     return true;
                 } catch (error) {
                     console.error("Error adding leaderboard entry:", error);
@@ -341,13 +342,13 @@
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
             <div id="target-word">
-                <div class="target-letter">E</div>
-                <div class="target-letter">N</div>
-                <div class="target-letter">G</div>
-                <div class="target-letter">I</div>
-                <div class="target-letter">N</div>
-                <div class="target-letter">E</div>
-                <div class="target-letter">E</div>
+                <div class="target-letter">L</div>
+                <div class="target-letter">A</div>
+                <div class="target-letter">B</div>
+                <div class="target-letter">R</div>
+                <div class="target-letter">A</div>
+                <div class="target-letter">D</div>
+                <div class="target-letter">O</div>
                 <div class="target-letter">R</div>
             </div>
         </div>
@@ -405,7 +406,7 @@
             
             // Firebase leaderboard listener
             const leaderboardQuery = query(
-                collection(db, "leaderboard"),
+                collection(db, "Game2024-12-20-leaderboard"),
                 orderBy("time"),
                 limit(10)
             );
@@ -429,7 +430,7 @@
             });
 
             // Best time listener
-            onSnapshot(doc(db, "bestTimes", "global"), (doc) => {
+            onSnapshot(doc(db, "Game2024-12-20-bestTimes", "global"), (doc) => {
                 if (doc.exists()) {
                     const bestTime = doc.data().time;
                     const display = document.querySelector('#best-time-container');
@@ -445,7 +446,7 @@
             const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
             const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
             const VOWELS = 'AEIOUY';
-            const TARGET_WORD = 'ENGINEER';
+            const TARGET_WORD = 'LABRADOR';
 
             // Game state variables
             let grid = [];
