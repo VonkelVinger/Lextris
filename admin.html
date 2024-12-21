@@ -6,7 +6,7 @@
     <title>Leximax Admin</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
@@ -20,7 +20,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Wait for DOM to be ready
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('gameForm');
             form.addEventListener('submit', async (e) => {
@@ -34,35 +33,29 @@
                 }
 
                 try {
-                    console.log(`Creating game with ID: ${gameId}`);
-
-                    // Create game document in games collection
-                    await setDoc(doc(db, 'games', gameId), {
+                    // Just create one flat document with everything in it
+                    const gameRef = doc(db, 'leximax_games', gameId);
+                    await setDoc(gameRef, {
+                        targetWord: targetWord,
                         createdAt: new Date().toISOString(),
-                        targetWord: targetWord
+                        bestTime: {
+                            score: null,
+                            username: null,
+                            timestamp: null
+                        },
+                        leaderboard: [{
+                            username: 'Sample Player',
+                            score: 999,
+                            timestamp: new Date().toISOString()
+                        }]
                     });
-                    console.log('Created game document');
 
-                    // Create bestTimes document
-                    await setDoc(doc(db, 'games', gameId, 'bestTimes', 'stats'), {
-                        time: null,
-                        updatedAt: null
-                    });
-                    console.log('Created bestTimes document');
-
-                    // Create leaderboard entry
-                    await addDoc(collection(db, 'games', gameId, 'leaderboard'), {
-                        username: 'Sample Player',
-                        score: 999,
-                        timestamp: new Date().toISOString()
-                    });
-                    console.log('Created leaderboard entry');
-
+                    console.log(`Created game: ${gameId}`);
                     alert(`Game "${gameId}" setup successfully!`);
                     form.reset();
 
                 } catch (error) {
-                    console.error('Error creating game collections:', error);
+                    console.error('Error:', error);
                     alert(`Error: ${error.message}`);
                 }
             });
