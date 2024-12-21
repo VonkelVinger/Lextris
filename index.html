@@ -14,14 +14,6 @@
             const todayDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
             todayGameLink.href = `game-${todayDate}.html`;
         });
-
-        // ✅ Archive Games Navigation
-        function goToArchiveGame() {
-            const selectedGame = document.getElementById('archive-games').value;
-            if (selectedGame) {
-                window.location.href = `game-${selectedGame}.html`;
-            }
-        }
     </script>
 </head>
 <body>
@@ -42,15 +34,7 @@
     <main>
         <div class="buttons-container">
             <a id="todays-game" class="button">TODAY'S GAME</a>
-            <div class="archive-dropdown">
-                <label for="archive-games">ARCHIVE GAMES:</label>
-                <select id="archive-games" onchange="goToArchiveGame()">
-                    <option value="">Select a Game</option>
-                    <option value="2024-12-21">2024-12-21</option>
-                    <option value="2024-12-20">2024-12-20</option>
-                    <option value="2024-12-19">2024-12-19</option>
-                </select>
-            </div>
+            <a href="archive-games.html" class="button">ARCHIVE GAMES</a>
             <a href="how-to-play.html" class="button">FIRST TIME? HERE'S HOW TO PLAY</a>
         </div>
 
