@@ -5,18 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin</title>
     <script type="module">
-        // ✅ Import Firebase Modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
             getFirestore, 
-            collection, 
             doc, 
             setDoc, 
             addDoc, 
-            serverTimestamp 
+            collection 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ✅ Initialize Firebase
+        // ✅ Firebase Initialization
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -29,43 +27,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Function to Create Game Collections
+        // ✅ Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
-                console.log(`Creating game with ID: ${gameId} and Target Word: ${targetWord}`);
-
-                // Create global document for the game
-                await setDoc(doc(db, `${gameId}`, "global"), {
-                    targetWord: targetWord,
-                    createdAt: serverTimestamp()
+                // ✅ Create 'global' Document
+                await setDoc(doc(db, gameId, "global"), {
+                    createdAt: new Date().toISOString(),
+                    targetWord: targetWord
                 });
 
-                // Create placeholder document in bestTimes
-                await setDoc(doc(db, `${gameId}/global/bestTimes`, "placeholder"), {
-                    time: 0,
-                    updatedAt: serverTimestamp()
+                // ✅ Create 'bestTimes' Collection with Placeholder Document
+                await setDoc(doc(db, `${gameId}-bestTimes`, "placeholder"), {
+                    score: null,
+                    timestamp: null
                 });
 
-                // Add a sample leaderboard entry
-                await addDoc(collection(db, `${gameId}/global/leaderboard`), {
+                // ✅ Create 'leaderboard' Collection with Sample Entry
+                await addDoc(collection(db, `${gameId}-leaderboard`), {
                     username: "Sample Player",
                     score: 999,
-                    timestamp: serverTimestamp()
+                    timestamp: new Date().toISOString()
                 });
 
                 alert(`Game "${gameId}" setup successfully!`);
+                console.log(`Game "${gameId}" created successfully.`);
             } catch (error) {
                 console.error("Error creating game collections:", error);
-                alert(`Failed to create game: ${error.message}`);
+                alert("Failed to create game. Check console for details.");
             }
         }
 
-        // ✅ Form Event Listener
+        // ✅ Event Listener for Form Submission
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("game-setup-form");
             form.addEventListener("submit", async (event) => {
                 event.preventDefault();
-
                 const gameId = document.getElementById("game-id").value.trim();
                 const targetWord = document.getElementById("target-word").value.trim().toUpperCase();
                 
@@ -80,7 +76,7 @@
         });
     </script>
     <style>
-        /* ✅ General Page Styling */
+        /* ✅ General Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -94,7 +90,6 @@
             color: #004d40;
         }
 
-        /* ✅ Form Styling */
         form {
             max-width: 400px;
             margin: 0 auto;
@@ -152,6 +147,8 @@
 
         <button type="submit">Create Game</button>
     </form>
-    <div class="notice">Ensure you are logged into Firebase and that secure rules are in place.</div>
+    <div class="notice">
+        Ensure you are logged into Firebase and that secure rules are in place.
+    </div>
 </body>
 </html>
