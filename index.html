@@ -6,82 +6,140 @@
     <title>Leximax</title>
     <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
     <style>
-        /* ✅ General Page Styling */
+        /* ✅ General Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            text-align: center;
+            padding: 0;
             background-color: #f9f9f9;
+            color: #333;
         }
 
-        h1 {
-            color: #004d40;
-            font-size: 2em;
-            margin-bottom: 30px;
-        }
-
-        /* ✅ Navigation Buttons */
-        .nav-container {
-            margin: 20px 0;
-        }
-
-        .nav-button {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 20px;
+        /* ✅ Header */
+        .header {
             background-color: #004d40;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logo div {
+            font-size: 1.8em;
+            font-weight: bold;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             color: white;
+        }
+
+        .logo .L { background: #1565C0; }
+        .logo .E { background: #D32F2F; }
+        .logo .X { background: #388E3C; }
+        .logo .I { background: #FFC107; }
+        .logo .M { background: #7B1FA2; }
+        .logo .A { background: #1976D2; }
+        .logo .X2 { background: #8E0038; }
+
+        /* ✅ Main Buttons */
+        .main-buttons {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .main-buttons a {
+            display: block;
+            margin: 10px auto;
+            padding: 12px 20px;
+            width: 80%;
+            max-width: 300px;
+            font-size: 1em;
+            font-weight: bold;
+            text-align: center;
             text-decoration: none;
             border-radius: 5px;
-            font-weight: bold;
-            font-size: 1em;
+            color: #FFC107;
+            background-color: #004d40;
+            border: 2px solid #FFC107;
         }
 
-        .nav-button:hover {
-            background-color: #00695c;
+        .main-buttons a:hover {
+            background-color: #FFC107;
+            color: #004d40;
         }
 
-        /* ✅ Archive Dropdown Styling */
-        .archive-dropdown {
-            margin-top: 30px;
+        /* ✅ Ad Section */
+        .ad-section {
+            margin: 40px auto;
+            text-align: center;
         }
 
-        label {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .ad-section h2 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
         }
 
-        select {
-            margin-top: 10px;
-            padding: 10px;
-            font-size: 16px;
+        .ad-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .ad-space {
+            width: 45%;
+            height: 150px;
+            background: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 5px;
         }
 
-        select:focus {
-            outline: none;
-            border-color: #00695c;
-        }
-
-        /* ✅ Footer Styling */
+        /* ✅ Footer */
         .footer {
             margin-top: 50px;
-            font-size: 14px;
-            color: #555;
+            padding: 10px;
+            background-color: #004d40;
+            color: #fff;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: #FFC107;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
         }
 
         /* ✅ Responsive Design */
         @media (max-width: 600px) {
-            .nav-button {
-                font-size: 0.9em;
-                padding: 8px 16px;
+            .logo div {
+                width: 30px;
+                height: 30px;
+                font-size: 1.2em;
             }
 
-            select {
-                font-size: 14px;
+            .main-buttons a {
+                font-size: 0.9em;
+                padding: 10px 15px;
+            }
+
+            .ad-space {
+                width: 90%;
+                height: 120px;
             }
         }
     </style>
@@ -93,7 +151,7 @@
             todayGameLink.href = `game.html?gameId=Game${todayDate}`;
         });
 
-        // ✅ Navigate to Selected Archive Game
+        // ✅ Navigate to Archive Games
         function goToArchiveGame() {
             const selectedGame = document.getElementById('archive-games').value;
             if (selectedGame) {
@@ -103,43 +161,42 @@
     </script>
 </head>
 <body>
-    <!-- ✅ Header Section -->
-    <h1>Welcome to Leximax</h1>
+    <!-- ✅ Header with Logo -->
+    <header class="header">
+        <div class="logo">
+            <div class="L">L</div>
+            <div class="E">E</div>
+            <div class="X">X</div>
+            <div class="I">I</div>
+            <div class="M">M</div>
+            <div class="A">A</div>
+            <div class="X2">X</div>
+        </div>
+    </header>
 
-    <!-- ✅ Today's Game Button -->
-    <div class="nav-container">
-        <a id="todays-game" class="nav-button" href="#">Today's Game</a>
+    <!-- ✅ Main Navigation Buttons -->
+    <div class="main-buttons">
+        <a id="todays-game" href="#">TODAY'S GAME</a>
+        <a href="archive.html">ARCHIVE GAMES</a>
+        <a href="how-to-play.html">FIRST TIME? HERE'S HOW TO PLAY</a>
     </div>
 
-    <!-- ✅ Archive Games Dropdown -->
-    <div class="archive-dropdown">
-        <label for="archive-games">Archive Games:</label>
-        <select id="archive-games" onchange="goToArchiveGame()">
-            <option value="">Select a Game</option>
-            <option value="Game2024-12-21">2024-12-21</option>
-            <option value="Game2024-12-20">2024-12-20</option>
-            <option value="Game2024-12-19">2024-12-19</option>
-            <option value="Game2024-12-18">2024-12-18</option>
-        </select>
-    </div>
-
-    <!-- ✅ About Section -->
-    <section style="margin-top: 40px;">
-        <h2>About Leximax</h2>
-        <p>Leximax is an exciting daily word challenge game. Solve the puzzle, beat your best time, and climb the leaderboard!</p>
-    </section>
-
-    <!-- ✅ Instructions Section -->
-    <section style="margin-top: 40px;">
-        <h2>How to Play</h2>
-        <p>Each day brings a new word puzzle. Guess letters, uncover the word, and submit your time to the leaderboard!</p>
+    <!-- ✅ Ad Section -->
+    <section class="ad-section">
+        <h2>Help us keep the game free by supporting our advertisers</h2>
+        <div class="ad-container">
+            <div class="ad-space">Ad Space 1</div>
+            <div class="ad-space">Ad Space 2</div>
+        </div>
     </section>
 
     <!-- ✅ Footer -->
-    <div class="footer">
-        &copy; 2024 Leximax. All rights reserved.
+    <footer class="footer">
+        <a href="about.html">About Leximax</a> |
+        <a href="privacy-policy.html">Privacy Policy</a> |
+        <a href="contact.html">Contact Us</a>
         <br>
-        <a href="privacy-policy.html" style="font-size: 12px; color: #555; text-decoration: none;">Privacy Policy</a>
-    </div>
+        &copy; 2024 Leximax. All rights reserved.
+    </footer>
 </body>
 </html>
