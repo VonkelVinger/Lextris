@@ -5,16 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin</title>
     <script type="module">
+        // ✅ Import Firebase Modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
             getFirestore, 
             collection, 
             doc, 
             setDoc, 
-            addDoc 
+            addDoc, 
+            serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Initialize Firebase
+        // ✅ Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -27,33 +29,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // ✅ Function to Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
-                // Create bestTimes document
-                await setDoc(doc(db, `${gameId}-bestTimes`, "global"), {
+                // Create global document for the game
+                await setDoc(doc(db, gameId, "global"), {
+                    targetWord: targetWord,
+                    createdAt: serverTimestamp(),
+                });
+
+                // Create a placeholder document in bestTimes
+                await setDoc(doc(db, `${gameId}/global/bestTimes`, "placeholder"), {
                     time: null,
-                    updatedAt: null,
+                    updatedAt: serverTimestamp(),
                 });
 
-                // Create leaderboard collection
-                await addDoc(collection(db, `${gameId}-leaderboard`), {
-                    name: "Sample Player",
-                    time: 999,
-                    timestamp: new Date().toISOString(),
+                // Create a sample entry in leaderboard
+                await addDoc(collection(db, `${gameId}/global/leaderboard`), {
+                    username: "Sample Player",
+                    score: 999,
+                    timestamp: serverTimestamp(),
                 });
 
-                alert(`Game ${gameId} setup successfully!`);
+                alert(`Game "${gameId}" setup successfully!`);
             } catch (error) {
                 console.error("Error creating game collections:", error);
                 alert("Failed to create game. Check console for details.");
             }
         }
 
-        // Event listener for the form submission
+        // ✅ Form Event Listener
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("game-setup-form");
             form.addEventListener("submit", async (event) => {
                 event.preventDefault();
+
                 const gameId = document.getElementById("game-id").value.trim();
                 const targetWord = document.getElementById("target-word").value.trim().toUpperCase();
                 
@@ -68,6 +78,7 @@
         });
     </script>
     <style>
+        /* ✅ General Page Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -81,6 +92,7 @@
             color: #004d40;
         }
 
+        /* ✅ Form Styling */
         form {
             max-width: 400px;
             margin: 0 auto;
