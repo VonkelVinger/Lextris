@@ -59,6 +59,7 @@
                 const leaderboardSnap = await getDocs(leaderboardRef);
                 const leaderboard = document.getElementById('leaderboard');
 
+                leaderboard.innerHTML = ""; // Clear default text
                 leaderboardSnap.forEach(doc => {
                     const { username, score } = doc.data();
                     const entry = document.createElement('li');
@@ -73,6 +74,7 @@
         }
     </script>
     <style>
+        /* ✅ General Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -80,24 +82,40 @@
             background-color: #f9f9f9;
             color: #333;
         }
+
         h1 {
             text-align: center;
             color: #004d40;
         }
+
         #target-word {
             text-align: center;
             font-size: 24px;
             margin-top: 20px;
         }
-        #leaderboard {
+
+        h2 {
+            text-align: center;
             margin-top: 30px;
+            font-size: 20px;
+        }
+
+        #leaderboard {
+            margin-top: 20px;
             list-style: none;
             padding: 0;
             text-align: center;
         }
+
         #leaderboard li {
             margin: 5px 0;
             font-size: 18px;
+        }
+
+        .error {
+            color: darkred;
+            text-align: center;
+            font-weight: bold;
         }
     </style>
 </head>
