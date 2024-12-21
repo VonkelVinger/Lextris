@@ -6,12 +6,7 @@
     <title>Leximax Admin</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            doc, 
-            setDoc 
-        } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // ✅ Firebase Configuration
         const firebaseConfig = {
@@ -29,30 +24,30 @@
         // ✅ Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
-                const gameDocRef = doc(db, "games", gameId);
-                await setDoc(gameDocRef, {
+                // Create global document
+                await setDoc(doc(db, gameId, 'global'), {
                     createdAt: new Date().toISOString(),
-                    targetWord: targetWord
+                    targetWord: targetWord,
                 });
 
-                const bestTimesCollectionRef = collection(db, "games", gameId, "bestTimes");
-                await setDoc(doc(bestTimesCollectionRef, "placeholder"), {
+                // Create a placeholder document in the bestTimes collection
+                await setDoc(doc(db, gameId, 'bestTimes', 'placeholder'), {
                     username: "Sample Player",
                     time: 999,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
                 });
 
-                const leaderboardCollectionRef = collection(db, "games", gameId, "leaderboard");
-                await setDoc(doc(leaderboardCollectionRef, "placeholder"), {
+                // Create a placeholder document in the leaderboard collection
+                await setDoc(doc(db, gameId, 'leaderboard', 'placeholder'), {
                     username: "Sample Player",
                     score: 999,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
                 });
 
                 alert(`Game "${gameId}" setup successfully!`);
             } catch (error) {
                 console.error("Error creating game collections:", error);
-                alert(`Failed to create game: ${error.message}`);
+                alert("Failed to create game. Check console for details.");
             }
         }
 
@@ -66,11 +61,6 @@
                 
                 if (!gameId || !targetWord) {
                     alert("Please fill in both fields!");
-                    return;
-                }
-
-                if (!/^Game\d{4}-\d{2}-\d{2}$/.test(gameId)) {
-                    alert("Game ID must follow the format: GameYYYY-MM-DD");
                     return;
                 }
 
@@ -144,7 +134,7 @@
         <button type="submit">Create Game</button>
     </form>
     <div class="notice">
-        Ensure your Firestore rules allow public access for game creation.
+        Ensure you are logged into Firebase and that secure rules are in place.
     </div>
 </body>
 </html>
