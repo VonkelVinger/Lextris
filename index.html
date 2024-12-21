@@ -5,11 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax</title>
     <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+    <script>
+        // ✅ Dynamically set Today's Game link
+        document.addEventListener('DOMContentLoaded', () => {
+            const todayGameLink = document.getElementById('todays-game');
+            const todayDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            todayGameLink.href = `game-${todayDate}.html`;
+        });
 
+        // ✅ Archive Games Navigation
+        function goToArchiveGame() {
+            const selectedGame = document.getElementById('archive-games').value;
+            if (selectedGame) {
+                window.location.href = `game-${selectedGame}.html`;
+            }
+        }
+    </script>
 </head>
 <body>
+    <!-- ✅ Header with Game Title -->
     <header>
         <div id="game-title">
             <div class="title-block" style="background-color: #0066FF;">L</div>
@@ -21,41 +37,64 @@
             <div class="title-block" style="background-color: #900C3F;">X</div>
         </div>
     </header>
+
+    <!-- ✅ Main Navigation Buttons -->
     <main>
         <div class="buttons-container">
-            <a href="game-2024-12-22.html" class="button">TODAY'S GAME</a>
-            <a href="archive-games.html" class="button">ARCHIVE GAMES</a>
+            <a id="todays-game" class="button">TODAY'S GAME</a>
+            <div class="archive-dropdown">
+                <label for="archive-games">ARCHIVE GAMES:</label>
+                <select id="archive-games" onchange="goToArchiveGame()">
+                    <option value="">Select a Game</option>
+                    <option value="2024-12-21">2024-12-21</option>
+                    <option value="2024-12-20">2024-12-20</option>
+                    <option value="2024-12-19">2024-12-19</option>
+                </select>
+            </div>
             <a href="how-to-play.html" class="button">FIRST TIME? HERE'S HOW TO PLAY</a>
         </div>
+
+        <!-- ✅ Ad Section -->
         <section class="ads">
             <h2>Help us keep the game free by supporting our advertisers</h2>
             <div class="ad-container">
                 <div class="ad-placeholder">Ad Space 1</div>
                 <div class="ad-placeholder">Ad Space 2</div>
             </div>
-<div id="cookie-banner" class="cookie-banner">
-    <p>
-        This website uses cookies to enhance your experience, personalize ads, and analyze traffic.
-        By clicking "Accept All Cookies," you consent to our use of cookies. 
-        See our <a href="privacy-policy.html" target="_blank">Privacy Policy</a> for more details.
-    </p>
-    <div class="cookie-buttons">
-        <button id="accept-cookies">Accept All Cookies</button>
-        <button id="customize-cookies">Customize</button>
-    </div>
-</div>
         </section>
+
+        <!-- ✅ Cookie Banner -->
+        <div id="cookie-banner" class="cookie-banner">
+            <p>
+                This website uses cookies to enhance your experience, personalize ads, and analyze traffic.
+                By clicking "Accept All Cookies," you consent to our use of cookies.
+                See our <a href="privacy-policy.html" target="_blank">Privacy Policy</a> for more details.
+            </p>
+            <div class="cookie-buttons">
+                <button id="accept-cookies">Accept All Cookies</button>
+                <button id="customize-cookies">Customize</button>
+            </div>
+        </div>
     </main>
+
+    <!-- ✅ Coffee Support Button -->
+    <div class="coffee-button">
+        <a href="https://www.buymeacoffee.com/PlayLeximax" target="_blank">We Buy Coffee</a>
+    </div>
+
+    <!-- ✅ Footer -->
     <footer>
         <a href="about-leximax.html">About Leximax</a> |
         <a href="privacy-policy.html">Privacy Policy</a> |
         <a href="contact.html">Contact Us</a>
         <p>&copy; 2024 Leximax. All rights reserved.</p>
-<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+            data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+            data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+            data-font-color="#000000" data-coffee-color="#ffffff"></script>
     </footer>
-    </main>
-<script src="scripts.js"></script>
-</body>
 
+    <!-- ✅ JavaScript File -->
+    <script src="scripts.js"></script>
 </body>
 </html>
