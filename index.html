@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax</title>
+    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
     <style>
         /* ✅ General Page Styling */
         body {
@@ -16,11 +17,13 @@
 
         h1 {
             color: #004d40;
+            font-size: 2em;
             margin-bottom: 30px;
         }
 
-        nav {
-            margin-top: 20px;
+        /* ✅ Navigation Buttons */
+        .nav-container {
+            margin: 20px 0;
         }
 
         .nav-button {
@@ -32,6 +35,7 @@
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
+            font-size: 1em;
         }
 
         .nav-button:hover {
@@ -40,12 +44,13 @@
 
         /* ✅ Archive Dropdown Styling */
         .archive-dropdown {
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         label {
             font-size: 16px;
             font-weight: bold;
+            margin-bottom: 10px;
         }
 
         select {
@@ -61,10 +66,16 @@
             border-color: #00695c;
         }
 
+        /* ✅ Footer Styling */
         .footer {
             margin-top: 50px;
             font-size: 14px;
             color: #555;
+        }
+
+        /* ✅ Admin Page Hidden */
+        .admin-section {
+            display: none;
         }
     </style>
     <script>
@@ -82,15 +93,25 @@
                 window.location.href = `game.html?gameId=${selectedGame}`;
             }
         }
+
+        // ✅ Show Admin Section for Authorized Users
+        function showAdminSection() {
+            const adminPassword = prompt("Enter admin password:");
+            if (adminPassword === "your_admin_password_here") {
+                document.querySelector('.admin-section').style.display = 'block';
+            } else {
+                alert('Access Denied!');
+            }
+        }
     </script>
 </head>
 <body>
     <h1>Welcome to Leximax</h1>
 
     <!-- ✅ Today's Game Button -->
-    <nav>
+    <div class="nav-container">
         <a id="todays-game" class="nav-button" href="#">Today's Game</a>
-    </nav>
+    </div>
 
     <!-- ✅ Archive Games Dropdown -->
     <div class="archive-dropdown">
@@ -103,10 +124,16 @@
         </select>
     </div>
 
-    <!-- ✅ Admin Panel Button -->
-    <nav>
-        <a href="admin.html" class="nav-button">Admin Panel</a>
-    </nav>
+    <!-- ✅ Admin Panel (Hidden by Default) -->
+    <div class="nav-container">
+        <button class="nav-button" onclick="showAdminSection()">Admin Access</button>
+    </div>
+
+    <div class="admin-section">
+        <nav>
+            <a href="admin.html" class="nav-button">Admin Panel</a>
+        </nav>
+    </div>
 
     <!-- ✅ Footer -->
     <div class="footer">
