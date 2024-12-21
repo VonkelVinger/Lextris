@@ -14,7 +14,7 @@
             addDoc 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ✅ Firebase Initialization
+        // ✅ Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -30,24 +30,23 @@
         // ✅ Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
-                // Create global document
+                // 1️⃣ Create global document
                 await setDoc(doc(db, gameId, "global"), {
                     createdAt: new Date().toISOString(),
-                    targetWord: targetWord,
+                    targetWord: targetWord
                 });
 
-                // Create a placeholder document in bestTimes
-                await setDoc(doc(collection(db, `${gameId}/bestTimes`)), {
-                    username: "Sample Player",
-                    time: 999,
-                    timestamp: new Date().toISOString(),
+                // 2️⃣ Create bestTimes collection with a placeholder document
+                await setDoc(doc(db, `${gameId}/bestTimes`, "placeholder"), {
+                    time: null,
+                    updatedAt: null
                 });
 
-                // Create a placeholder document in leaderboard
-                await setDoc(doc(collection(db, `${gameId}/leaderboard`)), {
+                // 3️⃣ Create leaderboard collection with a sample document
+                await addDoc(collection(db, `${gameId}/leaderboard`), {
                     username: "Sample Player",
                     score: 999,
-                    timestamp: new Date().toISOString(),
+                    timestamp: new Date().toISOString()
                 });
 
                 alert(`Game "${gameId}" setup successfully!`);
@@ -57,14 +56,14 @@
             }
         }
 
-        // ✅ Event Listener for Form Submission
+        // ✅ Event listener for form submission
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("game-setup-form");
             form.addEventListener("submit", async (event) => {
                 event.preventDefault();
                 const gameId = document.getElementById("game-id").value.trim();
                 const targetWord = document.getElementById("target-word").value.trim().toUpperCase();
-                
+
                 if (!gameId || !targetWord) {
                     alert("Please fill in both fields!");
                     return;
@@ -76,7 +75,6 @@
         });
     </script>
     <style>
-        /* ✅ General Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
