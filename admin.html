@@ -8,9 +8,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
             getFirestore, 
+            collection, 
             doc, 
             setDoc, 
-            collection, 
             addDoc 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
@@ -30,27 +30,27 @@
         // ✅ Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
-                // ✅ Create 'global' Document
-                await setDoc(doc(db, `${gameId}`, "global"), {
+                // Create global document
+                await setDoc(doc(db, gameId, "global"), {
                     createdAt: new Date().toISOString(),
-                    targetWord: targetWord
+                    targetWord: targetWord,
                 });
 
-                // ✅ Create 'bestTimes' Collection with Placeholder Document
-                await setDoc(doc(db, `${gameId}/bestTimes/placeholder`), {
-                    score: null,
-                    timestamp: null
+                // Create a placeholder document in bestTimes
+                await setDoc(doc(collection(db, `${gameId}/bestTimes`)), {
+                    username: "Sample Player",
+                    time: 999,
+                    timestamp: new Date().toISOString(),
                 });
 
-                // ✅ Create 'leaderboard' Collection with Sample Entry
-                await addDoc(collection(db, `${gameId}/leaderboard`), {
+                // Create a placeholder document in leaderboard
+                await setDoc(doc(collection(db, `${gameId}/leaderboard`)), {
                     username: "Sample Player",
                     score: 999,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
                 });
 
                 alert(`Game "${gameId}" setup successfully!`);
-                console.log(`Game "${gameId}" created successfully.`);
             } catch (error) {
                 console.error("Error creating game collections:", error);
                 alert("Failed to create game. Check console for details.");
@@ -147,8 +147,6 @@
 
         <button type="submit">Create Game</button>
     </form>
-    <div class="notice">
-        Ensure you are logged into Firebase and that secure rules are in place.
-    </div>
+    <div class="notice">Ensure you are logged into Firebase and that secure rules are in place.</div>
 </body>
 </html>
