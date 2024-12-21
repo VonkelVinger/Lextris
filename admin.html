@@ -11,12 +11,15 @@
             doc, 
             setDoc,
             collection,
-            addDoc
+            addDoc,
+            enableIndexedDbPersistence
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
         import { 
             getAuth, 
             signInWithEmailAndPassword,
-            onAuthStateChanged 
+            onAuthStateChanged,
+            setPersistence,
+            browserLocalPersistence
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -32,30 +35,48 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Enable persistence
+        setPersistence(auth, browserLocalPersistence)
+            .then(() => console.log("Auth persistence enabled"))
+            .catch((error) => console.error("Auth persistence error:", error));
+
+        enableIndexedDbPersistence(db)
+            .then(() => console.log("Firestore persistence enabled"))
+            .catch((error) => console.error("Firestore persistence error:", error));
+
         // Handle Authentication State
         onAuthStateChanged(auth, (user) => {
             const loginForm = document.getElementById("login-form");
             const gameForm = document.getElementById("game-setup-form");
             const loginStatus = document.getElementById("login-status");
+            const debugInfo = document.getElementById("debug-info");
             
             if (user) {
                 loginForm.style.display = "none";
                 gameForm.style.display = "block";
                 loginStatus.textContent = `Logged in as ${user.email}`;
+                debugInfo.textContent = `Auth Token: ${user.uid}`;
+                console.log("Auth state changed - User:", user);
             } else {
                 loginForm.style.display = "block";
                 gameForm.style.display = "none";
                 loginStatus.textContent = "Not logged in";
+                debugInfo.textContent = "No auth token available";
+                console.log("Auth state changed - No user");
             }
         });
 
         // Login Handler
         async function handleLogin(email, password) {
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                console.log("Login successful");
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log("Login successful", userCredential);
+                document.getElementById("debug-info").textContent = 
+                    `Login successful - UID: ${userCredential.user.uid}`;
             } catch (error) {
                 console.error("Login error:", error);
+                document.getElementById("debug-info").textContent = 
+                    `Login failed: ${error.code} - ${error.message}`;
                 alert(`Login failed: ${error.message}`);
             }
         }
@@ -65,6 +86,13 @@
                 if (!auth.currentUser) {
                     throw new Error("Must be logged in to create games");
                 }
+
+                console.log("Creating game with auth:", {
+                    uid: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    gameId: gameId,
+                    targetWord: targetWord
+                });
 
                 // Create the game structure
                 const gameRef = doc(db, gameId, 'global');
@@ -89,10 +117,14 @@
                     timestamp: new Date().toISOString()
                 });
 
-                alert(`Game "${gameId}" setup successfully!`);
                 console.log(`Game "${gameId}" created successfully`);
+                document.getElementById("debug-info").textContent = 
+                    `Game created successfully: ${gameId}`;
+                alert(`Game "${gameId}" setup successfully!`);
             } catch (error) {
                 console.error("Error creating game collections:", error);
+                document.getElementById("debug-info").textContent = 
+                    `Error creating game: ${error.code} - ${error.message}`;
                 alert(`Failed to create game: ${error.message}`);
             }
         }
@@ -146,6 +178,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         label {
@@ -189,6 +222,17 @@
             text-align: center;
             margin-bottom: 20px;
             font-weight: bold;
+            color: #004d40;
+        }
+
+        #debug-info {
+            text-align: center;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            max-width: 400px;
+            word-wrap: break-word;
         }
 
         #game-setup-form {
@@ -199,10 +243,11 @@
 <body>
     <h1>Leximax Admin</h1>
     <div id="login-status">Not logged in</div>
+    <div id="debug-info">Initializing...</div>
     
     <form id="login-form">
         <label for="email">Email:</label>
-        <input type="email" id="email" placeholder="Enter your email" required>
+        <input type="email" id="email" value="kempen.willem@gmail.com" required>
 
         <label for="password">Password:</label>
         <input type="password" id="password" placeholder="Enter your password" required>
