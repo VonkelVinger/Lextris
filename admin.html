@@ -6,7 +6,7 @@
     <title>Leximax Admin</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // ✅ Firebase Configuration
         const firebaseConfig = {
@@ -21,46 +21,32 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Game ID Validation
-        function isValidGameId(gameId) {
-            return /^Game\d{4}-\d{2}-\d{2}$/.test(gameId);
-        }
-
         // ✅ Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
-                if (!isValidGameId(gameId)) {
-                    alert("Invalid Game ID format. Use GameYYYY-MM-DD.");
-                    return;
-                }
-
                 // Create the global document
-                await setDoc(doc(db, `${gameId}/global`), {
+                await setDoc(doc(db, gameId, "global"), {
                     createdAt: new Date().toISOString(),
                     targetWord: targetWord,
                 });
 
                 // Create a placeholder document in the bestTimes collection
-                const bestTimesDoc = doc(collection(db, `${gameId}/bestTimes`), "placeholder");
-                await setDoc(bestTimesDoc, {
+                await setDoc(doc(db, gameId, "bestTimes", "placeholder"), {
                     username: "Sample Player",
                     time: 999,
                     timestamp: new Date().toISOString(),
                 });
-                await deleteDoc(bestTimesDoc); // Remove placeholder if unnecessary
 
                 // Create a placeholder document in the leaderboard collection
-                const leaderboardDoc = doc(collection(db, `${gameId}/leaderboard`), "placeholder");
-                await setDoc(leaderboardDoc, {
+                await setDoc(doc(db, gameId, "leaderboard", "placeholder"), {
                     username: "Sample Player",
                     score: 999,
                     timestamp: new Date().toISOString(),
                 });
-                await deleteDoc(leaderboardDoc); // Remove placeholder if unnecessary
 
                 alert(`Game "${gameId}" setup successfully!`);
             } catch (error) {
-                console.error("Error creating game collections:", error);
+                console.error("Error creating game collections:", error.message || error);
                 alert("Failed to create game. Check console for details.");
             }
         }
