@@ -6,9 +6,9 @@
     <title>Leximax Admin</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ✅ Firebase Initialization
+        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -21,43 +21,33 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Create Game Function
+        // ✅ Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
-                if (!gameId || !targetWord) {
-                    alert('Game ID and Target Word are required!');
-                    return;
-                }
-
-                console.log(`✅ Creating game with ID: ${gameId}`);
-
-                // ✅ Create Global Document
+                // Create the global document
                 await setDoc(doc(db, `${gameId}/global`), {
                     createdAt: new Date().toISOString(),
                     targetWord: targetWord,
                 });
-                console.log('✅ Global document created');
 
-                // ✅ Create BestTimes Subcollection with Placeholder Document
-                await addDoc(collection(db, `${gameId}/bestTimes`), {
+                // Create placeholder document in bestTimes collection
+                await setDoc(doc(db, `${gameId}/bestTimes/placeholder`), {
                     username: "Sample Player",
                     time: 999,
                     timestamp: new Date().toISOString(),
                 });
-                console.log('✅ bestTimes placeholder document created');
 
-                // ✅ Create Leaderboard Subcollection with Placeholder Document
-                await addDoc(collection(db, `${gameId}/leaderboard`), {
+                // Create placeholder document in leaderboard collection
+                await setDoc(doc(db, `${gameId}/leaderboard/placeholder`), {
                     username: "Sample Player",
                     score: 999,
                     timestamp: new Date().toISOString(),
                 });
-                console.log('✅ leaderboard placeholder document created');
 
                 alert(`Game "${gameId}" setup successfully!`);
             } catch (error) {
-                console.error("❌ Error creating game collections:", error.message);
-                alert(`Failed to create game: ${error.message}`);
+                console.error("Error creating game collections:", error);
+                alert("Failed to create game. Check console for details.");
             }
         }
 
