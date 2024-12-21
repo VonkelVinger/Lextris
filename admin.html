@@ -8,7 +8,13 @@
     <script type="module">
         // ✅ Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            collection, 
+            addDoc 
+        } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // ✅ Firebase Initialization
         const firebaseConfig = {
@@ -33,7 +39,7 @@
                 return;
             }
 
-            const gameId = gameIdInput;
+            const gameId = gameIdInput; // Ensure this is properly trimmed and unique
 
             try {
                 // ✅ Step 1: Create the 'global' document
@@ -43,7 +49,7 @@
                 });
 
                 // ✅ Step 2: Create the 'bestTimes' collection with a placeholder document
-                await setDoc(doc(db, `${gameId}/bestTimes/placeholder`), {
+                await setDoc(doc(db, `${gameId}/bestTimes`, "placeholder"), {
                     time: null,
                     updatedAt: null
                 });
