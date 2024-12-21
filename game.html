@@ -27,12 +27,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Fetch Game ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const gameId = urlParams.get('gameId');
+        // ✅ Extract Game ID from URL Path
+        const gameId = window.location.pathname.split('/').pop().replace('.html', '');
 
         if (!gameId) {
-            alert('Game ID is missing in the URL. Example: ?gameId=Game2024-12-22');
+            alert('Game ID is missing in the URL.');
         } else {
             fetchGameData(gameId);
         }
@@ -43,7 +42,7 @@
                 console.log(`Fetching data for ${gameId}`);
 
                 // Fetch Target Word
-                const globalDocRef = doc(db, gameId, "global");
+                const globalDocRef = doc(db, `${gameId}-bestTimes`, "global");
                 const globalDocSnap = await getDoc(globalDocRef);
 
                 if (globalDocSnap.exists()) {
@@ -55,7 +54,7 @@
                 }
 
                 // Fetch Leaderboard
-                const leaderboardRef = collection(db, `${gameId}/global/leaderboard`);
+                const leaderboardRef = collection(db, `${gameId}-leaderboard`);
                 const leaderboardSnap = await getDocs(leaderboardRef);
                 const leaderboard = document.getElementById('leaderboard');
 
