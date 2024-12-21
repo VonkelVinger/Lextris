@@ -73,9 +73,16 @@
             color: #555;
         }
 
-        /* ✅ Admin Page Hidden */
-        .admin-section {
-            display: none;
+        /* ✅ Responsive Design */
+        @media (max-width: 600px) {
+            .nav-button {
+                font-size: 0.9em;
+                padding: 8px 16px;
+            }
+
+            select {
+                font-size: 14px;
+            }
         }
     </style>
     <script>
@@ -93,19 +100,10 @@
                 window.location.href = `game.html?gameId=${selectedGame}`;
             }
         }
-
-        // ✅ Show Admin Section for Authorized Users
-        function showAdminSection() {
-            const adminPassword = prompt("Enter admin password:");
-            if (adminPassword === "your_admin_password_here") {
-                document.querySelector('.admin-section').style.display = 'block';
-            } else {
-                alert('Access Denied!');
-            }
-        }
     </script>
 </head>
 <body>
+    <!-- ✅ Header Section -->
     <h1>Welcome to Leximax</h1>
 
     <!-- ✅ Today's Game Button -->
@@ -121,23 +119,27 @@
             <option value="Game2024-12-21">2024-12-21</option>
             <option value="Game2024-12-20">2024-12-20</option>
             <option value="Game2024-12-19">2024-12-19</option>
+            <option value="Game2024-12-18">2024-12-18</option>
         </select>
     </div>
 
-    <!-- ✅ Admin Panel (Hidden by Default) -->
-    <div class="nav-container">
-        <button class="nav-button" onclick="showAdminSection()">Admin Access</button>
-    </div>
+    <!-- ✅ About Section -->
+    <section style="margin-top: 40px;">
+        <h2>About Leximax</h2>
+        <p>Leximax is an exciting daily word challenge game. Solve the puzzle, beat your best time, and climb the leaderboard!</p>
+    </section>
 
-    <div class="admin-section">
-        <nav>
-            <a href="admin.html" class="nav-button">Admin Panel</a>
-        </nav>
-    </div>
+    <!-- ✅ Instructions Section -->
+    <section style="margin-top: 40px;">
+        <h2>How to Play</h2>
+        <p>Each day brings a new word puzzle. Guess letters, uncover the word, and submit your time to the leaderboard!</p>
+    </section>
 
     <!-- ✅ Footer -->
     <div class="footer">
         &copy; 2024 Leximax. All rights reserved.
+        <br>
+        <a href="privacy-policy.html" style="font-size: 12px; color: #555; text-decoration: none;">Privacy Policy</a>
     </div>
 </body>
 </html>
