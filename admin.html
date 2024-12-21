@@ -1,4 +1,4 @@
-.<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -38,22 +38,24 @@
                     createdAt: new Date().toISOString(),
                     targetWord: targetWord
                 });
-                console.log(`Path: ${gameId}/global`);
+                console.log(`Path Created: ${gameId}/global`);
 
                 // ✅ Create Placeholder Document in bestTimes
-                await setDoc(doc(db, `${gameId}/bestTimes/placeholder`), {
+                const bestTimesPath = `${gameId}/bestTimes/placeholder`;
+                await setDoc(doc(db, bestTimesPath), {
                     time: null,
                     updatedAt: null
                 });
-                console.log(`Path: ${gameId}/bestTimes/placeholder`);
+                console.log(`Path Created: ${bestTimesPath}`);
 
                 // ✅ Create Sample Leaderboard Entry
-                await addDoc(collection(db, `${gameId}/leaderboard`), {
+                const leaderboardRef = collection(db, `${gameId}/leaderboard`);
+                await addDoc(leaderboardRef, {
                     username: 'Sample Player',
                     score: 999,
                     timestamp: new Date().toISOString()
                 });
-                console.log(`Path: ${gameId}/leaderboard`);
+                console.log(`Path Created: ${gameId}/leaderboard`);
 
                 alert(`Game "${gameId}" setup successfully!`);
 
