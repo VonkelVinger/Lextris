@@ -31,7 +31,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const todayGameLink = document.getElementById('todays-game');
             const todayDate = new Date().toISOString().split('T')[0];
-            todayGameLink.href = `game-${todayDate}.html`;
+            todayGameLink.href = `game.html?gameId=Game${todayDate}`;
         });
     </script>
 </head>
