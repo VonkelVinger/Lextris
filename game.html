@@ -11,7 +11,7 @@
             doc, 
             getDoc, 
             collection, 
-            getDocs
+            getDocs 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // ✅ Firebase Initialization
@@ -27,11 +27,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Extract Game ID from URL Path
-        const gameId = window.location.pathname.split('/').pop().replace('.html', '');
+        // ✅ Fetch Game ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('gameId');
+
+        console.log('Game ID from URL:', gameId); // Debugging log
 
         if (!gameId) {
-            alert('Game ID is missing in the URL.');
+            document.getElementById('target-word').innerText = 'Error: Game ID missing from URL.';
+            throw new Error('Game ID is missing in the URL. Example: ?gameId=Game2024-12-21');
         } else {
             fetchGameData(gameId);
         }
@@ -42,11 +46,12 @@
                 console.log(`Fetching data for ${gameId}`);
 
                 // Fetch Target Word
-                const globalDocRef = doc(db, `${gameId}-bestTimes`, "global");
+                const globalDocRef = doc(db, gameId, "global");
                 const globalDocSnap = await getDoc(globalDocRef);
 
                 if (globalDocSnap.exists()) {
                     const { targetWord } = globalDocSnap.data();
+                    console.log('Target Word:', targetWord); // Debugging log
                     document.getElementById('target-word').innerText = `Target Word: ${targetWord}`;
                 } else {
                     console.error("No such document!");
@@ -54,13 +59,14 @@
                 }
 
                 // Fetch Leaderboard
-                const leaderboardRef = collection(db, `${gameId}-leaderboard`);
+                const leaderboardRef = collection(db, `${gameId}/leaderboard`);
                 const leaderboardSnap = await getDocs(leaderboardRef);
                 const leaderboard = document.getElementById('leaderboard');
 
                 leaderboard.innerHTML = ""; // Clear default text
                 leaderboardSnap.forEach(doc => {
                     const { username, score } = doc.data();
+                    console.log('Leaderboard Entry:', username, score); // Debugging log
                     const entry = document.createElement('li');
                     entry.textContent = `${username}: ${score}`;
                     leaderboard.appendChild(entry);
