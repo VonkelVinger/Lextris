@@ -15,7 +15,7 @@
             color: #333;
         }
 
-        /* ✅ Header */
+        /* ✅ Header Styling */
         .header {
             background-color: #004d40;
             padding: 10px 0;
@@ -75,6 +75,31 @@
             color: #004d40;
         }
 
+        /* ✅ Archive Dropdown */
+        .archive-dropdown {
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .archive-dropdown label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .archive-dropdown select {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #00695c;
+        }
+
         /* ✅ Ad Section */
         .ad-section {
             margin: 40px auto;
@@ -104,6 +129,26 @@
             border-radius: 5px;
         }
 
+        /* ✅ About Section */
+        .about-section {
+            margin: 50px auto;
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-section h2 {
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+
+        .about-section p {
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
         /* ✅ Footer */
         .footer {
             margin-top: 50px;
@@ -124,40 +169,32 @@
             text-decoration: underline;
         }
 
-        /* ✅ Responsive Design */
-        @media (max-width: 600px) {
-            .logo div {
-                width: 30px;
-                height: 30px;
-                font-size: 1.2em;
-            }
+        /* ✅ We Buy Coffee Button */
+        .coffee-button {
+            margin: 30px auto;
+            text-align: center;
+        }
 
-            .main-buttons a {
-                font-size: 0.9em;
-                padding: 10px 15px;
-            }
+        .coffee-button a {
+            display: inline-block;
+            background-color: #FFD700;
+            color: #333;
+            padding: 10px 20px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 5px;
+        }
 
-            .ad-space {
-                width: 90%;
-                height: 120px;
-            }
+        .coffee-button a:hover {
+            background-color: #FFC107;
         }
     </style>
     <script>
-        // ✅ Dynamically Set "Today's Game" Link
         document.addEventListener('DOMContentLoaded', () => {
             const todayGameLink = document.getElementById('todays-game');
-            const todayDate = new Date().toISOString().split('T')[0]; // e.g., "2024-12-22"
+            const todayDate = new Date().toISOString().split('T')[0];
             todayGameLink.href = `game.html?gameId=Game${todayDate}`;
         });
-
-        // ✅ Navigate to Archive Games
-        function goToArchiveGame() {
-            const selectedGame = document.getElementById('archive-games').value;
-            if (selectedGame) {
-                window.location.href = `game.html?gameId=${selectedGame}`;
-            }
-        }
     </script>
 </head>
 <body>
@@ -174,7 +211,7 @@
         </div>
     </header>
 
-    <!-- ✅ Main Navigation Buttons -->
+    <!-- ✅ Main Buttons -->
     <div class="main-buttons">
         <a id="todays-game" href="#">TODAY'S GAME</a>
         <a href="archive.html">ARCHIVE GAMES</a>
@@ -190,13 +227,23 @@
         </div>
     </section>
 
+    <!-- ✅ About Section -->
+    <section class="about-section">
+        <h2>About Leximax</h2>
+        <p>Leximax is an exciting daily word challenge game where players compete to guess the word in the shortest time. Join the fun and challenge yourself daily!</p>
+    </section>
+
+    <!-- ✅ Coffee Button -->
+    <div class="coffee-button">
+        <a href="https://www.buymeacoffee.com/leximax" target="_blank">We Buy Coffee</a>
+    </div>
+
     <!-- ✅ Footer -->
     <footer class="footer">
         <a href="about.html">About Leximax</a> |
         <a href="privacy-policy.html">Privacy Policy</a> |
         <a href="contact.html">Contact Us</a>
-        <br>
-        &copy; 2024 Leximax. All rights reserved.
+        <br>&copy; 2024 Leximax. All rights reserved.
     </footer>
 </body>
 </html>
