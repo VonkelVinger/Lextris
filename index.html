@@ -4,246 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax</title>
-    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
-    <style>
-        /* ✅ General Page Styling */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-        }
+    <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="icon" type="image/png" href="favicon_L_top_highres.png">
 
-        /* ✅ Header Styling */
-        .header {
-            background-color: #004d40;
-            padding: 10px 0;
-            text-align: center;
-        }
-
-        .logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .logo div {
-            font-size: 1.8em;
-            font-weight: bold;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .logo .L { background: #1565C0; }
-        .logo .E { background: #D32F2F; }
-        .logo .X { background: #388E3C; }
-        .logo .I { background: #FFC107; }
-        .logo .M { background: #7B1FA2; }
-        .logo .A { background: #1976D2; }
-        .logo .X2 { background: #8E0038; }
-
-        /* ✅ Main Navigation Buttons */
-        .main-buttons {
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .main-buttons a {
-            display: block;
-            margin: 10px auto;
-            padding: 12px 20px;
-            width: 80%;
-            max-width: 300px;
-            font-size: 1em;
-            font-weight: bold;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 5px;
-            color: #FFC107;
-            background-color: #004d40;
-            border: 2px solid #FFC107;
-        }
-
-        .main-buttons a:hover {
-            background-color: #FFC107;
-            color: #004d40;
-        }
-
-        /* ✅ Archive Dropdown Styling */
-        .archive-dropdown {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .archive-dropdown label {
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .archive-dropdown select {
-            margin-top: 10px;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        select:focus {
-            outline: none;
-            border-color: #00695c;
-        }
-
-        /* ✅ Ad Section */
-        .ad-section {
-            margin: 40px auto;
-            text-align: center;
-        }
-
-        .ad-section h2 {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-
-        .ad-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .ad-space {
-            width: 45%;
-            height: 150px;
-            background: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        /* ✅ About Section */
-        .about-section {
-            margin: 50px auto;
-            text-align: center;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .about-section h2 {
-            margin-bottom: 10px;
-            color: #004d40;
-        }
-
-        .about-section p {
-            font-size: 1em;
-            line-height: 1.6;
-        }
-
-        /* ✅ Coffee Button */
-        .coffee-button {
-            margin: 30px auto;
-            text-align: center;
-        }
-
-        .coffee-button a {
-            display: inline-block;
-            background-color: #FFD700;
-            color: #333;
-            padding: 10px 20px;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .coffee-button a:hover {
-            background-color: #FFC107;
-        }
-
-        /* ✅ Footer */
-        .footer {
-            margin-top: 50px;
-            padding: 10px;
-            background-color: #004d40;
-            color: #fff;
-            text-align: center;
-            font-size: 0.9em;
-        }
-
-        .footer a {
-            color: #FFC107;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
-    <script>
-        // ✅ Dynamically Set "Today's Game" Link
-        document.addEventListener('DOMContentLoaded', () => {
-            const todayGameLink = document.getElementById('todays-game');
-            const todayDate = new Date().toISOString().split('T')[0];
-            todayGameLink.href = `game.html?gameId=Game${todayDate}`;
-        });
-    </script>
 </head>
 <body>
-    <!-- ✅ Header -->
-    <header class="header">
-        <div class="logo">
-            <div class="L">L</div>
-            <div class="E">E</div>
-            <div class="X">X</div>
-            <div class="I">I</div>
-            <div class="M">M</div>
-            <div class="A">A</div>
-            <div class="X2">X</div>
+    <header>
+        <div id="game-title">
+            <div class="title-block" style="background-color: #0066FF;">L</div>
+            <div class="title-block" style="background-color: #f44336;">E</div>
+            <div class="title-block" style="background-color: #4caf50;">X</div>
+            <div class="title-block" style="background-color: #ffc107;">I</div>
+            <div class="title-block" style="background-color: #9c27b0;">M</div>
+            <div class="title-block" style="background-color: #0066FF;">A</div>
+            <div class="title-block" style="background-color: #900C3F;">X</div>
         </div>
     </header>
-
-    <!-- ✅ Main Buttons -->
-    <div class="main-buttons">
-        <a id="todays-game" href="#">TODAY'S GAME</a>
-        <a href="archive.html">ARCHIVE GAMES</a>
-        <a href="how-to-play.html">FIRST TIME? HERE'S HOW TO PLAY</a>
-    </div>
-
-    <!-- ✅ Ad Section -->
-    <section class="ad-section">
-        <h2>Help us keep the game free by supporting our advertisers</h2>
-        <div class="ad-container">
-            <div class="ad-space">Ad Space 1</div>
-            <div class="ad-space">Ad Space 2</div>
+    <main>
+        <div class="buttons-container">
+            <a href="game-2024-12-22.html" class="button">TODAY'S GAME</a>
+            <a href="archive-games.html" class="button">ARCHIVE GAMES</a>
+            <a href="how-to-play.html" class="button">FIRST TIME? HERE'S HOW TO PLAY</a>
         </div>
-    </section>
-
-    <!-- ✅ About Section -->
-    <section class="about-section">
-        <h2>About Leximax</h2>
-        <p>Leximax is an exciting daily word challenge game where players compete to guess the word in the shortest time. Join the fun and challenge yourself daily!</p>
-    </section>
-
-    <!-- ✅ Coffee Button -->
-    <div class="coffee-button">
-        <a href="https://www.buymeacoffee.com/leximax" target="_blank">We Buy Coffee</a>
+        <section class="ads">
+            <h2>Help us keep the game free by supporting our advertisers</h2>
+            <div class="ad-container">
+                <div class="ad-placeholder">Ad Space 1</div>
+                <div class="ad-placeholder">Ad Space 2</div>
+            </div>
+<div id="cookie-banner" class="cookie-banner">
+    <p>
+        This website uses cookies to enhance your experience, personalize ads, and analyze traffic.
+        By clicking "Accept All Cookies," you consent to our use of cookies. 
+        See our <a href="privacy-policy.html" target="_blank">Privacy Policy</a> for more details.
+    </p>
+    <div class="cookie-buttons">
+        <button id="accept-cookies">Accept All Cookies</button>
+        <button id="customize-cookies">Customize</button>
     </div>
-
-    <!-- ✅ Footer -->
-    <footer class="footer">
-        <a href="about.html">About Leximax</a> |
+</div>
+        </section>
+    </main>
+    <footer>
+        <a href="about-leximax.html">About Leximax</a> |
         <a href="privacy-policy.html">Privacy Policy</a> |
         <a href="contact.html">Contact Us</a>
-        <br>&copy; 2024 Leximax. All rights reserved.
+        <p>&copy; 2024 Leximax. All rights reserved.</p>
+<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
     </footer>
+    </main>
+<script src="scripts.js"></script>
+</body>
+
 </body>
 </html>
