@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin</title>
     <script type="module">
+        // ✅ Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
             getFirestore, 
-            collection, 
             doc, 
             setDoc, 
+            collection, 
             addDoc 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ✅ Initialize Firebase
+        // ✅ Firebase Initialization
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -27,40 +28,44 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Create Game Collections
+        // ✅ Create Game Collections and Documents
         async function createGameCollections(gameId, targetWord) {
             try {
-                console.log(`Creating game collections for ${gameId}`);
+                const gamePath = `Game${gameId}`;
 
-                // 1️⃣ Create global document
-                await setDoc(doc(db, `${gameId}`, "global"), {
+                // 1. Create global document
+                await setDoc(doc(db, gamePath, "global"), {
                     createdAt: new Date().toISOString(),
-                    targetWord: targetWord
+                    targetWord: targetWord.toUpperCase()
                 });
 
-                // 2️⃣ Create a placeholder document in bestTimes collection
-                await setDoc(doc(db, `${gameId}`, "bestTimes", "placeholder"), {
-                    time: null,
-                    updatedAt: null
+                // 2. Create bestTimes collection with a placeholder document
+                const bestTimesPath = `${gamePath}/bestTimes`;
+                await addDoc(collection(db, bestTimesPath), {
+                    placeholder: true
                 });
 
-                // 3️⃣ Add a sample document in leaderboard collection
-                await addDoc(collection(db, `${gameId}`, "leaderboard"), {
+                // 3. Create leaderboard collection with a sample entry
+                const leaderboardPath = `${gamePath}/leaderboard`;
+                await addDoc(collection(db, leaderboardPath), {
                     username: "Sample Player",
                     score: 999,
                     timestamp: new Date().toISOString()
                 });
 
                 alert(`Game "${gameId}" setup successfully!`);
+                console.log(`Game "${gameId}" created with global, bestTimes, and leaderboard structures.`);
+
             } catch (error) {
                 console.error("Error creating game collections:", error);
-                alert("Failed to create game. Check console for details.");
+                alert("Failed to create game. Check the console for details.");
             }
         }
 
-        // ✅ Event listener for form submission
+        // ✅ Event Listener for Form Submission
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("game-setup-form");
+
             form.addEventListener("submit", async (event) => {
                 event.preventDefault();
                 const gameId = document.getElementById("game-id").value.trim();
@@ -77,6 +82,7 @@
         });
     </script>
     <style>
+        /* ✅ Styling for Admin Page */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -139,7 +145,7 @@
 <body>
     <h1>Leximax Admin</h1>
     <form id="game-setup-form">
-        <label for="game-id">Game ID (e.g., Game2024-12-20):</label>
+        <label for="game-id">Game ID (e.g., 2024-12-21):</label>
         <input type="text" id="game-id" placeholder="Enter the Game ID" required>
 
         <label for="target-word">Target Word:</label>
@@ -147,6 +153,8 @@
 
         <button type="submit">Create Game</button>
     </form>
-    <div class="notice">Ensure you are logged into Firebase and that secure rules are in place.</div>
+    <div class="notice">
+        Ensure you are logged into Firebase and that secure rules are in place.
+    </div>
 </body>
 </html>
