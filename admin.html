@@ -10,8 +10,8 @@
             getFirestore, 
             doc, 
             setDoc, 
-            addDoc, 
-            collection 
+            collection, 
+            addDoc 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // ✅ Firebase Initialization
@@ -31,19 +31,19 @@
         async function createGameCollections(gameId, targetWord) {
             try {
                 // ✅ Create 'global' Document
-                await setDoc(doc(db, gameId, "global"), {
+                await setDoc(doc(db, `${gameId}`, "global"), {
                     createdAt: new Date().toISOString(),
                     targetWord: targetWord
                 });
 
                 // ✅ Create 'bestTimes' Collection with Placeholder Document
-                await setDoc(doc(db, `${gameId}-bestTimes`, "placeholder"), {
+                await setDoc(doc(db, `${gameId}/bestTimes`, "placeholder"), {
                     score: null,
                     timestamp: null
                 });
 
                 // ✅ Create 'leaderboard' Collection with Sample Entry
-                await addDoc(collection(db, `${gameId}-leaderboard`), {
+                await addDoc(collection(db, `${gameId}/leaderboard`), {
                     username: "Sample Player",
                     score: 999,
                     timestamp: new Date().toISOString()
