@@ -4,17 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin</title>
-    <link rel="stylesheet" href="assets/style.css">
     <script type="module">
-        // ✅ Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc, 
-            collection, 
-            addDoc 
-        } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // ✅ Firebase Initialization
         const firebaseConfig = {
@@ -29,103 +21,88 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Create Game Function
         async function createGame() {
-            const gameIdInput = document.getElementById('gameId').value.trim();
-            const targetWordInput = document.getElementById('targetWord').value.trim();
+            const gameId = document.getElementById('gameId').value.trim();
+            const targetWord = document.getElementById('targetWord').value.trim();
 
-            if (!gameIdInput || !targetWordInput) {
-                alert('Please enter both Game ID and Target Word.');
+            if (!gameId || !targetWord) {
+                alert('Both Game ID and Target Word are required!');
                 return;
             }
 
-            const gameId = gameIdInput; // Ensure this is properly trimmed and unique
-
             try {
-                // ✅ Step 1: Create the 'global' document
-                await setDoc(doc(db, `${gameId}`, "global"), {
+                console.log(`Creating game with ID: ${gameId}`);
+                
+                // ✅ Create Global Document
+                await setDoc(doc(db, gameId, 'global'), {
                     createdAt: new Date().toISOString(),
-                    targetWord: targetWordInput
+                    targetWord: targetWord
                 });
+                console.log(`Path: ${gameId}/global`);
 
-                // ✅ Step 2: Create the 'bestTimes' collection with a placeholder document
-                await setDoc(doc(db, `${gameId}/bestTimes`, "placeholder"), {
+                // ✅ Create Placeholder Document in bestTimes
+                await setDoc(doc(collection(db, `${gameId}/bestTimes`), 'placeholder'), {
                     time: null,
                     updatedAt: null
                 });
+                console.log(`Path: ${gameId}/bestTimes/placeholder`);
 
-                // ✅ Step 3: Create the 'leaderboard' collection with a sample entry
+                // ✅ Create Sample Leaderboard Entry
                 await addDoc(collection(db, `${gameId}/leaderboard`), {
-                    username: "Sample Player",
+                    username: 'Sample Player',
                     score: 999,
                     timestamp: new Date().toISOString()
                 });
+                console.log(`Path: ${gameId}/leaderboard`);
 
                 alert(`Game "${gameId}" setup successfully!`);
-                console.log(`Game "${gameId}" created successfully.`);
+
             } catch (error) {
-                console.error("Error creating game collections:", error);
-                alert("Failed to create game. Check console for details.");
+                console.error('Error creating game collections:', error);
+                alert(`Error: ${error.message}`);
             }
         }
     </script>
     <style>
-        /* ✅ Basic Admin Page Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f9f9f9;
-            color: #333;
-        }
-
-        h1 {
             text-align: center;
+        }
+        h1 {
             color: #004d40;
         }
-
         .form-container {
             max-width: 400px;
-            margin: 20px auto;
+            margin: 0 auto;
             padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
         }
-
-        .form-container label {
+        label {
             display: block;
-            margin: 10px 0 5px;
+            margin-top: 10px;
+            font-weight: bold;
         }
-
-        .form-container input {
+        input {
             width: 100%;
             padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            margin-top: 5px;
         }
-
-        .form-container button {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
             background-color: #004d40;
-            color: #fff;
+            color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
         }
-
-        .form-container button:hover {
-            background-color: #003329;
-        }
-
-        .note {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
+        button:hover {
+            background-color: #002d27;
         }
     </style>
 </head>
@@ -133,13 +110,13 @@
     <h1>Leximax Admin</h1>
     <div class="form-container">
         <label for="gameId">Game ID (e.g., Game2024-12-21):</label>
-        <input type="text" id="gameId" placeholder="Enter the Game ID">
+        <input type="text" id="gameId" placeholder="Enter Game ID">
 
         <label for="targetWord">Target Word:</label>
-        <input type="text" id="targetWord" placeholder="Enter the Target Word">
+        <input type="text" id="targetWord" placeholder="Enter Target Word">
 
         <button onclick="createGame()">Create Game</button>
     </div>
-    <p class="note">Ensure you are logged into Firebase and that secure rules are in place.</p>
+    <p>Ensure you are logged into Firebase and that secure rules are in place.</p>
 </body>
 </html>
