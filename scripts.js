@@ -1,4 +1,4 @@
-// ✅ Cookie Consent Logic
+// ✅ COOKIE CONSENT LOGIC
 document.addEventListener('DOMContentLoaded', () => {
     const cookieBanner = document.getElementById('cookie-banner');
     const acceptCookiesButton = document.getElementById('accept-cookies');
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ✅ Highlight Active Button
+// ✅ HIGHLIGHT ACTIVE BUTTON IN NAVIGATION
 const currentUrl = window.location.pathname;
 document.querySelectorAll('.button').forEach(button => {
     if (button.href.includes(currentUrl)) {
@@ -31,7 +31,7 @@ document.querySelectorAll('.button').forEach(button => {
     }
 });
 
-// ✅ Ad Placeholder Click (Optional Enhancement)
+// ✅ AD PLACEHOLDER CLICK (Optional Enhancement)
 document.querySelectorAll('.ad-placeholder').forEach(ad => {
     ad.addEventListener('click', () => {
         alert('Ad clicked! This space can be configured for advertisements.');
