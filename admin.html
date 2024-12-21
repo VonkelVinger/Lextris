@@ -31,13 +31,13 @@
         async function createGameCollections(gameId, targetWord) {
             try {
                 // ✅ Create 'global' Document
-                await setDoc(doc(db, `${gameId}`, "global"), {
+                await setDoc(doc(db, `${gameId}/global`), {
                     createdAt: new Date().toISOString(),
                     targetWord: targetWord
                 });
 
                 // ✅ Create 'bestTimes' Collection with Placeholder Document
-                await setDoc(doc(db, `${gameId}/bestTimes`, "placeholder"), {
+                await setDoc(doc(db, `${gameId}/bestTimes/placeholder`), {
                     score: null,
                     timestamp: null
                 });
