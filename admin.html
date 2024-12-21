@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin</title>
+    <link rel="stylesheet" href="assets/style.css">
     <script type="module">
+        // ✅ Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            doc, 
-            setDoc, 
-            addDoc 
-        } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // ✅ Firebase Initialization
         const firebaseConfig = {
@@ -27,22 +23,32 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Create Game Structure
-        async function createGameCollections(gameId, targetWord) {
+        // ✅ Create Game Function
+        async function createGame() {
+            const gameIdInput = document.getElementById('gameId').value.trim();
+            const targetWordInput = document.getElementById('targetWord').value.trim();
+
+            if (!gameIdInput || !targetWordInput) {
+                alert('Please enter both Game ID and Target Word.');
+                return;
+            }
+
+            const gameId = gameIdInput;
+
             try {
-                // Create global document
-                await setDoc(doc(db, gameId, "global"), {
+                // ✅ Step 1: Create the 'global' document
+                await setDoc(doc(db, `${gameId}`, "global"), {
                     createdAt: new Date().toISOString(),
-                    targetWord: targetWord
+                    targetWord: targetWordInput
                 });
 
-                // Create a document in bestTimes (Valid Even Segments)
-                await setDoc(doc(db, `${gameId}/bestTimes/global`), {
+                // ✅ Step 2: Create the 'bestTimes' collection with a placeholder document
+                await setDoc(doc(db, `${gameId}/bestTimes/placeholder`), {
                     time: null,
                     updatedAt: null
                 });
 
-                // Create a sample document in leaderboard (Valid Even Segments)
+                // ✅ Step 3: Create the 'leaderboard' collection with a sample entry
                 await addDoc(collection(db, `${gameId}/leaderboard`), {
                     username: "Sample Player",
                     score: 999,
@@ -50,31 +56,15 @@
                 });
 
                 alert(`Game "${gameId}" setup successfully!`);
+                console.log(`Game "${gameId}" created successfully.`);
             } catch (error) {
                 console.error("Error creating game collections:", error);
                 alert("Failed to create game. Check console for details.");
             }
         }
-
-        // ✅ Handle Form Submission
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.getElementById("game-setup-form");
-            form.addEventListener("submit", async (event) => {
-                event.preventDefault();
-                const gameId = document.getElementById("game-id").value.trim();
-                const targetWord = document.getElementById("target-word").value.trim().toUpperCase();
-                
-                if (!gameId || !targetWord) {
-                    alert("Please fill in both fields!");
-                    return;
-                }
-
-                await createGameCollections(gameId, targetWord);
-                form.reset();
-            });
-        });
     </script>
     <style>
+        /* ✅ Basic Admin Page Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -88,63 +78,62 @@
             color: #004d40;
         }
 
-        form {
+        .form-container {
             max-width: 400px;
-            margin: 0 auto;
-            background-color: white;
+            margin: 20px auto;
             padding: 20px;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
         }
 
-        label {
+        .form-container label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            margin: 10px 0 5px;
         }
 
-        input {
+        .form-container input {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 16px;
+            padding: 8px;
+            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
 
-        button {
+        .form-container button {
             width: 100%;
             padding: 10px;
+            font-size: 16px;
             background-color: #004d40;
-            color: white;
-            font-weight: bold;
+            color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
 
-        button:hover {
-            background-color: #00695c;
+        .form-container button:hover {
+            background-color: #003329;
         }
 
-        .notice {
-            text-align: center;
+        .note {
             margin-top: 20px;
-            font-size: 14px;
-            color: #555;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <h1>Leximax Admin</h1>
-    <form id="game-setup-form">
-        <label for="game-id">Game ID (e.g., Game2024-12-20):</label>
-        <input type="text" id="game-id" placeholder="Enter the Game ID" required>
+    <div class="form-container">
+        <label for="gameId">Game ID (e.g., Game2024-12-21):</label>
+        <input type="text" id="gameId" placeholder="Enter the Game ID">
 
-        <label for="target-word">Target Word:</label>
-        <input type="text" id="target-word" placeholder="Enter the Target Word" required>
+        <label for="targetWord">Target Word:</label>
+        <input type="text" id="targetWord" placeholder="Enter the Target Word">
 
-        <button type="submit">Create Game</button>
-    </form>
-    <div class="notice">Ensure you are logged into Firebase and that secure rules are in place.</div>
+        <button onclick="createGame()">Create Game</button>
+    </div>
+    <p class="note">Ensure you are logged into Firebase and that secure rules are in place.</p>
 </body>
 </html>
