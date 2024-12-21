@@ -6,7 +6,7 @@
     <title>Leximax Admin</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
@@ -33,9 +33,11 @@
                 }
 
                 try {
-                    // Just create one flat document with everything in it
-                    const gameRef = doc(db, 'leximax_games', gameId);
-                    await setDoc(gameRef, {
+                    // Create the document using collection() and doc() builders
+                    const gamesCollection = collection(db, 'leximax_games');
+                    const gameDocRef = doc(gamesCollection, gameId);
+                    
+                    await setDoc(gameDocRef, {
                         targetWord: targetWord,
                         createdAt: new Date().toISOString(),
                         bestTime: {
@@ -50,7 +52,7 @@
                         }]
                     });
 
-                    console.log(`Created game: ${gameId}`);
+                    console.log('Document written with ID:', gameId);
                     alert(`Game "${gameId}" setup successfully!`);
                     form.reset();
 
@@ -120,6 +122,6 @@
             <button type="submit">Create Game</button>
         </form>
     </div>
-    <p>Ensure you are logged into Firebase and that secure rules are in place.</p>
+    <p>Ensure you have the correct Firebase permissions.</p>
 </body>
 </html>
