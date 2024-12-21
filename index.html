@@ -4,58 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax</title>
-    <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+    <style>
+        /* ✅ General Page Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            background-color: #f9f9f9;
+        }
 
+        h1 {
+            color: #004d40;
+        }
+
+        nav {
+            margin-top: 20px;
+        }
+
+        .nav-button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #004d40;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .nav-button:hover {
+            background-color: #00695c;
+        }
+
+        /* ✅ Archive Dropdown Styling */
+        .archive-dropdown {
+            margin-top: 20px;
+        }
+
+        label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        select {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #00695c;
+        }
+
+        .footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+    <script>
+        // ✅ Dynamically Set "Today's Game" Link
+        document.addEventListener('DOMContentLoaded', () => {
+            const todayGameLink = document.getElementById('todays-game');
+            const todayDate = new Date().toISOString().split('T')[0]; // e.g., "2024-12-22"
+            todayGameLink.href = `game.html?gameId=Game${todayDate}`;
+        });
+
+        // ✅ Navigate to Selected Archive Game
+        function goToArchiveGame() {
+            const selectedGame = document.getElementById('archive-games').value;
+            if (selectedGame) {
+                window.location.href = `game.html?gameId=${selectedGame}`;
+            }
+        }
+    </script>
 </head>
 <body>
-    <header>
-        <div id="game-title">
-            <div class="title-block" style="background-color: #0066FF;">L</div>
-            <div class="title-block" style="background-color: #f44336;">E</div>
-            <div class="title-block" style="background-color: #4caf50;">X</div>
-            <div class="title-block" style="background-color: #ffc107;">I</div>
-            <div class="title-block" style="background-color: #9c27b0;">M</div>
-            <div class="title-block" style="background-color: #0066FF;">A</div>
-            <div class="title-block" style="background-color: #900C3F;">X</div>
-        </div>
-    </header>
-    <main>
-        <div class="buttons-container">
-            <a href="game-2024-12-22.html" class="button">TODAY'S GAME</a>
-            <a href="archive-games.html" class="button">ARCHIVE GAMES</a>
-            <a href="how-to-play.html" class="button">FIRST TIME? HERE'S HOW TO PLAY</a>
-        </div>
-        <section class="ads">
-            <h2>Help us keep the game free by supporting our advertisers</h2>
-            <div class="ad-container">
-                <div class="ad-placeholder">Ad Space 1</div>
-                <div class="ad-placeholder">Ad Space 2</div>
-            </div>
-<div id="cookie-banner" class="cookie-banner">
-    <p>
-        This website uses cookies to enhance your experience, personalize ads, and analyze traffic.
-        By clicking "Accept All Cookies," you consent to our use of cookies. 
-        See our <a href="privacy-policy.html" target="_blank">Privacy Policy</a> for more details.
-    </p>
-    <div class="cookie-buttons">
-        <button id="accept-cookies">Accept All Cookies</button>
-        <button id="customize-cookies">Customize</button>
-    </div>
-</div>
-        </section>
-    </main>
-    <footer>
-        <a href="about-leximax.html">About Leximax</a> |
-        <a href="privacy-policy.html">Privacy Policy</a> |
-        <a href="contact.html">Contact Us</a>
-        <p>&copy; 2024 Leximax. All rights reserved.</p>
-<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
-    </footer>
-    </main>
-<script src="scripts.js"></script>
-</body>
+    <h1>Welcome to Leximax</h1>
 
+    <!-- ✅ Today's Game Button -->
+    <nav>
+        <a id="todays-game" class="nav-button" href="#">Today's Game</a>
+    </nav>
+
+    <!-- ✅ Archive Games Dropdown -->
+    <div class="archive-dropdown">
+        <label for="archive-games">Archive Games:</label>
+        <select id="archive-games" onchange="goToArchiveGame()">
+            <option value="">Select a Game</option>
+            <option value="Game2024-12-21">2024-12-21</option>
+            <option value="Game2024-12-20">2024-12-20</option>
+            <option value="Game2024-12-19">2024-12-19</option>
+        </select>
+    </div>
+
+    <!-- ✅ Admin Panel Button -->
+    <nav>
+        <a href="admin.html" class="nav-button">Admin Panel</a>
+    </nav>
+
+    <!-- ✅ Footer -->
+    <div class="footer">
+        &copy; 2024 Leximax. All rights reserved.
+    </div>
 </body>
 </html>
