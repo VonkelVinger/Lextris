@@ -6,7 +6,7 @@
     <title>Leximax</title>
     <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
     <style>
-        /* ✅ General Styling */
+        /* ✅ General Page Styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -48,7 +48,7 @@
         .logo .A { background: #1976D2; }
         .logo .X2 { background: #8E0038; }
 
-        /* ✅ Main Buttons */
+        /* ✅ Main Navigation Buttons */
         .main-buttons {
             margin: 30px 0;
             text-align: center;
@@ -75,16 +75,15 @@
             color: #004d40;
         }
 
-        /* ✅ Archive Dropdown */
+        /* ✅ Archive Dropdown Styling */
         .archive-dropdown {
-            margin: 30px auto;
+            margin-top: 30px;
             text-align: center;
         }
 
         .archive-dropdown label {
             font-size: 16px;
             font-weight: bold;
-            margin-bottom: 10px;
         }
 
         .archive-dropdown select {
@@ -149,6 +148,26 @@
             line-height: 1.6;
         }
 
+        /* ✅ Coffee Button */
+        .coffee-button {
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        .coffee-button a {
+            display: inline-block;
+            background-color: #FFD700;
+            color: #333;
+            padding: 10px 20px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .coffee-button a:hover {
+            background-color: #FFC107;
+        }
+
         /* ✅ Footer */
         .footer {
             margin-top: 50px;
@@ -168,28 +187,9 @@
         .footer a:hover {
             text-decoration: underline;
         }
-
-        /* ✅ We Buy Coffee Button */
-        .coffee-button {
-            margin: 30px auto;
-            text-align: center;
-        }
-
-        .coffee-button a {
-            display: inline-block;
-            background-color: #FFD700;
-            color: #333;
-            padding: 10px 20px;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .coffee-button a:hover {
-            background-color: #FFC107;
-        }
     </style>
     <script>
+        // ✅ Dynamically Set "Today's Game" Link
         document.addEventListener('DOMContentLoaded', () => {
             const todayGameLink = document.getElementById('todays-game');
             const todayDate = new Date().toISOString().split('T')[0];
@@ -198,7 +198,7 @@
     </script>
 </head>
 <body>
-    <!-- ✅ Header with Logo -->
+    <!-- ✅ Header -->
     <header class="header">
         <div class="logo">
             <div class="L">L</div>
