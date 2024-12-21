@@ -32,29 +32,31 @@
         // ✅ Function to Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
+                console.log(`Creating game with ID: ${gameId} and Target Word: ${targetWord}`);
+
                 // Create global document for the game
-                await setDoc(doc(db, gameId, "global"), {
+                await setDoc(doc(db, `${gameId}`, "global"), {
                     targetWord: targetWord,
-                    createdAt: serverTimestamp(),
+                    createdAt: serverTimestamp()
                 });
 
-                // Create a placeholder document in bestTimes
+                // Create placeholder document in bestTimes
                 await setDoc(doc(db, `${gameId}/global/bestTimes`, "placeholder"), {
-                    time: null,
-                    updatedAt: serverTimestamp(),
+                    time: 0,
+                    updatedAt: serverTimestamp()
                 });
 
-                // Create a sample entry in leaderboard
+                // Add a sample leaderboard entry
                 await addDoc(collection(db, `${gameId}/global/leaderboard`), {
                     username: "Sample Player",
                     score: 999,
-                    timestamp: serverTimestamp(),
+                    timestamp: serverTimestamp()
                 });
 
                 alert(`Game "${gameId}" setup successfully!`);
             } catch (error) {
                 console.error("Error creating game collections:", error);
-                alert("Failed to create game. Check console for details.");
+                alert(`Failed to create game: ${error.message}`);
             }
         }
 
@@ -150,6 +152,6 @@
 
         <button type="submit">Create Game</button>
     </form>
-    <div class="notice">Ensure you are logged into Firebase and testing rules are in place.</div>
+    <div class="notice">Ensure you are logged into Firebase and that secure rules are in place.</div>
 </body>
 </html>
