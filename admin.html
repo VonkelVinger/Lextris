@@ -31,14 +31,14 @@
                 });
 
                 // Create placeholder document in bestTimes collection
-                await setDoc(doc(db, `${gameId}/bestTimes/placeholder`), {
+                await setDoc(doc(db, `${gameId}/bestTimes`, "placeholder"), {
                     username: "Sample Player",
                     time: 999,
                     timestamp: new Date().toISOString(),
                 });
 
                 // Create placeholder document in leaderboard collection
-                await setDoc(doc(db, `${gameId}/leaderboard/placeholder`), {
+                await setDoc(doc(db, `${gameId}/leaderboard`, "placeholder"), {
                     username: "Sample Player",
                     score: 999,
                     timestamp: new Date().toISOString(),
