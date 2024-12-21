@@ -6,8 +6,9 @@
     <title>Leximax Admin</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        // ✅ Firebase Initialization
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -20,46 +21,61 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('gameForm');
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const gameId = document.getElementById('gameId').value.trim();
-                const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
-
+        // ✅ Create Game Function
+        async function createGameCollections(gameId, targetWord) {
+            try {
                 if (!gameId || !targetWord) {
-                    alert('Both Game ID and Target Word are required!');
+                    alert('Game ID and Target Word are required!');
                     return;
                 }
 
-                try {
-                    // Create the document using collection() and doc() builders
-                    const gamesCollection = collection(db, 'leximax_games');
-                    const gameDocRef = doc(gamesCollection, gameId);
-                    
-                    await setDoc(gameDocRef, {
-                        targetWord: targetWord,
-                        createdAt: new Date().toISOString(),
-                        bestTime: {
-                            score: null,
-                            username: null,
-                            timestamp: null
-                        },
-                        leaderboard: [{
-                            username: 'Sample Player',
-                            score: 999,
-                            timestamp: new Date().toISOString()
-                        }]
-                    });
+                console.log(`✅ Creating game with ID: ${gameId}`);
 
-                    console.log('Document written with ID:', gameId);
-                    alert(`Game "${gameId}" setup successfully!`);
-                    form.reset();
+                // ✅ Create Global Document
+                await setDoc(doc(db, `${gameId}/global`), {
+                    createdAt: new Date().toISOString(),
+                    targetWord: targetWord,
+                });
+                console.log('✅ Global document created');
 
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert(`Error: ${error.message}`);
+                // ✅ Create BestTimes Subcollection with Placeholder Document
+                await addDoc(collection(db, `${gameId}/bestTimes`), {
+                    username: "Sample Player",
+                    time: 999,
+                    timestamp: new Date().toISOString(),
+                });
+                console.log('✅ bestTimes placeholder document created');
+
+                // ✅ Create Leaderboard Subcollection with Placeholder Document
+                await addDoc(collection(db, `${gameId}/leaderboard`), {
+                    username: "Sample Player",
+                    score: 999,
+                    timestamp: new Date().toISOString(),
+                });
+                console.log('✅ leaderboard placeholder document created');
+
+                alert(`Game "${gameId}" setup successfully!`);
+            } catch (error) {
+                console.error("❌ Error creating game collections:", error.message);
+                alert(`Failed to create game: ${error.message}`);
+            }
+        }
+
+        // ✅ Event Listener for Form Submission
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("game-setup-form");
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const gameId = document.getElementById("game-id").value.trim();
+                const targetWord = document.getElementById("target-word").value.trim().toUpperCase();
+                
+                if (!gameId || !targetWord) {
+                    alert("Please fill in both fields!");
+                    return;
                 }
+
+                await createGameCollections(gameId, targetWord);
+                form.reset();
             });
         });
     </script>
@@ -69,59 +85,66 @@
             margin: 0;
             padding: 20px;
             background-color: #f9f9f9;
-            text-align: center;
+            color: #333;
         }
         h1 {
+            text-align: center;
             color: #004d40;
         }
-        .form-container {
+        form {
             max-width: 400px;
             margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
             background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         label {
             display: block;
-            margin-top: 10px;
+            margin-bottom: 8px;
             font-weight: bold;
-            text-align: left;
         }
         input {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         button {
-            margin-top: 20px;
-            padding: 10px 20px;
+            width: 100%;
+            padding: 10px;
             background-color: #004d40;
             color: white;
+            font-weight: bold;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            width: 100%;
         }
         button:hover {
-            background-color: #002d27;
+            background-color: #00695c;
+        }
+        .notice {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
         }
     </style>
 </head>
 <body>
     <h1>Leximax Admin</h1>
-    <div class="form-container">
-        <form id="gameForm">
-            <label for="gameId">Game ID (e.g., Game2024-12-21):</label>
-            <input type="text" id="gameId" placeholder="Enter Game ID" required>
+    <form id="game-setup-form">
+        <label for="game-id">Game ID (e.g., Game2024-12-21):</label>
+        <input type="text" id="game-id" placeholder="Enter the Game ID" required>
 
-            <label for="targetWord">Target Word:</label>
-            <input type="text" id="targetWord" placeholder="Enter Target Word" required>
+        <label for="target-word">Target Word:</label>
+        <input type="text" id="target-word" placeholder="Enter the Target Word" required>
 
-            <button type="submit">Create Game</button>
-        </form>
+        <button type="submit">Create Game</button>
+    </form>
+    <div class="notice">
+        Ensure you are logged into Firebase and that secure rules are in place.
     </div>
-    <p>Ensure you have the correct Firebase permissions.</p>
 </body>
 </html>
