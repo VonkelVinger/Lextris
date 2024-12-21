@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -32,16 +32,16 @@
 
             try {
                 console.log(`Creating game with ID: ${gameId}`);
-                
+
                 // ✅ Create Global Document
-                await setDoc(doc(db, gameId, 'global'), {
+                await setDoc(doc(db, `${gameId}/global`), {
                     createdAt: new Date().toISOString(),
                     targetWord: targetWord
                 });
                 console.log(`Path: ${gameId}/global`);
 
                 // ✅ Create Placeholder Document in bestTimes
-                await setDoc(doc(collection(db, `${gameId}/bestTimes`), 'placeholder'), {
+                await setDoc(doc(db, `${gameId}/bestTimes/placeholder`), {
                     time: null,
                     updatedAt: null
                 });
