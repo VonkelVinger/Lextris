@@ -1,36 +1,93 @@
-// ✅ Cookie Consent Logic
-document.addEventListener('DOMContentLoaded', () => {
-    const cookieBanner = document.getElementById('cookie-banner');
-    const acceptCookiesButton = document.getElementById('accept-cookies');
-    const customizeCookiesButton = document.getElementById('customize-cookies');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leximax</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+    
+    <!-- ✅ Prevent Cookie Banner Flash -->
+    <script>
+        (function() {
+            const hasAcceptedCookies = localStorage.getItem('cookiesAccepted');
+            if (hasAcceptedCookies === 'true') {
+                document.documentElement.classList.add('cookies-accepted');
+            }
+        })();
+    </script>
+    
+    <!-- ✅ Dynamically set Today's Game link -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const todayGameLink = document.getElementById('todays-game');
+            const todayDate = new Date().toISOString().split('T')[0];
+            todayGameLink.href = `game-${todayDate}.html`;
+        });
+    </script>
+</head>
+<body>
+    <!-- ✅ Header with Game Title -->
+    <header>
+        <div id="game-title">
+            <div class="title-block" style="background-color: #0066FF;">L</div>
+            <div class="title-block" style="background-color: #f44336;">E</div>
+            <div class="title-block" style="background-color: #4caf50;">X</div>
+            <div class="title-block" style="background-color: #ffc107;">I</div>
+            <div class="title-block" style="background-color: #9c27b0;">M</div>
+            <div class="title-block" style="background-color: #0066FF;">A</div>
+            <div class="title-block" style="background-color: #900C3F;">X</div>
+        </div>
+    </header>
 
-    if (localStorage.getItem('cookiesAccepted') === 'true') {
-        cookieBanner.style.display = 'none';
-        document.documentElement.classList.remove('show-cookie-banner');
-    }
+    <!-- ✅ Main Navigation Buttons -->
+    <main>
+        <div class="buttons-container">
+            <a id="todays-game" class="button">TODAY'S GAME</a>
+            <a href="archive-games.html" class="button">ARCHIVE GAMES</a>
+            <a href="how-to-play.html" class="button">FIRST TIME? HERE'S HOW TO PLAY</a>
+        </div>
 
-    acceptCookiesButton.addEventListener('click', () => {
-        localStorage.setItem('cookiesAccepted', 'true');
-        cookieBanner.style.display = 'none';
-        document.documentElement.classList.remove('show-cookie-banner');
-    });
+        <!-- ✅ Ad Section -->
+        <section class="ads">
+            <h2>Help us keep the game free by supporting our advertisers</h2>
+            <div class="ad-container">
+                <div class="ad-placeholder">Ad Space 1</div>
+                <div class="ad-placeholder">Ad Space 2</div>
+            </div>
+        </section>
 
-    customizeCookiesButton.addEventListener('click', () => {
-        alert('Customize cookie preferences (not yet implemented).');
-    });
-});
+        <!-- ✅ Cookie Banner -->
+        <div id="cookie-banner" class="cookie-banner">
+            <p>
+                This website uses cookies to enhance your experience, personalize ads, and analyze traffic.
+                By clicking "Accept All Cookies," you consent to our use of cookies.
+                See our <a href="privacy-policy.html" target="_blank">Privacy Policy</a> for more details.
+            </p>
+            <div class="cookie-buttons">
+                <button id="accept-cookies">Accept All Cookies</button>
+                <button id="customize-cookies">Customize</button>
+            </div>
+        </div>
+    </main>
 
-// ✅ Highlight Active Button
-const currentUrl = window.location.pathname;
-document.querySelectorAll('.button').forEach(button => {
-    if (button.href.includes(currentUrl)) {
-        button.classList.add('active');
-    }
-});
+    <!-- ✅ Coffee Support Button -->
+    <div class="coffee-button"></div>
 
-// ✅ Ad Placeholder Click (Optional Enhancement)
-document.querySelectorAll('.ad-placeholder').forEach(ad => {
-    ad.addEventListener('click', () => {
-        alert('Ad clicked! This space can be configured for advertisements.');
-    });
-});
+    <!-- ✅ Footer -->
+    <footer>
+        <a href="about-leximax.html">About Leximax</a> |
+        <a href="privacy-policy.html">Privacy Policy</a> |
+        <a href="contact.html">Contact Us</a>
+        <p>&copy; 2024 Leximax. All rights reserved.</p>
+        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+            data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+            data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+            data-font-color="#000000" data-coffee-color="#ffffff"></script>
+    </footer>
+
+    <!-- ✅ JavaScript File -->
+    <script src="scripts.js"></script>
+</body>
+</html>
