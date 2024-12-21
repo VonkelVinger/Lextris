@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const acceptCookiesButton = document.getElementById('accept-cookies');
     const customizeCookiesButton = document.getElementById('customize-cookies');
 
-    // Hide banner if cookies are already accepted
+    // Check if cookies have already been accepted
     if (localStorage.getItem('cookiesAccepted') === 'true') {
         cookieBanner.style.display = 'none';
         document.documentElement.classList.remove('show-cookie-banner');
@@ -31,7 +31,7 @@ document.querySelectorAll('.button').forEach(button => {
     }
 });
 
-// ✅ AD PLACEHOLDER CLICK (Optional Enhancement)
+// ✅ AD PLACEHOLDER CLICK (OPTIONAL ENHANCEMENT)
 document.querySelectorAll('.ad-placeholder').forEach(ad => {
     ad.addEventListener('click', () => {
         alert('Ad clicked! This space can be configured for advertisements.');
