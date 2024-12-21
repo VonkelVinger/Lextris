@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+    
     <!-- ✅ Prevent Cookie Banner Flash -->
     <script>
         (function() {
@@ -16,8 +17,9 @@
             }
         })();
     </script>
+    
+    <!-- ✅ Dynamically set Today's Game link -->
     <script>
-        // ✅ Dynamically set Today's Game link
         document.addEventListener('DOMContentLoaded', () => {
             const todayGameLink = document.getElementById('todays-game');
             const todayDate = new Date().toISOString().split('T')[0];
@@ -71,9 +73,7 @@
     </main>
 
     <!-- ✅ Coffee Support Button -->
-    <div class="coffee-button">
-        <a href="https://www.buymeacoffee.com/PlayLeximax" target="_blank">Buy me a coffee</a>
-    </div>
+    <div class="coffee-button"></div>
 
     <!-- ✅ Footer -->
     <footer>
