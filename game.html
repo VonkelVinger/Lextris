@@ -85,7 +85,6 @@
             font-weight: bold;
             font-size: 16px;
         }
-
         /* Game Grid */
         #game-grid {
             width: 100%;
@@ -202,7 +201,6 @@
             <div id="best-time-container" class="time-container">Best Time:<br>--:--</div>
         </div>
     </div>
-
     <table id="leaderboard">
         <caption>LEADERBOARD</caption>
         <thead>
@@ -211,236 +209,36 @@
         <tbody></tbody>
     </table>
 
-    <script src="firebase.js" type="module"></script>
-    <script src="game.js" type="module"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const GAME_ID = new URLSearchParams(window.location.search).get('gameId');
+        let TARGET_WORD = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const gameRef = doc(db, 'daily_games', GAME_ID);
+            const gameSnap = await getDoc(gameRef);
+
+            TARGET_WORD = gameSnap.data()?.targetWord || 'ERROR';
+            document.getElementById('target-word').innerHTML = TARGET_WORD.split('').map(letter => `<div class="target-letter">${letter}</div>`).join('');
+        });
+
+        function dropBlock() {
+            console.log("Block dropped!");
+        }
+    </script>
 </body>
 </html>
-// Import Firebase dependencies
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-import { 
-    getFirestore, 
-    doc, 
-    getDoc, 
-    collection, 
-    addDoc, 
-    query, 
-    orderBy, 
-    limit, 
-    onSnapshot 
-} from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
-
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-    authDomain: "leximax-96299.firebaseapp.com",
-    projectId: "leximax-96299",
-    storageBucket: "leximax-96299.appspot.com",
-    messagingSenderId: "1067424610925",
-    appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Fetch Game Data
-export async function fetchGameData(gameId) {
-    try {
-        if (!gameId) throw new Error('Game ID is missing.');
-
-        const gameRef = doc(db, 'daily_games', gameId);
-        const gameSnap = await getDoc(gameRef);
-
-        if (!gameSnap.exists()) throw new Error(`Game ${gameId} not found.`);
-
-        const data = gameSnap.data();
-        console.log('Game Data Loaded:', data);
-
-        return data;
-    } catch (error) {
-        console.error('Failed to fetch game data:', error.message);
-        return null;
-    }
-}
-
-// Leaderboard Listener
-export function setupLeaderboardListener(gameId, updateLeaderboardCallback) {
-    try {
-        const leaderboardQuery = query(
-            collection(db, 'daily_games', gameId, 'leaderboard'),
-            orderBy("time"),
-            limit(10)
-        );
-
-        return onSnapshot(leaderboardQuery, (snapshot) => {
-            const leaderboard = [];
-            snapshot.forEach((doc) => {
-                leaderboard.push({
-                    name: doc.data().name || 'Anonymous',
-                    time: doc.data().time || '--:--'
-                });
-            });
-            updateLeaderboardCallback(leaderboard);
-        });
-    } catch (error) {
-        console.error('Failed to set up leaderboard listener:', error.message);
-    }
-}
-
-// Add Leaderboard Entry
-export async function addLeaderboardEntry(gameId, playerName, time) {
-    try {
-        const leaderboardRef = collection(db, 'daily_games', gameId, 'leaderboard');
-        await addDoc(leaderboardRef, {
-            name: playerName.slice(0, 12) || 'Anonymous',
-            time: time,
-            timestamp: new Date().toISOString()
-        });
-        console.log('Leaderboard entry added.');
-    } catch (error) {
-        console.error('Failed to add leaderboard entry:', error.message);
-    }
-}
-import { fetchGameData, setupLeaderboardListener, addLeaderboardEntry } from './firebase.js';
-
-// Game State Variables
-let TARGET_WORD = '';
-let GAME_ID = '';
-let grid = [];
-let currentBlock = null;
-let nextBlock = null;
-let gameInterval = null;
-let gameTime = 0;
-let isPaused = false;
-let isGameOver = false;
-let isMoving = false;
-
-// Constants
-const GRID_WIDTH = 8;
-const GRID_HEIGHT = 10;
-const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
-const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
-const VOWELS = 'AEIOUY';
-
-// 🟢 **Initialize the Game**
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        // Get Game ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        GAME_ID = urlParams.get('gameId');
-        if (!GAME_ID) throw new Error('Game ID is missing from the URL.');
-
-        // Fetch Game Data
-        const gameData = await fetchGameData(GAME_ID);
-        if (!gameData) throw new Error('Failed to load game data.');
-
-        TARGET_WORD = gameData.targetWord || 'ERROR';
-        displayTargetWord(TARGET_WORD);
-
-        // Setup Leaderboard
-        setupLeaderboardListener(GAME_ID, updateLeaderboard);
-
-        // Initialize Game
-        initGame();
-        setupEventListeners();
-    } catch (error) {
-        console.error('Game Initialization Error:', error.message);
-        document.body.innerHTML = `<h2 style="color: red; text-align: center; margin-top: 50px;">Error: ${error.message}</h2>`;
-    }
-});
-
-// 🟡 **Display Target Word**
-function displayTargetWord(word) {
-    const targetWordContainer = document.getElementById('target-word');
-    if (targetWordContainer) {
-        targetWordContainer.innerHTML = word
-            .split('')
-            .map(letter => `<div class="target-letter">${letter}</div>`)
-            .join('');
-    } else {
-        console.error('Element #target-word not found.');
-    }
-}
-
-// 🟡 **Initialize Grid**
-function initGame() {
-    initGrid();
-    currentBlock = createBlock();
-    nextBlock = createBlock();
-    drawBlock(currentBlock);
-    resetTimer();
-}
-
-// 🟡 **Initialize Grid Cells**
-function initGrid() {
-    const gameGrid = document.getElementById('game-grid');
-    gameGrid.innerHTML = '';
-    grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
-
-    for (let y = 0; y < GRID_HEIGHT; y++) {
-        for (let x = 0; x < GRID_WIDTH; x++) {
-            const cell = document.createElement('div');
-            cell.className = 'grid-cell';
-            cell.setAttribute('data-x', x);
-            cell.setAttribute('data-y', y);
-            gameGrid.appendChild(cell);
-        }
-    }
-}
-
-// 🟡 **Create Blocks**
-function createBlock() {
-    const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-    const letter = Math.random() < 0.3 ?
-        VOWELS[Math.floor(Math.random() * VOWELS.length)] :
-        LETTERS[Math.floor(Math.random() * LETTERS.length)];
-    return { color, letter, x: Math.floor(GRID_WIDTH / 2), y: 0 };
-}
-
-// 🟡 **Draw Block**
-function drawBlock(block) {
-    if (!block) return;
-    const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
-    if (cell) {
-        cell.className = 'grid-cell filled';
-        cell.style.backgroundColor = block.color;
-        cell.textContent = block.letter;
-    }
-}
-
-// 🟡 **Clear Block**
-function clearBlock(block) {
-    if (!block) return;
-    const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
-    if (cell) {
-        cell.className = 'grid-cell';
-        cell.style.backgroundColor = '';
-        cell.textContent = '';
-    }
-}
-
-// 🟡 **Move Block**
-async function moveBlock(dx, dy) {
-    if (!currentBlock || isPaused || isGameOver || isMoving) return;
-
-    isMoving = true;
-    clearBlock(currentBlock);
-
-    const newX = currentBlock.x + dx;
-    const newY = currentBlock.y + dy;
-    const testBlock = { ...currentBlock, x: newX, y: newY };
-
-    if (!isCollision(testBlock)) {
-        currentBlock.x = newX;
-        currentBlock.y = newY;
-    } else if (dy > 0) {
-        placeBlock();
-    }
-
-    drawBlock(currentBlock);
-    isMoving = false;
-}
-
-// 🟡 **Drop Block**
-function dropBlock() {
-    if (!currentBlock
