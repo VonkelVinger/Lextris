@@ -7,7 +7,7 @@
     <script type="module">
         // Import Firebase modules with updated version
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -54,7 +54,7 @@
                 // Create game document with our working structure
                 await setDoc(doc(db, 'daily_games', gameId), {
                     targetWord: targetWord,
-                    createdAt: new Date().toISOString(),
+                    createdAt: serverTimestamp(), // Now using serverTimestamp() instead of string
                     active: true,
                     leaderboard: []  // Array for {playerName: string, time: number}
                 });
