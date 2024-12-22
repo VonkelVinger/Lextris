@@ -215,27 +215,19 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-            authDomain: "leximax-96299.firebaseapp.com",
-            projectId: "leximax-96299",
-            storageBucket: "leximax-96299.appspot.com",
-            messagingSenderId: "1067424610925",
-            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
-        };
+        const firebaseConfig = { /* Firebase Config Here */ };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let GAME_ID = new URLSearchParams(window.location.search).get('gameId');
+        const GAME_ID = new URLSearchParams(window.location.search).get('gameId');
         let TARGET_WORD = '';
-        let gameTime = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
             const gameRef = doc(db, 'daily_games', GAME_ID);
             const gameSnap = await getDoc(gameRef);
-            TARGET_WORD = gameSnap.data().targetWord;
 
+            TARGET_WORD = gameSnap.data()?.targetWord || 'ERROR';
             document.getElementById('target-word').innerHTML = TARGET_WORD.split('').map(letter => `<div class="target-letter">${letter}</div>`).join('');
         });
 
