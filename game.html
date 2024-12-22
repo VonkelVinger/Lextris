@@ -57,8 +57,12 @@
                 targetWord = gameData.targetWord || 'UNKNOWN';
                 console.log('✅ Target Word:', targetWord);
 
-                // ✅ Populate Target Word in Your Game
-                initializeTargetWord(targetWord);
+                // ✅ Inject Target Word into Your Original Game Logic
+                if (window.initializeOriginalGame) {
+                    window.initializeOriginalGame(targetWord);
+                } else {
+                    console.warn('⚠️ initializeOriginalGame function not found.');
+                }
 
                 // ✅ Setup Leaderboard Listener
                 const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
@@ -95,8 +99,7 @@
                     }
                 });
 
-                // ✅ Start the Game After Data Loads
-                startGame();
+                console.log('✅ Game data fully loaded from Firebase.');
 
             } catch (error) {
                 console.error('❌ Error loading game:', error.message);
@@ -104,32 +107,12 @@
             }
         });
 
-        // ✅ Initialize Target Word Display
-        function initializeTargetWord(word) {
-            const targetWordContainer = document.getElementById('target-word');
-            targetWordContainer.innerHTML = word.split('')
-                .map(letter => `<div class="target-letter">${letter}</div>`)
-                .join('');
-        }
-
-        // ✅ Time Formatting Utility
+        // ✅ Utility: Time Formatting
         function formatTime(seconds) {
             if (!seconds && seconds !== 0) return '--:--';
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = seconds % 60;
             return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        // ✅ Start Game Logic
-        function startGame() {
-            if (gameInitialized) return;
-            console.log('🎮 Starting Game with Target Word:', targetWord);
-            gameInitialized = true;
-
-            // ✅ Call your original game logic here
-            if (window.initializeOriginalGame) {
-                window.initializeOriginalGame(targetWord);
-            }
         }
     </script>
 
