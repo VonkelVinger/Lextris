@@ -31,8 +31,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Ensure Game Initialization Only After Data is Loaded
-        async function initializeGame() {
+        let targetWord = '';
+        let gameInitialized = false;
+
+        document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const gameId = urlParams.get('gameId');
 
@@ -52,11 +54,11 @@
                 }
 
                 const gameData = gameSnap.data();
-                console.log('✅ Game loaded successfully:', gameData);
+                targetWord = gameData.targetWord || 'UNKNOWN';
+                console.log('✅ Target Word:', targetWord);
 
-                // ✅ Inject Target Word into Game Logic
-                const targetWord = gameData.targetWord || 'UNKNOWN';
-                initializeTargetWord(targetWord); // Call your original game init logic
+                // ✅ Populate Target Word in Your Game
+                initializeTargetWord(targetWord);
 
                 // ✅ Setup Leaderboard Listener
                 const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
@@ -93,16 +95,16 @@
                     }
                 });
 
-                // ✅ Start Your Game Logic
+                // ✅ Start the Game After Data Loads
                 startGame();
 
             } catch (error) {
                 console.error('❌ Error loading game:', error.message);
                 document.body.innerHTML = `<h2 style="color: red;">Error: ${error.message}</h2>`;
             }
-        }
+        });
 
-        // ✅ Game Logic Initialization
+        // ✅ Initialize Target Word Display
         function initializeTargetWord(word) {
             const targetWordContainer = document.getElementById('target-word');
             targetWordContainer.innerHTML = word.split('')
@@ -110,6 +112,7 @@
                 .join('');
         }
 
+        // ✅ Time Formatting Utility
         function formatTime(seconds) {
             if (!seconds && seconds !== 0) return '--:--';
             const minutes = Math.floor(seconds / 60);
@@ -119,16 +122,19 @@
 
         // ✅ Start Game Logic
         function startGame() {
-            console.log('🎮 Game is starting with all Firebase data loaded.');
-            // Trigger your game's start logic here
-        }
+            if (gameInitialized) return;
+            console.log('🎮 Starting Game with Target Word:', targetWord);
+            gameInitialized = true;
 
-        document.addEventListener('DOMContentLoaded', initializeGame);
+            // ✅ Call your original game logic here
+            if (window.initializeOriginalGame) {
+                window.initializeOriginalGame(targetWord);
+            }
+        }
     </script>
 
     <style>
         * {
-            -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -174,14 +180,12 @@
             max-width: 320px;
             margin-top: 15px;
             border-collapse: collapse;
-            background-color: #f0f0f0;
         }
 
         #leaderboard caption {
             background-color: #003366;
             color: white;
             padding: 8px;
-            font-weight: bold;
         }
 
         #leaderboard th, #leaderboard td {
