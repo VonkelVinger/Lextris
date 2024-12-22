@@ -18,33 +18,21 @@
             appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Function to create game document
-        async function createGameDocument(gameId, targetWord) {
+        async function createGame(gameId, targetWord) {
             try {
-                // Create a single document with all necessary fields
-                const gameDocRef = doc(db, 'games', gameId);
-                await setDoc(gameDocRef, {
+                // Create a basic game document
+                await setDoc(doc(db, 'games', gameId), {
                     targetWord: targetWord,
                     createdAt: new Date().toISOString(),
-                    active: true,
-                    leaderboards: {
-                        speed: [],
-                        efficiency: [],
-                        overall: []
-                    },
-                    stats: {
-                        totalPlays: 0,
-                        averageAttempts: 0,
-                        averageTime: 0
-                    }
+                    active: true
                 });
-
                 alert(`Game ${gameId} created successfully with target word: ${targetWord}`);
             } catch (error) {
-                console.error("Error creating game document:", error);
+                console.error("Error creating game:", error);
                 alert(`Error creating game: ${error.message}`);
             }
         }
@@ -75,7 +63,7 @@
                     return;
                 }
 
-                await createGameDocument(gameId, targetWord);
+                await createGame(gameId, targetWord);
                 form.reset();
             });
         });
