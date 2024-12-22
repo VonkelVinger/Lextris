@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
-    
+
     <!-- ✅ Firebase Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
@@ -32,10 +32,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Game Variables
         let targetWord = '';
 
-        // ✅ Game Initialization
+        // ✅ Initialize Game AFTER Firebase Fetch
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const gameId = urlParams.get('gameId');
@@ -47,7 +46,7 @@
             }
 
             try {
-                // ✅ Fetch Game Data from Firestore
+                // ✅ Fetch Game Data
                 const gameRef = doc(db, 'daily_games', gameId);
                 const gameSnap = await getDoc(gameRef);
 
@@ -59,14 +58,14 @@
                 targetWord = gameData.targetWord || 'UNKNOWN';
                 console.log('✅ Target Word:', targetWord);
 
-                // ✅ Inject Target Word into Your Game
-                if (window.initializeOriginalGame) {
+                // ✅ Ensure the game logic starts AFTER targetWord is ready
+                if (typeof window.initializeOriginalGame === 'function') {
                     window.initializeOriginalGame(targetWord);
                 } else {
-                    console.warn('⚠️ initializeOriginalGame function is not available.');
+                    console.warn('⚠️ initializeOriginalGame is not defined in your script.');
                 }
 
-                // ✅ Listen for Leaderboard Updates
+                // ✅ Leaderboard Listener
                 const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
                 const leaderboardQuery = query(leaderboardRef, orderBy('time'), limit(10));
                 
@@ -91,7 +90,7 @@
                     }
                 });
 
-                // ✅ Listen for Best Time Updates
+                // ✅ Best Time Listener
                 const bestTimeRef = doc(db, 'bestTimes', 'global');
                 onSnapshot(bestTimeRef, (doc) => {
                     if (doc.exists()) {
@@ -101,13 +100,15 @@
                     }
                 });
 
+                console.log('✅ Game data fully loaded from Firebase.');
+
             } catch (error) {
                 console.error('❌ Error loading game:', error.message);
                 document.body.innerHTML = `<h2 style="color: red;">Error: ${error.message}</h2>`;
             }
         });
 
-        // ✅ Utility: Format Time
+        // ✅ Utility Function
         function formatTime(seconds) {
             if (!seconds && seconds !== 0) return '--:--';
             const minutes = Math.floor(seconds / 60);
@@ -116,10 +117,10 @@
         }
     </script>
 
-    <!-- ✅ Original Game Script (Do Not Modify) -->
+    <!-- ✅ Include Your Game Script Without Modification -->
     <script src="your-original-game-script.js"></script>
 
-    <!-- ✅ Styles (Preserve Your Design) -->
+    <!-- ✅ Style (Preserved from Your Original Game) -->
     <style>
         * {
             box-sizing: border-box;
@@ -159,7 +160,7 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- Your original game renders here -->
+        <!-- ✅ Your original game logic will load here -->
     </div>
 
     <table id="leaderboard">
