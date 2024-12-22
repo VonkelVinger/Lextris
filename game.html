@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
     
+    <!-- ✅ Firebase Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
@@ -31,9 +32,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // ✅ Game Variables
         let targetWord = '';
-        let gameInitialized = false;
 
+        // ✅ Game Initialization
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const gameId = urlParams.get('gameId');
@@ -45,7 +47,7 @@
             }
 
             try {
-                // ✅ Fetch Game Data
+                // ✅ Fetch Game Data from Firestore
                 const gameRef = doc(db, 'daily_games', gameId);
                 const gameSnap = await getDoc(gameRef);
 
@@ -57,14 +59,14 @@
                 targetWord = gameData.targetWord || 'UNKNOWN';
                 console.log('✅ Target Word:', targetWord);
 
-                // ✅ Inject Target Word into Your Original Game Logic
+                // ✅ Inject Target Word into Your Game
                 if (window.initializeOriginalGame) {
                     window.initializeOriginalGame(targetWord);
                 } else {
-                    console.warn('⚠️ initializeOriginalGame function not found.');
+                    console.warn('⚠️ initializeOriginalGame function is not available.');
                 }
 
-                // ✅ Setup Leaderboard Listener
+                // ✅ Listen for Leaderboard Updates
                 const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
                 const leaderboardQuery = query(leaderboardRef, orderBy('time'), limit(10));
                 
@@ -89,7 +91,7 @@
                     }
                 });
 
-                // ✅ Setup Best Time Listener
+                // ✅ Listen for Best Time Updates
                 const bestTimeRef = doc(db, 'bestTimes', 'global');
                 onSnapshot(bestTimeRef, (doc) => {
                     if (doc.exists()) {
@@ -99,15 +101,13 @@
                     }
                 });
 
-                console.log('✅ Game data fully loaded from Firebase.');
-
             } catch (error) {
                 console.error('❌ Error loading game:', error.message);
                 document.body.innerHTML = `<h2 style="color: red;">Error: ${error.message}</h2>`;
             }
         });
 
-        // ✅ Utility: Time Formatting
+        // ✅ Utility: Format Time
         function formatTime(seconds) {
             if (!seconds && seconds !== 0) return '--:--';
             const minutes = Math.floor(seconds / 60);
@@ -116,6 +116,10 @@
         }
     </script>
 
+    <!-- ✅ Original Game Script (Do Not Modify) -->
+    <script src="your-original-game-script.js"></script>
+
+    <!-- ✅ Styles (Preserve Your Design) -->
     <style>
         * {
             box-sizing: border-box;
@@ -131,31 +135,6 @@
             align-items: center;
             padding: 20px;
             min-height: 100vh;
-        }
-
-        .game-wrapper {
-            width: 100%;
-            max-width: 320px;
-            text-align: center;
-        }
-
-        #target-word {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .target-letter {
-            width: 25px;
-            height: 25px;
-            background-color: #004d40;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 16px;
         }
 
         #leaderboard {
@@ -179,9 +158,8 @@
     </style>
 </head>
 <body>
-    <div class="game-wrapper">
-        <h1>LEXIMAX Daily Game</h1>
-        <div id="target-word"></div>
+    <div id="game-container">
+        <!-- Your original game renders here -->
     </div>
 
     <table id="leaderboard">
