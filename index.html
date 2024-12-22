@@ -25,17 +25,6 @@
             }
         })();
     </script>
-    
-    <!-- ✅ Dynamically set Today's Game link -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const todayGameLink = document.getElementById('todays-game');
-            const todayDate = new Date().toISOString().split('T')[0];
-            todayGameLink.href = `game.html?gameId=Game${todayDate}`;
-        });
-    </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8193235321568974"
-     crossorigin="anonymous"></script>
 </head>
 <body>
     <!-- ✅ Header with Game Title -->
@@ -96,6 +85,65 @@
             data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
             data-font-color="#000000" data-coffee-color="#ffffff"></script>
     </footer>
+
+    <!-- ✅ Firebase Integration for Dynamic Game Linking -->
+    <script type="module">
+        // Initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Fetch the most recent active game
+        document.addEventListener('DOMContentLoaded', async () => {
+            const todaysGameLink = document.getElementById('todays-game');
+
+            try {
+                const gamesRef = collection(db, 'daily_games');
+                const q = query(
+                    gamesRef,
+                    where('active', '==', true),
+                    orderBy('createdAt', 'desc'),
+                    limit(1)
+                );
+
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const latestGame = querySnapshot.docs[0];
+                    const gameId = latestGame.id; // Example: Game2024-12-23
+                    todaysGameLink.href = `game.html?gameId=${gameId}`;
+                    console.log('Latest active game:', gameId);
+                } else {
+                    console.warn('No active games found.');
+                    todaysGameLink.href = '#';
+                    todaysGameLink.textContent = 'No Active Game Available';
+                }
+            } catch (error) {
+                console.error('Error fetching the latest active game:', error);
+                todaysGameLink.href = '#';
+                todaysGameLink.textContent = 'Error Loading Game';
+            }
+        });
+    </script>
+
+    <!-- ✅ JavaScript for Cookie Banner -->
+    <script>
+        document.getElementById('accept-cookies').addEventListener('click', () => {
+            localStorage.setItem('cookiesAccepted', 'true');
+            document.documentElement.classList.remove('show-cookie-banner');
+        });
+    </script>
 
     <!-- ✅ JavaScript File -->
     <script src="scripts.js"></script>
