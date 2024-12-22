@@ -74,11 +74,15 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${rank++}</td>
-                            <td>${data.name}</td>
+                            <td>${data.name || 'Anonymous'}</td>
                             <td>${formatTime(data.time)}</td>
                         `;
                         tbody.appendChild(row);
                     });
+
+                    if (snapshot.empty) {
+                        tbody.innerHTML = '<tr><td colspan="3">No leaderboard entries yet.</td></tr>';
+                    }
                 });
 
                 // ✅ Setup Best Time Listener
