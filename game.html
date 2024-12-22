@@ -31,7 +31,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        // ✅ Ensure Game Initialization Only After Data is Loaded
+        async function initializeGame() {
             const urlParams = new URLSearchParams(window.location.search);
             const gameId = urlParams.get('gameId');
 
@@ -42,7 +43,7 @@
             }
 
             try {
-                // ✅ Fetch Game Document
+                // ✅ Fetch Game Data
                 const gameRef = doc(db, 'daily_games', gameId);
                 const gameSnap = await getDoc(gameRef);
 
@@ -53,12 +54,9 @@
                 const gameData = gameSnap.data();
                 console.log('✅ Game loaded successfully:', gameData);
 
-                // ✅ Display Target Word
+                // ✅ Inject Target Word into Game Logic
                 const targetWord = gameData.targetWord || 'UNKNOWN';
-                const targetWordContainer = document.getElementById('target-word');
-                targetWordContainer.innerHTML = targetWord.split('')
-                    .map(letter => `<div class="target-letter">${letter}</div>`)
-                    .join('');
+                initializeTargetWord(targetWord); // Call your original game init logic
 
                 // ✅ Setup Leaderboard Listener
                 const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
@@ -95,19 +93,37 @@
                     }
                 });
 
+                // ✅ Start Your Game Logic
+                startGame();
+
             } catch (error) {
                 console.error('❌ Error loading game:', error.message);
                 document.body.innerHTML = `<h2 style="color: red;">Error: ${error.message}</h2>`;
             }
-        });
+        }
 
-        // ✅ Time Formatting Utility
+        // ✅ Game Logic Initialization
+        function initializeTargetWord(word) {
+            const targetWordContainer = document.getElementById('target-word');
+            targetWordContainer.innerHTML = word.split('')
+                .map(letter => `<div class="target-letter">${letter}</div>`)
+                .join('');
+        }
+
         function formatTime(seconds) {
             if (!seconds && seconds !== 0) return '--:--';
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = seconds % 60;
             return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
         }
+
+        // ✅ Start Game Logic
+        function startGame() {
+            console.log('🎮 Game is starting with all Firebase data loaded.');
+            // Trigger your game's start logic here
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeGame);
     </script>
 
     <style>
