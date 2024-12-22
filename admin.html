@@ -8,7 +8,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ✅ Firebase Configuration
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -21,18 +21,46 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Create Game Collections
-        rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
+        // Function to create game collections
+        async function createGameCollections(gameId, targetWord) {
+            try {
+                // Create the game document with metadata
+                const gameRef = doc(db, 'games', gameId);
+                await setDoc(gameRef, {
+                    targetWord: targetWord,
+                    createdAt: new Date().toISOString(),
+                    active: true
+                });
 
+                // Create subcollections for different leaderboards
+                const leaderboardTypes = ['speed', 'efficiency', 'overall'];
+                
+                for (const type of leaderboardTypes) {
+                    const leaderboardRef = collection(db, 'games', gameId, `leaderboard_${type}`);
+                    // Create an initial empty document to ensure the collection exists
+                    await addDoc(leaderboardRef, {
+                        placeholder: true,
+                        createdAt: new Date().toISOString()
+                    });
+                }
 
-        // ✅ Event Listener for Form Submission
+                // Create a statistics collection for tracking game metrics
+                const statsRef = collection(db, 'games', gameId, 'statistics');
+                await addDoc(statsRef, {
+                    totalPlays: 0,
+                    averageAttempts: 0,
+                    averageTime: 0,
+                    createdAt: new Date().toISOString()
+                });
+
+                alert(`Game ${gameId} created successfully with target word: ${targetWord}`);
+            } catch (error) {
+                console.error("Error creating game collections:", error);
+                alert(`Error creating game: ${error.message}`);
+            }
+        }
+
+        // Event Listener for Form Submission
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("game-setup-form");
             form.addEventListener("submit", async (event) => {
@@ -42,6 +70,19 @@ service cloud.firestore {
                 
                 if (!gameId || !targetWord) {
                     alert("Please fill in both fields!");
+                    return;
+                }
+
+                // Validate game ID format
+                const gameIdPattern = /^Game\d{4}-\d{2}-\d{2}$/;
+                if (!gameIdPattern.test(gameId)) {
+                    alert("Game ID must be in the format 'GameYYYY-MM-DD'");
+                    return;
+                }
+
+                // Validate target word (only letters)
+                if (!/^[A-Z]+$/.test(targetWord)) {
+                    alert("Target word must contain only letters!");
                     return;
                 }
 
@@ -108,10 +149,8 @@ service cloud.firestore {
     <form id="game-setup-form">
         <label for="game-id">Game ID (e.g., Game2024-12-22):</label>
         <input type="text" id="game-id" placeholder="Enter the Game ID" required>
-
         <label for="target-word">Target Word:</label>
         <input type="text" id="target-word" placeholder="Enter the Target Word" required>
-
         <button type="submit">Create Game</button>
     </form>
     <div class="notice">
