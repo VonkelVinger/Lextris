@@ -5,208 +5,199 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Game</title>
     <link rel="stylesheet" href="assets/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+
     <style>
-        /* Basic styling for the game layout */
-        #game-container {
+        body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
         }
-        .game-title {
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .phrase {
             text-align: center;
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 20px;
         }
-        .phrase-display {
-            text-align: center;
-            font-size: 20px;
-            margin-bottom: 20px;
-        }
-        .keyboard {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .key {
-            width: 30px;
-            height: 30px;
-            margin: 5px;
-            text-align: center;
-            line-height: 30px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            user-select: none;
-        }
-        .key-disabled {
-            background-color: #ddd;
-            cursor: not-allowed;
-        }
+
         .message {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 18px;
             color: darkred;
             font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .reset-button {
+
+        .leaderboard {
+            margin-top: 40px;
+        }
+
+        .leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard th, .leaderboard td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .leaderboard th {
+            background-color: #004d40;
+            color: white;
+        }
+
+        .leaderboard td {
+            background-color: #f9f9f9;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+        }
+
+        .loading {
             text-align: center;
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <!-- ✅ Game Title -->
-    <header>
-        <div class="game-title">Leximax - Daily Challenge</div>
-    </header>
-
-    <!-- ✅ Game Container -->
-    <div id="game-container">
-        <div id="phrase-display" class="phrase-display">Loading game...</div>
-        <div id="keyboard" class="keyboard"></div>
-        <div id="message" class="message"></div>
-        <div class="reset-button">
-            <button id="reset-button">Restart Game</button>
+    <div class="container">
+        <h1>Leximax Daily Game</h1>
+        <div class="game-info">
+            <p><strong>Game ID:</strong> <span id="gameIdDisplay">Loading...</span></p>
+            <p><strong>Target Word:</strong> <span id="targetWord">Loading...</span></p>
         </div>
+
+        <div class="phrase" id="phrase">Loading game...</div>
+        <div class="message" id="message"></div>
+
+        <div class="leaderboard">
+            <h2>Leaderboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Time (s)</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <tr>
+                        <td colspan="3" class="loading">Loading leaderboard...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="error" id="error"></p>
     </div>
 
-    <!-- ✅ Firebase Integration -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        // ✅ Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Firebase configuration
+        // ✅ Firebase Configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Fetch gameId from URL
+        // ✅ Parse Game ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const gameId = urlParams.get('gameId');
+        const gameIdDisplay = document.getElementById('gameIdDisplay');
+        const targetWordDisplay = document.getElementById('targetWord');
+        const phraseDisplay = document.getElementById('phrase');
+        const messageDisplay = document.getElementById('message');
+        const leaderboardBody = document.getElementById('leaderboardBody');
+        const errorDisplay = document.getElementById('error');
 
-        // Game variables
-        let targetWord = '';
-        let guessedLetters = new Set();
-        let incorrectGuesses = 0;
-        let maxGuesses = 6;
+        if (!gameId) {
+            errorDisplay.textContent = '❌ No game ID provided in the URL.';
+        } else {
+            gameIdDisplay.textContent = gameId;
+            loadGame(gameId);
+            loadLeaderboard(gameId);
+        }
 
-        // Initialize game
-        async function fetchGame(gameId) {
+        // ✅ Fetch Game Data
+        async function loadGame(gameId) {
             try {
                 const gameRef = doc(db, 'daily_games', gameId);
                 const gameSnap = await getDoc(gameRef);
 
                 if (gameSnap.exists()) {
                     const gameData = gameSnap.data();
-                    targetWord = gameData.targetWord.toUpperCase();
-                    startGame();
+                    targetWordDisplay.textContent = gameData.targetWord || 'Unknown';
+                    phraseDisplay.textContent = '🟩'.repeat(gameData.targetWord.length); // Placeholder display
+                    messageDisplay.textContent = 'Start guessing!';
+                    console.log('✅ Game loaded successfully:', gameData);
                 } else {
-                    displayMessage('Game not found.');
+                    errorDisplay.textContent = `❌ Game with ID '${gameId}' not found.`;
+                    console.error('❌ Game document does not exist.');
                 }
             } catch (error) {
-                console.error('Error fetching game data:', error);
-                displayMessage('Failed to load game. Please try again.');
+                console.error('❌ Error fetching game:', error);
+                errorDisplay.textContent = '❌ Error fetching game data. Check the console for details.';
             }
         }
 
-        // Start Game
-        function startGame() {
-            renderPhrase();
-            renderKeyboard();
-        }
+        // ✅ Fetch Leaderboard
+        async function loadLeaderboard(gameId) {
+            try {
+                const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
+                const q = query(leaderboardRef, orderBy('time', 'asc'));
+                const querySnapshot = await getDocs(q);
 
-        // Display the phrase with hidden letters
-        function renderPhrase() {
-            const display = targetWord.split('').map(letter => 
-                guessedLetters.has(letter) ? letter : '_'
-            ).join(' ');
-            document.getElementById('phrase-display').textContent = display;
+                leaderboardBody.innerHTML = '';
 
-            if (!display.includes('_')) {
-                displayMessage('🎉 You won! Great job!');
-                disableKeyboard();
-            }
-        }
-
-        // Create the keyboard
-        function renderKeyboard() {
-            const keyboardContainer = document.getElementById('keyboard');
-            keyboardContainer.innerHTML = '';
-            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-            alphabet.split('').forEach(letter => {
-                const key = document.createElement('div');
-                key.textContent = letter;
-                key.className = 'key';
-                if (guessedLetters.has(letter)) {
-                    key.classList.add('key-disabled');
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const row = `
+                            <tr>
+                                <td>${data.username || 'Unknown'}</td>
+                                <td>${data.time || 0}</td>
+                                <td>${data.date?.toDate().toLocaleDateString() || 'N/A'}</td>
+                            </tr>
+                        `;
+                        leaderboardBody.innerHTML += row;
+                    });
+                } else {
+                    leaderboardBody.innerHTML = '<tr><td colspan="3">No leaderboard entries yet.</td></tr>';
                 }
-                key.addEventListener('click', () => makeGuess(letter));
-                keyboardContainer.appendChild(key);
-            });
-        }
-
-        // Handle guesses
-        function makeGuess(letter) {
-            if (guessedLetters.has(letter)) return;
-
-            guessedLetters.add(letter);
-            if (!targetWord.includes(letter)) {
-                incorrectGuesses++;
-                if (incorrectGuesses >= maxGuesses) {
-                    displayMessage('😢 Game Over! The word was: ' + targetWord);
-                    disableKeyboard();
-                }
+            } catch (error) {
+                console.error('❌ Error fetching leaderboard:', error);
+                errorDisplay.textContent = '❌ Error fetching leaderboard. Check the console for details.';
             }
-
-            renderPhrase();
-            renderKeyboard();
-        }
-
-        // Disable keyboard after game ends
-        function disableKeyboard() {
-            const keys = document.querySelectorAll('.key');
-            keys.forEach(key => key.classList.add('key-disabled'));
-        }
-
-        // Display messages
-        function displayMessage(msg) {
-            document.getElementById('message').textContent = msg;
-        }
-
-        // Reset game
-        document.getElementById('reset-button').addEventListener('click', () => {
-            guessedLetters.clear();
-            incorrectGuesses = 0;
-            startGame();
-            displayMessage('');
-        });
-
-        // Load Game
-        if (gameId) {
-            fetchGame(gameId);
-        } else {
-            displayMessage('No game specified. Please return to the home page.');
         }
     </script>
-
-    <!-- ✅ Footer -->
-    <footer>
-        <p>&copy; 2024 Leximax. All rights reserved.</p>
-    </footer>
 </body>
 </html>
