@@ -4,26 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin Panel</title>
-    <link rel="stylesheet" href="assets/style.css">
     <script type="module">
-        // ✅ Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        // Import Firebase modules with updated version
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ✅ Firebase Configuration
+        // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Function to create a new game with leaderboard
+        // Function to create a new game
         window.createGame = async function createGame() {
             const gameId = document.getElementById('gameId').value.trim();
             const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
@@ -36,40 +35,38 @@
             const logs = document.getElementById('logs');
             logs.innerHTML = '';
 
+            // Validate game ID format
+            const gameIdPattern = /^Game\d{4}-\d{2}-\d{2}$/;
+            if (!gameIdPattern.test(gameId)) {
+                logs.innerHTML += '❌ Error: Game ID must be in the format "GameYYYY-MM-DD"<br>';
+                return;
+            }
+
+            // Validate target word (only letters)
+            if (!/^[A-Z]+$/.test(targetWord)) {
+                logs.innerHTML += '❌ Error: Target word must contain only letters<br>';
+                return;
+            }
+
             try {
-                // ✅ STEP 1: Create Game Document
                 logs.innerHTML += '⏳ Creating game document...<br>';
+                
+                // Create game document with our working structure
                 await setDoc(doc(db, 'daily_games', gameId), {
+                    targetWord: targetWord,
+                    createdAt: new Date().toISOString(),
                     active: true,
-                    createdAt: serverTimestamp(),
-                    targetWord: targetWord
+                    leaderboard: []  // Array for {playerName: string, time: number}
                 });
+
                 logs.innerHTML += `✅ Game '${gameId}' created successfully!<br>`;
-
-                // ✅ STEP 2: Verify Game Document Exists
-                logs.innerHTML += '⏳ Verifying game document exists...<br>';
-                const gameRef = doc(db, 'daily_games', gameId);
-                const gameSnap = await getDoc(gameRef);
-                if (!gameSnap.exists()) {
-                    throw new Error('Game document not found after creation!');
-                }
-                logs.innerHTML += `✅ Game document verified!<br>`;
-
-                // ✅ STEP 3: Create Leaderboard Subcollection
-                logs.innerHTML += '⏳ Creating leaderboard subcollection...<br>';
-                const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
-                await setDoc(doc(leaderboardRef, 'template'), {
-                    username: "TemplateUser",
-                    time: 0,
-                    date: serverTimestamp()
-                });
-                logs.innerHTML += `✅ Leaderboard for '${gameId}' created successfully!<br>`;
-
-                alert(`✅ Game and Leaderboard for '${gameId}' set up successfully!`);
+                alert(`✅ Game '${gameId}' created successfully!`);
+                document.getElementById('gameId').value = '';
+                document.getElementById('targetWord').value = '';
             } catch (error) {
-                console.error('❌ Error creating game or leaderboard:', error);
+                console.error('❌ Error creating game:', error);
                 logs.innerHTML += `❌ Error: ${error.message}<br>`;
-                alert('Error creating game or leaderboard. Check the logs below.');
+                alert('Error creating game. Check the logs below.');
             }
         };
     </script>
@@ -90,6 +87,7 @@
         }
         h1 {
             text-align: center;
+            color: #004d40;
         }
         .form-group {
             margin-bottom: 15px;
@@ -97,22 +95,27 @@
         .form-group label {
             display: block;
             margin-bottom: 5px;
+            font-weight: bold;
         }
         .form-group input {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         .form-group button {
-            background-color: #4CAF50;
+            width: 100%;
+            background-color: #004d40;
             color: white;
             padding: 10px 15px;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
         }
         .form-group button:hover {
-            background-color: #45a049;
+            background-color: #00695c;
         }
         .logs {
             margin-top: 20px;
@@ -142,7 +145,6 @@
         <div class="logs" id="logs"></div>
     </div>
     <script>
-        // ✅ Attach Event Listener in Non-Module Script
         document.getElementById('create-game-btn').addEventListener('click', () => {
             if (window.createGame) {
                 window.createGame();
