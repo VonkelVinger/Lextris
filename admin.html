@@ -21,39 +21,30 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Function to create game collections
-        async function createGameCollections(gameId, targetWord) {
+        // Function to create game document
+        async function createGameDocument(gameId, targetWord) {
             try {
-                // Create the main game document
+                // Create a single document with all necessary fields
                 const gameDocRef = doc(db, 'games', gameId);
                 await setDoc(gameDocRef, {
                     targetWord: targetWord,
                     createdAt: new Date().toISOString(),
-                    active: true
-                });
-
-                // Create the leaderboard documents
-                const leaderboardTypes = ['speed', 'efficiency', 'overall'];
-                for (const type of leaderboardTypes) {
-                    const leaderboardDocRef = doc(db, 'games', gameId, 'leaderboards', type);
-                    await setDoc(leaderboardDocRef, {
-                        createdAt: new Date().toISOString(),
-                        entries: []
-                    });
-                }
-
-                // Create the statistics document
-                const statsDocRef = doc(db, 'games', gameId, 'stats', 'general');
-                await setDoc(statsDocRef, {
-                    totalPlays: 0,
-                    averageAttempts: 0,
-                    averageTime: 0,
-                    createdAt: new Date().toISOString()
+                    active: true,
+                    leaderboards: {
+                        speed: [],
+                        efficiency: [],
+                        overall: []
+                    },
+                    stats: {
+                        totalPlays: 0,
+                        averageAttempts: 0,
+                        averageTime: 0
+                    }
                 });
 
                 alert(`Game ${gameId} created successfully with target word: ${targetWord}`);
             } catch (error) {
-                console.error("Error creating game collections:", error);
+                console.error("Error creating game document:", error);
                 alert(`Error creating game: ${error.message}`);
             }
         }
@@ -84,7 +75,7 @@
                     return;
                 }
 
-                await createGameCollections(gameId, targetWord);
+                await createGameDocument(gameId, targetWord);
                 form.reset();
             });
         });
