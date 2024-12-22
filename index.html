@@ -43,7 +43,7 @@
     <!-- ✅ Main Navigation Buttons -->
     <main>
         <div class="buttons-container">
-            <a id="todays-game" class="button">TODAY'S GAME</a>
+            <a id="todays-game" class="button">Loading Today's Game...</a>
             <a href="archive-games.html" class="button">ARCHIVE GAMES</a>
             <a href="how-to-play.html" class="button">FIRST TIME? HERE'S HOW TO PLAY</a>
         </div>
@@ -71,40 +71,24 @@
         </div>
     </main>
 
-    <!-- ✅ Coffee Support Button -->
-    <div class="coffee-button"></div>
-
-    <!-- ✅ Footer -->
-    <footer>
-        <a href="about-leximax.html">About Leximax</a> |
-        <a href="privacy-policy.html">Privacy Policy</a> |
-        <a href="contact.html">Contact Us</a>
-        <p>&copy; 2024 Leximax. All rights reserved.</p>
-        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-            data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
-            data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
-            data-font-color="#000000" data-coffee-color="#ffffff"></script>
-    </footer>
-
     <!-- ✅ Firebase Integration for Dynamic Game Linking -->
     <script type="module">
-        // Initialize Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        // ✅ Firebase Configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Fetch the most recent active game
         document.addEventListener('DOMContentLoaded', async () => {
             const todaysGameLink = document.getElementById('todays-game');
 
@@ -117,27 +101,29 @@
                     limit(1)
                 );
 
+                console.log('⏳ Fetching the most recent active game...');
                 const querySnapshot = await getDocs(q);
 
                 if (!querySnapshot.empty) {
                     const latestGame = querySnapshot.docs[0];
-                    const gameId = latestGame.id; // Example: Game2024-12-23
+                    const gameId = latestGame.id;
+                    console.log('✅ Latest Active Game Found:', gameId);
                     todaysGameLink.href = `game.html?gameId=${gameId}`;
-                    console.log('Latest active game:', gameId);
+                    todaysGameLink.textContent = 'Play Today\'s Game';
                 } else {
-                    console.warn('No active games found.');
+                    console.warn('⚠️ No active games found.');
                     todaysGameLink.href = '#';
                     todaysGameLink.textContent = 'No Active Game Available';
                 }
             } catch (error) {
-                console.error('Error fetching the latest active game:', error);
+                console.error('❌ Error fetching the latest active game:', error);
                 todaysGameLink.href = '#';
                 todaysGameLink.textContent = 'Error Loading Game';
             }
         });
     </script>
 
-    <!-- ✅ JavaScript for Cookie Banner -->
+    <!-- ✅ Cookie Banner JavaScript -->
     <script>
         document.getElementById('accept-cookies').addEventListener('click', () => {
             localStorage.setItem('cookiesAccepted', 'true');
