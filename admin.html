@@ -24,14 +24,14 @@
         // ✅ Create Game Collections
         async function createGameCollections(gameId, targetWord) {
             try {
-                const gameRef = doc(db, gameId, "global");
-                await setDoc(gameRef, {
+                // Create the global document
+                await setDoc(doc(db, `${gameId}/global`), {
                     createdAt: new Date().toISOString(),
                     targetWord: targetWord,
                 });
 
-                const leaderboardRef = collection(db, gameId, "leaderboard");
-                await setDoc(doc(leaderboardRef, "placeholder"), {
+                // Create leaderboardEntries collection
+                await setDoc(doc(collection(db, `${gameId}/leaderboardEntries`), "placeholder"), {
                     username: "Sample Player",
                     time: 999,
                     timestamp: new Date().toISOString(),
@@ -118,7 +118,7 @@
 <body>
     <h1>Leximax Admin</h1>
     <form id="game-setup-form">
-        <label for="game-id">Game ID (e.g., Game2024-12-21):</label>
+        <label for="game-id">Game ID (e.g., Game2024-12-22):</label>
         <input type="text" id="game-id" placeholder="Enter the Game ID" required>
 
         <label for="target-word">Target Word:</label>
