@@ -22,27 +22,15 @@
         const db = getFirestore(app);
 
         // ✅ Create Game Collections
-        async function createGameCollections(gameId, targetWord) {
-            try {
-                // Create the global document
-                await setDoc(doc(db, `${gameId}/global`), {
-                    createdAt: new Date().toISOString(),
-                    targetWord: targetWord
-                });
+        rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
 
-                // Create a placeholder document in the leaderboard collection
-                await addDoc(collection(db, `${gameId}/leaderboard`), {
-                    username: "Sample Player",
-                    time: 999,
-                    timestamp: new Date().toISOString()
-                });
-
-                alert(`Game "${gameId}" setup successfully!`);
-            } catch (error) {
-                console.error("Error creating game collections:", error);
-                alert("Failed to create game. Check console for details.");
-            }
-        }
 
         // ✅ Event Listener for Form Submission
         document.addEventListener("DOMContentLoaded", () => {
