@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin Panel</title>
     <script type="module">
-        // Import Firebase modules with updated version
+        // ✅ Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Firebase Configuration
+        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -22,7 +22,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Function to create a new game
+        // ✅ Function to create a new game with a leaderboard
         window.createGame = async function createGame() {
             const gameId = document.getElementById('gameId').value.trim();
             const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
@@ -35,14 +35,12 @@
             const logs = document.getElementById('logs');
             logs.innerHTML = '';
 
-            // Validate game ID format
+            // ✅ Validate gameId and targetWord
             const gameIdPattern = /^Game\d{4}-\d{2}-\d{2}$/;
             if (!gameIdPattern.test(gameId)) {
                 logs.innerHTML += '❌ Error: Game ID must be in the format "GameYYYY-MM-DD"<br>';
                 return;
             }
-
-            // Validate target word (only letters)
             if (!/^[A-Z]+$/.test(targetWord)) {
                 logs.innerHTML += '❌ Error: Target word must contain only letters<br>';
                 return;
@@ -50,23 +48,32 @@
 
             try {
                 logs.innerHTML += '⏳ Creating game document...<br>';
-                
-                // Create game document with our working structure
+
+                // ✅ Create the main game document
                 await setDoc(doc(db, 'daily_games', gameId), {
                     targetWord: targetWord,
-                    createdAt: serverTimestamp(), // Now using serverTimestamp() instead of string
-                    active: true,
-                    leaderboard: []  // Array for {playerName: string, time: number}
+                    createdAt: serverTimestamp(),
+                    active: true
                 });
-
                 logs.innerHTML += `✅ Game '${gameId}' created successfully!<br>`;
-                alert(`✅ Game '${gameId}' created successfully!`);
+
+                // ✅ Initialize the leaderboard subcollection
+                logs.innerHTML += '⏳ Initializing leaderboard subcollection...<br>';
+                const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
+                await setDoc(doc(leaderboardRef, 'template'), {
+                    username: "TemplateUser",
+                    time: 0,
+                    date: serverTimestamp()
+                });
+                logs.innerHTML += `✅ Leaderboard for '${gameId}' initialized successfully!<br>`;
+
+                alert(`✅ Game and Leaderboard for '${gameId}' set up successfully!`);
                 document.getElementById('gameId').value = '';
                 document.getElementById('targetWord').value = '';
             } catch (error) {
-                console.error('❌ Error creating game:', error);
+                console.error('❌ Error creating game or leaderboard:', error);
                 logs.innerHTML += `❌ Error: ${error.message}<br>`;
-                alert('Error creating game. Check the logs below.');
+                alert('Error creating game or leaderboard. Check the logs below.');
             }
         };
     </script>
