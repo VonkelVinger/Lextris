@@ -25,10 +25,11 @@
         async function createGameCollections(gameId, targetWord) {
             try {
                 // Create the global document
-                await setDoc(doc(db, `${gameId}/global`), {
-                    createdAt: new Date().toISOString(),
-                    targetWord: targetWord,
-                });
+               await setDoc(doc(collection(db, `${gameId}/leaderboard`), "placeholder"), {
+    username: "Sample Player",
+    score: 999,
+    timestamp: new Date().toISOString(),
+});
 
                 // Create leaderboardEntries collection
                 await setDoc(doc(collection(db, `${gameId}/leaderboardEntries`), "placeholder"), {
