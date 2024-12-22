@@ -3,148 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leximax Admin</title>
+    <title>Leximax Admin Panel</title>
+    <link rel="stylesheet" href="assets/style.css">
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        // ✅ Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Firebase Configuration
+        // ✅ Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-            authDomain: "leximax-96299.firebaseapp.com",
-            projectId: "leximax-96299",
-            storageBucket: "leximax-96299.appspot.com",
-            messagingSenderId: "1067424610925",
-            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        console.log("Firebase initialized");
+        // ✅ Function to create a new game with leaderboard
+        async function createGame() {
+            const gameId = document.getElementById('gameId').value.trim();
+            const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
 
-        async function createGame(gameId, targetWord) {
-            console.log(`Attempting to create game: ${gameId} with word: ${targetWord}`);
+            if (!gameId || !targetWord) {
+                alert('Both Game ID and Target Word are required.');
+                return;
+            }
+
+            const logs = document.getElementById('logs');
+            logs.innerHTML = '';
+
             try {
-                const gameRef = doc(db, 'daily_games', gameId);
-                const gameData = {
-                    targetWord: targetWord,
-                    createdAt: new Date().toISOString(),
+                // ✅ STEP 1: Create Game Document
+                logs.innerHTML += '⏳ Creating game document...<br>';
+                await setDoc(doc(db, 'daily_games', gameId), {
                     active: true,
-                    leaderboard: []  // Will store array of {playerName: string, time: number}
-                };
-                
-                console.log('About to create document with data:', gameData);
-                await setDoc(gameRef, gameData);
-                console.log('Document successfully created');
-                
-                alert(`Game ${gameId} created successfully with target word: ${targetWord}`);
+                    createdAt: serverTimestamp(),
+                    targetWord: targetWord
+                });
+                logs.innerHTML += `✅ Game '${gameId}' created successfully!<br>`;
+
+                // ✅ STEP 2: Verify Game Document Exists
+                logs.innerHTML += '⏳ Verifying game document exists...<br>';
+                const gameRef = doc(db, 'daily_games', gameId);
+                const gameSnap = await getDoc(gameRef);
+                if (!gameSnap.exists()) {
+                    throw new Error('Game document not found after creation!');
+                }
+                logs.innerHTML += `✅ Game document verified!<br>`;
+
+                // ✅ STEP 3: Create Leaderboard Subcollection
+                logs.innerHTML += '⏳ Creating leaderboard subcollection...<br>';
+                const leaderboardRef = collection(db, `daily_games/${gameId}/leaderboard`);
+                await setDoc(doc(leaderboardRef, 'template'), {
+                    username: "TemplateUser",
+                    time: 0,
+                    date: serverTimestamp()
+                });
+                logs.innerHTML += `✅ Leaderboard for '${gameId}' created successfully!<br>`;
+
+                alert(`✅ Game and Leaderboard for '${gameId}' set up successfully!`);
             } catch (error) {
-                console.error("Error creating game:", error);
-                alert(`Error creating game: ${error.message}`);
+                console.error('❌ Error creating game or leaderboard:', error);
+                logs.innerHTML += `❌ Error: ${error.message}<br>`;
+                alert('Error creating game or leaderboard. Check the logs below.');
             }
         }
-
-        // Event Listener for Form Submission
-        document.addEventListener("DOMContentLoaded", () => {
-            console.log("DOM Content Loaded");
-            const form = document.getElementById("game-setup-form");
-            
-            form.addEventListener("submit", async (event) => {
-                event.preventDefault();
-                console.log("Form submitted");
-                
-                const gameId = document.getElementById("game-id").value.trim();
-                const targetWord = document.getElementById("target-word").value.trim().toUpperCase();
-                
-                if (!gameId || !targetWord) {
-                    alert("Please fill in both fields!");
-                    return;
-                }
-
-                // Validate game ID format
-                const gameIdPattern = /^Game\d{4}-\d{2}-\d{2}$/;
-                if (!gameIdPattern.test(gameId)) {
-                    alert("Game ID must be in the format 'GameYYYY-MM-DD'");
-                    return;
-                }
-
-                // Validate target word (only letters)
-                if (!/^[A-Z]+$/.test(targetWord)) {
-                    alert("Target word must contain only letters!");
-                    return;
-                }
-
-                await createGame(gameId, targetWord);
-                form.reset();
-            });
-        });
     </script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #f9f9f9;
-            color: #333;
+        }
+        .admin-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 5px;
         }
         h1 {
             text-align: center;
-            color: #004d40;
         }
-        form {
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .form-group {
+            margin-bottom: 15px;
         }
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            margin-bottom: 5px;
         }
-        input {
+        .form-group input {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 8px;
+            box-sizing: border-box;
         }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #004d40;
+        .form-group button {
+            background-color: #4CAF50;
             color: white;
-            font-weight: bold;
+            padding: 10px 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #00695c;
+        .form-group button:hover {
+            background-color: #45a049;
         }
-        .notice {
-            text-align: center;
+        .logs {
             margin-top: 20px;
+            background: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             font-size: 14px;
             color: #555;
         }
     </style>
 </head>
 <body>
-    <h1>Leximax Admin</h1>
-    <form id="game-setup-form">
-        <label for="game-id">Game ID (e.g., Game2024-12-22):</label>
-        <input type="text" id="game-id" placeholder="Enter the Game ID" required>
-        <label for="target-word">Target Word:</label>
-        <input type="text" id="target-word" placeholder="Enter the Target Word" required>
-        <button type="submit">Create Game</button>
-    </form>
-    <div class="notice">
-        Version 3 - Simplified leaderboard structure
+    <div class="admin-container">
+        <h1>Leximax Admin Panel</h1>
+        <div class="form-group">
+            <label for="gameId">Game ID (e.g., Game2024-12-23):</label>
+            <input type="text" id="gameId" placeholder="Enter Game ID">
+        </div>
+        <div class="form-group">
+            <label for="targetWord">Target Word:</label>
+            <input type="text" id="targetWord" placeholder="Enter Target Word">
+        </div>
+        <div class="form-group">
+            <button onclick="createGame()">Create Game</button>
+        </div>
+        <div class="logs" id="logs"></div>
     </div>
 </body>
 </html>
