@@ -527,8 +527,7 @@
             }
         };
 
-        async function startGame() {
-    console.log("Starting game...");
+  async function startGame() {
     // Reset game state
     grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
     gameTime = 0;
@@ -538,20 +537,19 @@
     // Get today's word from Firestore
     try {
         const today = new Date().toISOString().split('T')[0];
-        console.log("Looking for game on date:", today);
-        const gameDoc = await getDoc(doc(db, 'daily_games', today));
-        console.log("Document exists:", gameDoc.exists());
+        const gameId = `Game${today}`; // Add "Game" prefix to match admin panel format
+        console.log("Looking for game:", gameId);
+        const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
         if (!gameDoc.exists()) {
             console.error("No word found for today");
             return;
         }
         TARGET_WORD = gameDoc.data().word;
-        GAME_ID = today;
+        GAME_ID = gameId;
         console.log("Found word:", TARGET_WORD);
 
         // Display target word
         const targetWordDiv = document.getElementById('target-word');
-        console.log("Target word div:", targetWordDiv);
         targetWordDiv.innerHTML = '';
         for (const letter of TARGET_WORD) {
             const letterDiv = document.createElement('div');
@@ -559,7 +557,6 @@
             letterDiv.textContent = letter;
             targetWordDiv.appendChild(letterDiv);
         }
-        console.log("Target word display complete");
 
         // Initialize blocks
         currentBlock = createBlock();
@@ -578,7 +575,6 @@
         
         // Update grid
         updateGrid();
-        console.log("Grid updated");
         
         // Setup leaderboard
         setupLeaderboard();
