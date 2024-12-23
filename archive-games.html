@@ -9,64 +9,76 @@
     <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8193235321568974"
      crossorigin="anonymous"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const archiveCalendar = document.getElementById('archive-calendar');
-            const gameDates = [
-                { date: '2024-12-21', label: '21 December 2024' }
-            ];
-
-            // Populate Calendar
-            gameDates.forEach(game => {
-                const listItem = document.createElement('li');
-                listItem.className = 'calendar-item';
-                listItem.innerHTML = `
-                    <a href="game.html?gameId=Game${game.date}">${game.label}</a>
-                `;
-                archiveCalendar.appendChild(listItem);
-            });
-        });
-    </script>
     <style>
+        /* Calendar Styling */
         .calendar-container {
             text-align: center;
             margin: 20px 0;
         }
 
-        .calendar-container h2 {
-            margin-bottom: 10px;
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            max-width: 350px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .calendar-day {
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            font-weight: bold;
             color: #004d40;
         }
 
-        .calendar-list {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .calendar-item a {
-            display: block;
-            padding: 8px 12px;
-            background-color: #0066FF;
-            color: white;
-            border-radius: 4px;
+        .calendar-day a {
             text-decoration: none;
+            color: #004d40;
+        }
+
+        .calendar-day a:hover {
+            text-decoration: underline;
+            color: #003366;
+        }
+
+        .calendar-header {
+            font-size: 18px;
+            margin-bottom: 10px;
             font-weight: bold;
+            color: #004d40;
         }
 
-        .calendar-item a:hover {
-            background-color: #0044AA;
-        }
-
-        /* Correct positioning for Buy Me a Coffee button */
         .coffee-button {
             text-align: center;
             margin-top: 30px;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const calendar = document.getElementById('calendar-grid');
+            const gameDates = [
+                { date: '2024-12-21', label: '21 Dec', link: 'game.html?gameId=Game2024-12-21' }
+            ];
+
+            // Fill Calendar Days
+            for (let i = 1; i <= 31; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+
+                const game = gameDates.find(g => parseInt(g.date.split('-')[2]) === i);
+
+                if (game) {
+                    dayDiv.innerHTML = `<a href="${game.link}">${game.label}</a>`;
+                } else {
+                    dayDiv.textContent = i;
+                }
+
+                calendar.appendChild(dayDiv);
+            }
+        });
+    </script>
 </head>
 <body>
     <!-- ✅ Header with Game Title -->
@@ -88,10 +100,8 @@
 
         <!-- ✅ Calendar Section -->
         <section class="calendar-container">
-            <h2>Game Archive</h2>
-            <ul id="archive-calendar" class="calendar-list">
-                <!-- Calendar links will populate here dynamically -->
-            </ul>
+            <h2 class="calendar-header">December 2024</h2>
+            <div id="calendar-grid" class="calendar"></div>
         </section>
 
         <!-- ✅ Ad Section -->
