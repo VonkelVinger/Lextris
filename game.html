@@ -322,7 +322,132 @@
         </thead>
         <tbody></tbody>
     </table>
-    if (!checkCollision(newX, newY)) {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            collection,
+            addDoc,
+            query, 
+            orderBy, 
+            limit, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Game variables
+        let TARGET_WORD = '';
+        let GAME_ID = '';
+        const GRID_WIDTH = 8;
+        const GRID_HEIGHT = 10;
+        const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
+        const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
+        const VOWELS = 'AEIOUY';
+        let grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
+        let currentBlock = null;
+        let nextBlock = null;
+        let gameInterval = null;
+        let timerInterval = null;
+        let gameTime = 0;
+        let isPaused = false;
+        let isGameOver = false;
+        let isMoving = false;
+        let bestTime = localStorage.getItem('bestTime') || null;
+
+        // Helper functions
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function updateTimer() {
+            if (!isPaused && !isGameOver) {
+                gameTime++;
+                document.querySelector('#timer-container').innerHTML = `Time:<br>${formatTime(gameTime)}`;
+            }
+        }
+
+        async function addLeaderboardEntry(name, time) {
+            try {
+                await addDoc(collection(db, 'daily_games', GAME_ID, 'leaderboard'), {
+                    name,
+                    time,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error("Error adding leaderboard entry:", error);
+            }
+        }
+
+        function createBlock() {
+            const letter = Math.random() < 0.3 ? 
+                VOWELS[Math.floor(Math.random() * VOWELS.length)] : 
+                LETTERS[Math.floor(Math.random() * LETTERS.length)];
+            
+            return {
+                letter,
+                color: COLORS[Math.floor(Math.random() * COLORS.length)],
+                x: Math.floor(GRID_WIDTH / 2),
+                y: 0
+            };
+        }
+
+        function checkCollision(x, y) {
+            if (x < 0 || x >= GRID_WIDTH || y >= GRID_HEIGHT) return true;
+            if (y < 0) return false;
+            return grid[y][x] !== null;
+        }
+
+        function updateGrid() {
+            const gameGrid = document.getElementById('game-grid');
+            gameGrid.innerHTML = '';
+
+            // Create empty grid
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    
+                    if (grid[y][x]) {
+                        cell.classList.add('filled');
+                        cell.textContent = grid[y][x].letter;
+                        cell.style.backgroundColor = grid[y][x].color;
+                    }
+                    
+                    if (currentBlock && currentBlock.x === x && currentBlock.y === y) {
+                        cell.classList.add('filled');
+                        cell.textContent = currentBlock.letter;
+                        cell.style.backgroundColor = currentBlock.color;
+                    }
+                    
+                    gameGrid.appendChild(cell);
+                }
+            }
+        }
+
+        function moveBlock(dx, dy) {
+            if (isPaused || isGameOver || !currentBlock || isMoving) return;
+
+            const newX = currentBlock.x + dx;
+            const newY = currentBlock.y + dy;
+
+            if (!checkCollision(newX, newY)) {
                 currentBlock.x = newX;
                 currentBlock.y = newY;
                 updateGrid();
