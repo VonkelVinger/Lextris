@@ -468,48 +468,47 @@
         }
 
         // ✅ End Game Logic
-        function endGame(message, isWin = false) {
-            clearInterval(gameInterval);
-            isGameOver = true;
+       function endGame(message, isWin = false) {
+    clearInterval(gameInterval);
+    isGameOver = true;
 
-            const overlay = document.createElement('div');
-            overlay.style.position = 'fixed';
-            overlay.style.top = '50%';
-            overlay.style.left = '50%';
-            overlay.style.transform = 'translate(-50%, -50%)';
-            overlay.style.backgroundColor = 'white';
-            overlay.style.padding = '20px';
-            overlay.style.borderRadius = '8px';
-            overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-            overlay.style.zIndex = '100';
-            overlay.style.fontWeight = 'bold';
-            overlay.style.textAlign = 'center';
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '50%';
+    overlay.style.left = '50%';
+    overlay.style.transform = 'translate(-50%, -50%)';
+    overlay.style.backgroundColor = 'white';
+    overlay.style.padding = '20px';
+    overlay.style.borderRadius = '8px';
+    overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+    overlay.style.zIndex = '100';
+    overlay.style.fontWeight = 'bold';
+    overlay.style.textAlign = 'center';
 
-            if (isWin) {
-                overlay.innerHTML = `
-                    <div style="margin-bottom: 15px;">${message}</div>
-                    <form id="leaderboard-form" style="display: flex; flex-direction: column; gap: 10px;">
-                        <input type="text" id="player-name" 
-                               maxlength="12" 
-                               placeholder="Enter your name"
-                               style="padding: 5px; border: 1px solid #004d40; border-radius: 4px;">
-                        <button type="submit">Submit Score</button>
-                    </form>
-                `;
-                document.body.appendChild(overlay);
+    if (isWin) {
+        overlay.innerHTML = `
+            <div style="margin-bottom: 15px;">${message}</div>
+            <form id="leaderboard-form" style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="player-name" 
+                       maxlength="12" 
+                       placeholder="Enter your name"
+                       style="padding: 5px; border: 1px solid #004d40; border-radius: 4px;">
+                <button type="submit">Submit Score</button>
+            </form>
+        `;
+        document.body.appendChild(overlay);
 
-                document.getElementById('leaderboard-form').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
-                    await addLeaderboardEntry(GAME_ID, playerName, gameTime);
-                    overlay.remove();
-                });
-            } else {
-                overlay.textContent = message;
-                document.body.appendChild(overlay);
-            }
-        }
-
+        document.getElementById('leaderboard-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
+            await addLeaderboardEntry(GAME_ID, playerName, gameTime);
+            overlay.remove();
+        });
+    } else {
+        overlay.innerHTML = `<div>${message}</div>`;
+        document.body.appendChild(overlay);
+    }
+}
         // ✅ Submit Score to Leaderboard
         async function addLeaderboardEntry(gameId, playerName, time) {
             try {
@@ -615,26 +614,27 @@
 
         // ✅ Restart Game
         function restartGame() {
-            clearInterval(gameInterval);
-            isGameOver = false;
-            isPaused = false;
-            gameTime = 0;
+    clearInterval(gameInterval);
+    isGameOver = false;
+    isPaused = false;
+    gameTime = 0;
 
-            initGrid();
-            currentBlock = createBlock();
-            nextBlock = createBlock();
-            drawBlock(currentBlock);
+    initGrid();
+    currentBlock = createBlock();
+    nextBlock = createBlock();
+    drawBlock(currentBlock);
 
-            document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
-            document.querySelector('#pause-btn').textContent = 'PAUSE';
+    document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
+    document.querySelector('#pause-btn').textContent = 'PAUSE';
 
-            gameInterval = setInterval(() => {
-                if (!isPaused && !isGameOver) {
-                    moveBlock(0, 1);
-                    updateTimer();
-                }
-            }, 1000);
+    gameInterval = setInterval(() => {
+        if (!isPaused && !isGameOver) {
+            moveBlock(0, 1);
+            updateTimer();
         }
+    }, 1000);
+}
+
 
         // ✅ Event Listener for Restart Button
         document.addEventListener('DOMContentLoaded', () => {
