@@ -60,7 +60,6 @@
                         time: Number(time),
                         timestamp: new Date().toISOString()
                     };
-                    // Ensure the data is properly formatted
                     const sanitizedEntry = JSON.parse(JSON.stringify(entry));
                     await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), sanitizedEntry);
                     return true;
@@ -322,48 +321,6 @@
             border-bottom: 1px solid #cccccc;
             font-size: 14px;
         }
-
-        .game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            z-index: 1000;
-        }
-
-        .game-over input {
-            margin: 10px 0;
-            padding: 8px;
-            width: 200px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .game-over button {
-            background-color: #003366;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-weight: bold;
-            transition: background-color 0.2s ease;
-        }
-
-        .game-over button:hover {
-            background-color: #004488;
-        }
-
-        .game-over button:active {
-            background-color: #002244;
-        }
     </style>
 </head>
 <body>
@@ -422,18 +379,18 @@
 
     <script type="module">
         document.addEventListener('DOMContentLoaded', async () => {
-            // Import Firebase functions
+            // Firebase imports
             const { 
                 getFirestore, 
                 collection, 
                 query, 
                 orderBy, 
                 limit, 
-                onSnapshot
+                onSnapshot 
             } = await import("https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js");
-            
+
             const db = getFirestore();
-            
+
             // Game variables
             let TARGET_WORD = '';
             let GAME_ID = '';
@@ -452,7 +409,7 @@
             let isGameOver = false;
             let isMoving = false;
 
-            // Initialize DOM elements
+            // DOM Elements
             const startBtn = document.getElementById('start-btn');
             const pauseBtn = document.getElementById('pause-btn');
             const leftBtn = document.getElementById('left-btn');
@@ -461,7 +418,7 @@
             const timerDisplay = document.querySelector('#timer-container');
             const bestTimeDisplay = document.querySelector('#best-time-container');
 
-            // Initialize target word and setup leaderboard immediately
+            // Initialize Target Word and Leaderboard
             async function initializeTargetWord() {
                 const gameData = await window.firebaseOps.getGameData();
                 if (gameData) {
@@ -541,6 +498,8 @@
                 if (block.y >= 0 && grid[block.y][block.x] !== null) return true;
                 return false;
             }
+        });
+    </script>
             async function moveBlock(dx, dy) {
                 if (!currentBlock || isPaused || isGameOver || isMoving) return;
                 
@@ -564,27 +523,22 @@
             function placeBlock() {
                 if (!currentBlock || currentBlock.y < 0) return;
                 
-                // Update the grid array
                 grid[currentBlock.y][currentBlock.x] = {
                     letter: currentBlock.letter,
                     color: currentBlock.color
                 };
                 
-                // Ensure the block is visually drawn
                 drawBlock(currentBlock);
                 
-                // Check for matches before checking win condition
                 if (!checkMatches()) {
                     checkWin();
                 }
                 
-                // Check for game over condition
                 if (nextBlock && isCollision(nextBlock)) {
                     endGame('GAME OVER');
                     return;
                 }
                 
-                // Set up next block
                 currentBlock = nextBlock;
                 nextBlock = createBlock();
                 if (currentBlock) drawBlock(currentBlock);
@@ -636,12 +590,10 @@
             function checkMatches() {
                 const toRemove = new Set();
                 
-                // Check for matches in all directions
                 for (let y = 0; y < GRID_HEIGHT; y++) {
                     for (let x = 0; x < GRID_WIDTH; x++) {
                         if (!grid[y][x]) continue;
                         
-                        // Check right
                         if (x < GRID_WIDTH - 1) {
                             if (checkAdjacentMatch(x, y, x + 1, y)) {
                                 toRemove.add(`${x},${y}`);
@@ -649,7 +601,6 @@
                             }
                         }
                         
-                        // Check down
                         if (y < GRID_HEIGHT - 1) {
                             if (checkAdjacentMatch(x, y, x, y + 1)) {
                                 toRemove.add(`${x},${y}`);
@@ -671,6 +622,7 @@
                 }
                 return false;
             }
+
             function shiftDownCells() {
                 let moved;
                 do {
@@ -685,7 +637,6 @@
                         }
                     }
                     
-                    // Update visual representation
                     for (let x = 0; x < GRID_WIDTH; x++) {
                         for (let y = 0; y < GRID_HEIGHT; y++) {
                             const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
@@ -704,7 +655,6 @@
                     }
                 } while (moved);
                 
-                // After all shifts are complete, check for new matches
                 setTimeout(() => {
                     if (!checkMatches()) {
                         checkWin();
@@ -737,7 +687,6 @@
                             `;
                             tbody.appendChild(row);
                             
-                            // Update best time from first leaderboard entry
                             if (index === 0 && bestTimeDisplay) {
                                 bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(data.time)}`;
                             }
@@ -747,9 +696,8 @@
                     }
                 });
             }
-
             async function checkWin() {
-                // Only check for horizontal matches
+                // Check for horizontal matches
                 for (let y = 0; y < GRID_HEIGHT; y++) {
                     for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
                         let word = '';
@@ -805,25 +753,22 @@
                 
                 document.getElementById('game-grid').appendChild(overlay);
             }
+
             async function startGame() {
-                // Remove any existing game over overlay
                 const overlay = document.querySelector('.game-over');
                 if (overlay) overlay.remove();
                 
-                // Reset game state
                 grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
                 gameTime = 0;
                 isPaused = false;
                 isGameOver = false;
                 isMoving = false;
                 
-                // Initialize grid and blocks
                 initGrid();
                 currentBlock = createBlock();
                 nextBlock = createBlock();
                 drawBlock(currentBlock);
                 
-                // Set up intervals
                 if (gameInterval) clearInterval(gameInterval);
                 if (timerInterval) clearInterval(timerInterval);
                 
@@ -835,7 +780,6 @@
                 
                 timerInterval = setInterval(updateTimer, 1000);
                 
-                // Reset displays
                 timerDisplay.innerHTML = 'Time:<br>00:00';
                 pauseBtn.textContent = 'PAUSE';
             }
@@ -846,7 +790,6 @@
                 pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
             }
 
-            // Global submit score function
             window.submitScore = async function() {
                 const nameInput = document.getElementById('player-name');
                 const name = nameInput.value.trim() || 'Anonymous';
@@ -872,17 +815,21 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') moveBlock(-1, 0);
                 if (e.key === 'ArrowRight') moveBlock(1, 0);
-                if (e.key === 'ArrowDown') moveBlock(0, 1);
+                if (e.key === 'ArrowDown') dropBlock();
                 if (e.key === ' ') {
                     e.preventDefault();
                     dropBlock();
                 }
             });
 
-            // Initialize target word and game grid immediately
+            // Initialize the target word and game grid on load
             await initializeTargetWord();
             initGrid();
         });
     </script>
 </body>
 </html>
+
+
+
+                        
