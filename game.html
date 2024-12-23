@@ -386,6 +386,9 @@
             document.querySelector('#pause-btn').textContent = isPaused ? 'RESUME' : 'PAUSE';
         }
 
+        // Make initializeGame globally accessible
+        window.initializeGame = initializeGame;
+        
         // Initialize game on load
         window.addEventListener('load', initializeGame);
     </script>
