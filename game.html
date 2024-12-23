@@ -428,7 +428,7 @@
         <tbody></tbody>
     </table>
 
-    <script>
+    <script type="module">
         document.addEventListener('DOMContentLoaded', async () => {
             // Import Firebase functions
             const { 
@@ -468,8 +468,8 @@
             const rightBtn = document.getElementById('right-btn');
             const timerDisplay = document.querySelector('#timer-container');
 
-            // Core initialization functions
-            async function initializeGameData() {
+            // Initialize target word immediately
+            async function initializeTargetWord() {
                 const gameData = await window.firebaseOps.getGameData();
                 if (gameData) {
                     TARGET_WORD = gameData.targetWord;
@@ -489,6 +489,7 @@
                 }
                 return false;
             }
+
             function updateTimer() {
                 if (!isPaused && !isGameOver) {
                     gameTime++;
@@ -539,7 +540,6 @@
                     cell.textContent = '';
                 }
             }
-
             function isCollision(block) {
                 if (!block) return true;
                 if (block.x < 0 || block.x >= GRID_WIDTH) return true;
@@ -584,10 +584,16 @@
                 // Ensure the block is visually drawn
                 drawBlock(currentBlock);
                 
-                // Check for matches and game state
-                checkMatches();
-                checkGameOver();
-                checkWin();
+                // Check for matches before checking win condition
+                if (!checkMatches()) {
+                    checkWin();
+                }
+                
+                // Check for game over condition
+                if (nextBlock && isCollision(nextBlock)) {
+                    endGame('GAME OVER');
+                    return;
+                }
                 
                 // Set up next block
                 currentBlock = nextBlock;
@@ -609,46 +615,72 @@
                 placeBlock();
                 isMoving = false;
             }
+
+            function isPartOfTargetWord(letter) {
+                return TARGET_WORD.includes(letter);
+            }
+
+            function clearCell(x, y) {
+                grid[y][x] = null;
+                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
+                if (cell) {
+                    cell.style.transform = 'scale(0)';
+                    setTimeout(() => {
+                        cell.className = 'grid-cell';
+                        cell.style.transform = '';
+                        cell.style.backgroundColor = '';
+                        cell.textContent = '';
+                    }, 100);
+                }
+            }
+
+            // Helper function to check adjacent matches
+            function checkAdjacentMatch(x1, y1, x2, y2) {
+                const block1 = grid[y1][x1];
+                const block2 = grid[y2][x2];
+                
+                if (!block1 || !block2) return false;
+                if (isPartOfTargetWord(block1.letter) || isPartOfTargetWord(block2.letter)) return false;
+                
+                return block1.color === block2.color || block1.letter === block2.letter;
+            }
             function checkMatches() {
-                for (let x = 0; x < GRID_WIDTH; x++) {
-                    for (let y = 0; y <= GRID_HEIGHT - TARGET_WORD.length; y++) {
-                        let word = '';
-                        let isValid = true;
-                        let cells = [];
+                const toRemove = new Set();
+                
+                // Check for matches in all directions
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        if (!grid[y][x]) continue;
                         
-                        for (let i = 0; i < TARGET_WORD.length; i++) {
-                            if (!grid[y + i][x]) {
-                                isValid = false;
-                                break;
+                        // Check right
+                        if (x < GRID_WIDTH - 1) {
+                            if (checkAdjacentMatch(x, y, x + 1, y)) {
+                                toRemove.add(`${x},${y}`);
+                                toRemove.add(`${x + 1},${y}`);
                             }
-                            word += grid[y + i][x].letter;
-                            cells.push([x, y + i]);
                         }
                         
-                        if (isValid && word === TARGET_WORD) {
-                            clearCells(cells);
-                            shiftDownCells();
-                            return true;
+                        // Check down
+                        if (y < GRID_HEIGHT - 1) {
+                            if (checkAdjacentMatch(x, y, x, y + 1)) {
+                                toRemove.add(`${x},${y}`);
+                                toRemove.add(`${x},${y + 1}`);
+                            }
                         }
                     }
                 }
+                
+                if (toRemove.size > 0) {
+                    toRemove.forEach(pos => {
+                        const [x, y] = pos.split(',').map(Number);
+                        clearCell(x, y);
+                    });
+                    setTimeout(() => {
+                        shiftDownCells();
+                    }, 150);
+                    return true;
+                }
                 return false;
-            }
-
-            function clearCells(cells) {
-                cells.forEach(([x, y]) => {
-                    const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
-                    if (cell) {
-                        cell.style.transform = 'scale(0)';
-                        setTimeout(() => {
-                            grid[y][x] = null;
-                            cell.className = 'grid-cell';
-                            cell.style.transform = '';
-                            cell.style.backgroundColor = '';
-                            cell.textContent = '';
-                        }, 100);
-                    }
-                });
             }
 
             function shiftDownCells() {
@@ -683,8 +715,50 @@
                         }
                     }
                 } while (moved);
+                
+                // Check for new matches after shifting
+                if (checkMatches()) {
+                    return;
+                }
             }
 
+            async function checkWin() {
+                // Only check for horizontal matches
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
+                        let word = '';
+                        let isValid = true;
+                        
+                        for (let i = 0; i < TARGET_WORD.length; i++) {
+                            if (!grid[y][x + i]) {
+                                isValid = false;
+                                break;
+                            }
+                            word += grid[y][x + i].letter;
+                        }
+                        
+                        if (isValid && word === TARGET_WORD) {
+                            isGameOver = true;
+                            clearInterval(gameInterval);
+                            clearInterval(timerInterval);
+                            
+                            const timeStr = formatTime(gameTime);
+                            const message = `YOU DID IT IN ${timeStr}!`;
+                            
+                            // Highlight winning word
+                            for (let i = 0; i < TARGET_WORD.length; i++) {
+                                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x + i}"][data-y="${y}"]`);
+                                if (cell) {
+                                    cell.style.transform = 'scale(1.1)';
+                                }
+                            }
+                            
+                            endGame(message, true);
+                            return;
+                        }
+                    }
+                }
+            }
             function setupLeaderboard() {
                 if (!GAME_ID) return;
 
@@ -712,39 +786,6 @@
                 });
             }
 
-            function checkGameOver() {
-                if (nextBlock && isCollision(nextBlock)) {
-                    endGame('GAME OVER');
-                }
-            }
-
-            async function checkWin() {
-                for (let y = 0; y < GRID_HEIGHT; y++) {
-                    for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
-                        let word = '';
-                        let isValid = true;
-                        
-                        for (let i = 0; i < TARGET_WORD.length; i++) {
-                            if (!grid[y][x + i]) {
-                                isValid = false;
-                                break;
-                            }
-                            word += grid[y][x + i].letter;
-                        }
-                        
-                        if (isValid && word === TARGET_WORD) {
-                            isGameOver = true;
-                            clearInterval(gameInterval);
-                            
-                            const timeStr = formatTime(gameTime);
-                            const message = `YOU DID IT IN ${timeStr}!`;
-                            
-                            endGame(message, true);
-                            return;
-                        }
-                    }
-                }
-            }
             function endGame(message, isWin = false) {
                 clearInterval(gameInterval);
                 clearInterval(timerInterval);
@@ -774,15 +815,6 @@
                 isPaused = false;
                 isGameOver = false;
                 isMoving = false;
-                
-                // Initialize game data if not already done
-                if (!TARGET_WORD) {
-                    const success = await initializeGameData();
-                    if (!success) {
-                        console.error("Failed to initialize game data");
-                        return;
-                    }
-                }
                 
                 // Initialize grid and blocks
                 initGrid();
@@ -834,7 +866,6 @@
             rightBtn.addEventListener('click', () => moveBlock(1, 0));
             downBtn.addEventListener('click', dropBlock);
 
-            // Keyboard controls
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') moveBlock(-1, 0);
                 if (e.key === 'ArrowRight') moveBlock(1, 0);
@@ -845,7 +876,8 @@
                 }
             });
 
-            // Initialize game on load
+            // Initialize target word and game grid immediately
+            await initializeTargetWord();
             initGrid();
         });
     </script>
