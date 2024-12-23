@@ -11,22 +11,62 @@
      crossorigin="anonymous"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const archiveList = document.getElementById('archive-list');
+            const archiveCalendar = document.getElementById('archive-calendar');
             const gameDates = [
                 { date: '2024-12-21', label: '21 December 2024' }
             ];
 
-            // Dynamically generate game links
+            // Populate Calendar
             gameDates.forEach(game => {
                 const listItem = document.createElement('li');
-                const link = document.createElement('a');
-                link.href = `game.html?gameId=Game${game.date}`;
-                link.textContent = game.label;
-                listItem.appendChild(link);
-                archiveList.appendChild(listItem);
+                listItem.className = 'calendar-item';
+                listItem.innerHTML = `
+                    <a href="game.html?gameId=Game${game.date}">${game.label}</a>
+                `;
+                archiveCalendar.appendChild(listItem);
             });
         });
     </script>
+    <style>
+        .calendar-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .calendar-container h2 {
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+
+        .calendar-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .calendar-item a {
+            display: block;
+            padding: 8px 12px;
+            background-color: #0066FF;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .calendar-item a:hover {
+            background-color: #0044AA;
+        }
+
+        /* Correct positioning for Buy Me a Coffee button */
+        .coffee-button {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
 </head>
 <body>
     <!-- ✅ Header with Game Title -->
@@ -45,9 +85,14 @@
     <!-- ✅ Main Content -->
     <main>
         <h1 class="center-text dark-green">Can you beat these best times?</h1>
-        <ul id="archive-list" class="center-list">
-            <!-- Game links will be dynamically populated here -->
-        </ul>
+
+        <!-- ✅ Calendar Section -->
+        <section class="calendar-container">
+            <h2>Game Archive</h2>
+            <ul id="archive-calendar" class="calendar-list">
+                <!-- Calendar links will populate here dynamically -->
+            </ul>
+        </section>
 
         <!-- ✅ Ad Section -->
         <section class="ads">
@@ -57,15 +102,15 @@
                 <div class="ad-placeholder">Ad Space 2</div>
             </div>
         </section>
-    </main>
 
-    <!-- ✅ Coffee Support Button -->
-    <div class="coffee-button">
-        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-            data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
-            data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
-            data-font-color="#000000" data-coffee-color="#ffffff"></script>
-    </div>
+        <!-- ✅ Buy Me a Coffee Button -->
+        <div class="coffee-button">
+            <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+                data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+                data-font-color="#000000" data-coffee-color="#ffffff"></script>
+        </div>
+    </main>
 
     <!-- ✅ Footer -->
     <footer>
