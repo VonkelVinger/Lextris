@@ -322,7 +322,7 @@
         </thead>
         <tbody></tbody>
     </table>
-    <script type="module">
+ <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
             getFirestore, 
@@ -386,8 +386,8 @@
         async function addLeaderboardEntry(name, time) {
             try {
                 const entry = {
-                    name: name,
-                    time: time,
+                    name: String(name),
+                    time: Number(time),
                     timestamp: new Date().toISOString()
                 };
                 
@@ -453,9 +453,8 @@
                 currentBlock.x = newX;
                 currentBlock.y = newY;
                 updateGrid();
-            } else if (dy > 0) {  // If hitting bottom
+            } else if (dy > 0) {
                 placeBlock();
-                updateGrid();  // Ensure grid is updated after placement
             }
         }
 
@@ -467,7 +466,6 @@
             }
             
             placeBlock();
-            updateGrid();  // Ensure grid is updated after placement
         }
 
         function getWord(cells) {
@@ -577,31 +575,36 @@
         };
 
         function setupLeaderboard() {
-            try {
-                const leaderboardQuery = query(
-                    collection(db, 'daily_games', GAME_ID, 'leaderboard'),
-                    orderBy('time'),
-                    limit(10)
-                );
+            if (!GAME_ID) return;
 
-                onSnapshot(leaderboardQuery, (snapshot) => {
-                    const tbody = document.querySelector('#leaderboard tbody');
-                    tbody.innerHTML = '';
-                    
-                    snapshot.docs.forEach((doc, index) => {
-                        try {
-                            const data = doc.data();
-                            const row = tbody.insertRow();
-                            row.insertCell().textContent = index + 1;
-                            row.insertCell().textContent = data.name || 'Anonymous';
-                            row.insertCell().textContent = formatTime(data.time || 0);
-                        } catch (err) {
-                            console.error('Error processing leaderboard entry:', err);
-                        }
-                    });
-                }, (error) => {
-                    console.error('Leaderboard listener error:', error);
+            try {
+                const leaderboardRef = collection(db, 'daily_games', GAME_ID, 'leaderboard');
+                const leaderboardQuery = query(leaderboardRef, orderBy('time'), limit(10));
+
+                const unsubscribe = onSnapshot(leaderboardQuery, {
+                    next: (snapshot) => {
+                        const tbody = document.querySelector('#leaderboard tbody');
+                        tbody.innerHTML = '';
+                        
+                        snapshot.docs.forEach((doc, index) => {
+                            try {
+                                const data = doc.data();
+                                const row = tbody.insertRow();
+                                row.insertCell().textContent = index + 1;
+                                row.insertCell().textContent = String(data.name || 'Anonymous');
+                                row.insertCell().textContent = formatTime(Number(data.time || 0));
+                            } catch (err) {
+                                console.error('Error processing leaderboard entry:', err);
+                            }
+                        });
+                    },
+                    error: (error) => {
+                        console.error('Leaderboard listener error:', error);
+                    }
                 });
+
+                // Store unsubscribe function for cleanup
+                window.leaderboardUnsubscribe = unsubscribe;
             } catch (error) {
                 console.error('Error setting up leaderboard:', error);
             }
@@ -654,6 +657,12 @@
                 if (timerInterval) clearInterval(timerInterval);
                 timerInterval = setInterval(updateTimer, 1000);
                 
+                // Clear previous leaderboard listener if exists
+                if (window.leaderboardUnsubscribe) {
+                    window.leaderboardUnsubscribe();
+                    window.leaderboardUnsubscribe = null;
+                }
+                
                 // Update grid
                 updateGrid();
                 
@@ -696,4 +705,4 @@
         window.addEventListener('load', initializeGame);
     </script>
 </body>
-</html>
+</html>   
