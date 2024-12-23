@@ -385,11 +385,13 @@
 
         async function addLeaderboardEntry(name, time) {
             try {
-                await addDoc(collection(db, 'daily_games', GAME_ID, 'leaderboard'), {
-                    name,
-                    time,
+                const entry = {
+                    name: name,
+                    time: time,
                     timestamp: new Date().toISOString()
-                });
+                };
+                
+                await addDoc(collection(db, 'daily_games', GAME_ID, 'leaderboard'), entry);
             } catch (error) {
                 console.error("Error adding leaderboard entry:", error);
             }
@@ -451,8 +453,9 @@
                 currentBlock.x = newX;
                 currentBlock.y = newY;
                 updateGrid();
-            } else if (dy > 0) {
+            } else if (dy > 0) {  // If hitting bottom
                 placeBlock();
+                updateGrid();  // Ensure grid is updated after placement
             }
         }
 
@@ -464,6 +467,7 @@
             }
             
             placeBlock();
+            updateGrid();  // Ensure grid is updated after placement
         }
 
         function getWord(cells) {
@@ -516,11 +520,15 @@
             };
 
             checkForWords();
+
+            // Update current and next blocks
             currentBlock = nextBlock;
             nextBlock = createBlock();
             
+            // Check for game over
             if (checkCollision(currentBlock.x, currentBlock.y)) {
                 endGame();
+                return;
             }
             
             updateGrid();
@@ -569,24 +577,34 @@
         };
 
         function setupLeaderboard() {
-            const leaderboardQuery = query(
-                collection(db, 'daily_games', GAME_ID, 'leaderboard'),
-                orderBy('time'),
-                limit(10)
-            );
+            try {
+                const leaderboardQuery = query(
+                    collection(db, 'daily_games', GAME_ID, 'leaderboard'),
+                    orderBy('time'),
+                    limit(10)
+                );
 
-            onSnapshot(leaderboardQuery, (snapshot) => {
-                const tbody = document.querySelector('#leaderboard tbody');
-                tbody.innerHTML = '';
-                
-                snapshot.docs.forEach((doc, index) => {
-                    const data = doc.data();
-                    const row = tbody.insertRow();
-                    row.insertCell().textContent = index + 1;
-                    row.insertCell().textContent = data.name;
-                    row.insertCell().textContent = formatTime(data.time);
+                onSnapshot(leaderboardQuery, (snapshot) => {
+                    const tbody = document.querySelector('#leaderboard tbody');
+                    tbody.innerHTML = '';
+                    
+                    snapshot.docs.forEach((doc, index) => {
+                        try {
+                            const data = doc.data();
+                            const row = tbody.insertRow();
+                            row.insertCell().textContent = index + 1;
+                            row.insertCell().textContent = data.name || 'Anonymous';
+                            row.insertCell().textContent = formatTime(data.time || 0);
+                        } catch (err) {
+                            console.error('Error processing leaderboard entry:', err);
+                        }
+                    });
+                }, (error) => {
+                    console.error('Leaderboard listener error:', error);
                 });
-            });
+            } catch (error) {
+                console.error('Error setting up leaderboard:', error);
+            }
         }
 
         async function startGame() {
