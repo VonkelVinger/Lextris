@@ -528,57 +528,64 @@
         };
 
         async function startGame() {
-            // Reset game state
-            grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
-            gameTime = 0;
-            isPaused = false;
-            isGameOver = false;
-            
-            // Get today's word from Firestore
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                const gameDoc = await getDoc(doc(db, 'daily_games', today));
-                if (!gameDoc.exists()) {
-                    console.error("No word found for today");
-                    return;
-                }
-                TARGET_WORD = gameDoc.data().word;
-                GAME_ID = today;
-
-                // Display target word
-                const targetWordDiv = document.getElementById('target-word');
-                targetWordDiv.innerHTML = '';
-                for (const letter of TARGET_WORD) {
-                    const letterDiv = document.createElement('div');
-                    letterDiv.className = 'target-letter';
-                    letterDiv.textContent = letter;
-                    targetWordDiv.appendChild(letterDiv);
-                }
-
-                // Initialize blocks
-                currentBlock = createBlock();
-                nextBlock = createBlock();
-                
-                // Start game loop
-                if (gameInterval) clearInterval(gameInterval);
-                gameInterval = setInterval(() => {
-                    if (!isPaused && !isGameOver) {
-                        moveBlock(0, 1);
-                    }
-                }, 1000);
-
-                // Start timer
-                setInterval(updateTimer, 1000);
-                
-                // Update grid
-                updateGrid();
-                
-                // Setup leaderboard
-                setupLeaderboard();
-            } catch (error) {
-                console.error("Error starting game:", error);
-            }
+    console.log("Starting game...");
+    // Reset game state
+    grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
+    gameTime = 0;
+    isPaused = false;
+    isGameOver = false;
+    
+    // Get today's word from Firestore
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        console.log("Looking for game on date:", today);
+        const gameDoc = await getDoc(doc(db, 'daily_games', today));
+        console.log("Document exists:", gameDoc.exists());
+        if (!gameDoc.exists()) {
+            console.error("No word found for today");
+            return;
         }
+        TARGET_WORD = gameDoc.data().word;
+        GAME_ID = today;
+        console.log("Found word:", TARGET_WORD);
+
+        // Display target word
+        const targetWordDiv = document.getElementById('target-word');
+        console.log("Target word div:", targetWordDiv);
+        targetWordDiv.innerHTML = '';
+        for (const letter of TARGET_WORD) {
+            const letterDiv = document.createElement('div');
+            letterDiv.className = 'target-letter';
+            letterDiv.textContent = letter;
+            targetWordDiv.appendChild(letterDiv);
+        }
+        console.log("Target word display complete");
+
+        // Initialize blocks
+        currentBlock = createBlock();
+        nextBlock = createBlock();
+        
+        // Start game loop
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = setInterval(() => {
+            if (!isPaused && !isGameOver) {
+                moveBlock(0, 1);
+            }
+        }, 1000);
+
+        // Start timer
+        setInterval(updateTimer, 1000);
+        
+        // Update grid
+        updateGrid();
+        console.log("Grid updated");
+        
+        // Setup leaderboard
+        setupLeaderboard();
+    } catch (error) {
+        console.error("Error starting game:", error);
+    }
+}
 
         function setupLeaderboard() {
             const leaderboardQuery = query(
