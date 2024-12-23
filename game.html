@@ -85,6 +85,7 @@
             font-weight: bold;
             font-size: 16px;
         }
+
         /* ✅ Game Grid */
         #game-grid {
             width: 100%;
@@ -235,7 +236,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Game Variables
+        // ✅ Core Game Variables
         const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
         const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
         const VOWELS = 'AEIOUY';
@@ -379,7 +380,6 @@
                 cell.textContent = block.letter;
             }
         }
-    </script>
         // ✅ Clear a Block from the Grid
         function clearBlock(block) {
             if (!block) return;
@@ -400,18 +400,18 @@
             );
         }
 
-        // ✅ Place a Block
+        // ✅ Place a Block on the Grid
         function placeBlock() {
-            if (!currentBlock) return;
-
+            if (!currentBlock || currentBlock.y < 0) return;
             grid[currentBlock.y][currentBlock.x] = { ...currentBlock };
             drawBlock(currentBlock);
+            checkWin();
             currentBlock = nextBlock;
             nextBlock = createBlock();
-            checkWin();
+            if (currentBlock) drawBlock(currentBlock);
         }
 
-        // ✅ Move a Block
+        // ✅ Move a Block Horizontally or Vertically
         async function moveBlock(dx, dy) {
             if (!currentBlock || isPaused || isGameOver) return;
 
@@ -424,11 +424,14 @@
             if (!isCollision(testBlock)) {
                 currentBlock.x = newX;
                 currentBlock.y = newY;
+                await new Promise(resolve => setTimeout(resolve, 0));
+                drawBlock(currentBlock);
             } else if (dy > 0) {
+                drawBlock(currentBlock);
                 placeBlock();
+            } else {
+                drawBlock(currentBlock);
             }
-
-            drawBlock(currentBlock);
         }
 
         // ✅ Drop a Block Instantly
@@ -460,7 +463,8 @@
                     if (isValid && word === TARGET_WORD) {
                         isGameOver = true;
                         clearInterval(gameInterval);
-                        endGame(`YOU WON IN ${formatTime(gameTime)}!`, true);
+                        const timeStr = formatTime(gameTime);
+                        endGame(`YOU WON IN ${timeStr}!`, true);
                         return;
                     }
                 }
@@ -468,48 +472,49 @@
         }
 
         // ✅ End Game Logic
-      function endGame(message, isWin = false) {
-    clearInterval(gameInterval);
-    isGameOver = true;
+        function endGame(message, isWin = false) {
+            clearInterval(gameInterval);
+            isGameOver = true;
 
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '50%';
-    overlay.style.left = '50%';
-    overlay.style.transform = 'translate(-50%, -50%)';
-    overlay.style.backgroundColor = 'white';
-    overlay.style.padding = '20px';
-    overlay.style.borderRadius = '8px';
-    overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-    overlay.style.zIndex = '100';
-    overlay.style.fontWeight = 'bold';
-    overlay.style.textAlign = 'center';
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '50%';
+            overlay.style.left = '50%';
+            overlay.style.transform = 'translate(-50%, -50%)';
+            overlay.style.backgroundColor = 'white';
+            overlay.style.padding = '20px';
+            overlay.style.borderRadius = '8px';
+            overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            overlay.style.zIndex = '100';
+            overlay.style.fontWeight = 'bold';
+            overlay.style.textAlign = 'center';
 
-    if (isWin) {
-        overlay.innerHTML = `
-            <div style="margin-bottom: 15px;">${message}</div>
-            <form id="leaderboard-form" style="display: flex; flex-direction: column; gap: 10px;">
-                <input type="text" id="player-name" 
-                       maxlength="12" 
-                       placeholder="Enter your name"
-                       style="padding: 5px; border: 1px solid #004d40; border-radius: 4px;">
-                <button type="submit" style="margin-top: 10px; background-color: #004d40; color: white; padding: 5px; border: none; border-radius: 4px;">Submit Score</button>
-            </form>
-        `;
-        document.body.appendChild(overlay);
+            if (isWin) {
+                overlay.innerHTML = `
+                    <div style="margin-bottom: 15px;">${message}</div>
+                    <form id="leaderboard-form" style="display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="player-name" 
+                               maxlength="12" 
+                               placeholder="Enter your name"
+                               style="padding: 5px; border: 1px solid #004d40; border-radius: 4px;">
+                        <button type="submit" style="margin-top: 10px; background-color: #004d40; color: white; padding: 5px; border: none; border-radius: 4px;">Submit Score</button>
+                    </form>
+                `;
+                document.body.appendChild(overlay);
 
-        document.getElementById('leaderboard-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
-            await addLeaderboardEntry(GAME_ID, playerName, gameTime);
-            overlay.remove();
-        });
-    } else {
-        overlay.innerHTML = `<div>${message}</div>`;
-        document.body.appendChild(overlay);
-    }
-}
-        // ✅ Submit Score to Leaderboard
+                document.getElementById('leaderboard-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
+                    await addLeaderboardEntry(GAME_ID, playerName, gameTime);
+                    overlay.remove();
+                });
+            } else {
+                overlay.innerHTML = `<div>${message}</div>`;
+                document.body.appendChild(overlay);
+            }
+        }
+
+        // ✅ Add Score to Leaderboard
         async function addLeaderboardEntry(gameId, playerName, time) {
             try {
                 const leaderboardRef = collection(db, 'daily_games', gameId, 'leaderboard');
@@ -524,7 +529,62 @@
             }
         }
 
-        // ✅ Game Start Function
+        // ✅ Restart Game
+        function restartGame() {
+            clearInterval(gameInterval);
+            isGameOver = false;
+            isPaused = false;
+            gameTime = 0;
+
+            initGrid();
+            currentBlock = createBlock();
+            nextBlock = createBlock();
+            drawBlock(currentBlock);
+
+            document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
+            document.querySelector('#pause-btn').textContent = 'PAUSE';
+
+            gameInterval = setInterval(() => {
+                if (!isPaused && !isGameOver) {
+                    moveBlock(0, 1);
+                    updateTimer();
+                }
+            }, 1000);
+        }
+        // ✅ Setup Event Listeners for Controls
+        function setupEventListeners() {
+            // ✅ Mobile Controls
+            document.getElementById('left-btn')?.addEventListener('click', () => moveBlock(-1, 0));
+            document.getElementById('right-btn')?.addEventListener('click', () => moveBlock(1, 0));
+            document.getElementById('down-btn')?.addEventListener('click', dropBlock);
+
+            // ✅ Keyboard Controls
+            document.addEventListener('keydown', (e) => {
+                if (isPaused || isGameOver) return;
+
+                switch (e.key) {
+                    case 'ArrowLeft':
+                        moveBlock(-1, 0);
+                        break;
+                    case 'ArrowRight':
+                        moveBlock(1, 0);
+                        break;
+                    case 'ArrowDown':
+                        moveBlock(0, 1);
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        dropBlock();
+                        break;
+                }
+            });
+
+            // ✅ Game Control Buttons
+            document.getElementById('start-btn')?.addEventListener('click', startGame);
+            document.getElementById('pause-btn')?.addEventListener('click', togglePause);
+        }
+
+        // ✅ Start Game Function
         function startGame() {
             const overlay = document.querySelector('div[style*="position: fixed"]');
             if (overlay) overlay.remove();
@@ -557,7 +617,7 @@
             document.querySelector('#pause-btn').textContent = isPaused ? 'RESUME' : 'PAUSE';
         }
 
-        // ✅ Update Timer
+        // ✅ Timer Update Function
         function updateTimer() {
             if (!isPaused && !isGameOver) {
                 gameTime++;
@@ -565,91 +625,112 @@
             }
         }
 
-        // ✅ Setup Event Listeners
-        function setupEventListeners() {
-            document.getElementById('left-btn').addEventListener('click', () => moveBlock(-1, 0));
-            document.getElementById('right-btn').addEventListener('click', () => moveBlock(1, 0));
-            document.getElementById('down-btn').addEventListener('click', dropBlock);
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
-                if (e.key === 'ArrowRight') moveBlock(1, 0);
-                if (e.key === 'ArrowDown') moveBlock(0, 1);
-                if (e.key === ' ') {
-                    e.preventDefault();
-                    dropBlock();
-                }
-            });
-
-            document.getElementById('start-btn')?.addEventListener('click', startGame);
-            document.getElementById('pause-btn')?.addEventListener('click', togglePause);
-        }
-        // ✅ Initialize Game on Page Load
-        document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        GAME_ID = urlParams.get('gameId');
-
-        if (!GAME_ID) throw new Error('Game ID is missing from the URL.');
-
-        const gameRef = doc(db, 'daily_games', GAME_ID);
-        const gameSnap = await getDoc(gameRef);
-
-        if (!gameSnap.exists()) {
-            throw new Error(`Game ${GAME_ID} not found.`);
-        }
-
-        TARGET_WORD = gameSnap.data()?.targetWord || 'ERROR';
-        displayTargetWord(TARGET_WORD);
-
-        // Start Leaderboard Listener
-        setupLeaderboardListener();
-        initGame();
-        setupEventListeners();
-    } catch (error) {
-        console.error('Initialization Error:', error.message);
-        document.body.innerHTML = `<h2 style="color: red; text-align: center; margin-top: 50px;">Error: ${error.message}</h2>`;
-    }
-});
-        // ✅ Restart Game
+        // ✅ Restart Game Logic
         function restartGame() {
-    clearInterval(gameInterval);
-    isGameOver = false;
-    isPaused = false;
-    gameTime = 0;
+            clearInterval(gameInterval);
+            isGameOver = false;
+            isPaused = false;
+            gameTime = 0;
 
-    initGrid();
-    currentBlock = createBlock();
-    nextBlock = createBlock();
-    drawBlock(currentBlock);
+            initGrid();
+            currentBlock = createBlock();
+            nextBlock = createBlock();
+            drawBlock(currentBlock);
 
-    document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
-    document.querySelector('#pause-btn').textContent = 'PAUSE';
+            document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
+            document.querySelector('#pause-btn').textContent = 'PAUSE';
 
-    gameInterval = setInterval(() => {
-        if (!isPaused && !isGameOver) {
-            moveBlock(0, 1);
-            updateTimer();
+            gameInterval = setInterval(() => {
+                if (!isPaused && !isGameOver) {
+                    moveBlock(0, 1);
+                    updateTimer();
+                }
+            }, 1000);
         }
-    }, 1000);
-}
 
-
-        // ✅ Event Listener for Restart Button
-        document.addEventListener('DOMContentLoaded', () => {
-            const startButton = document.getElementById('start-btn');
-            const pauseButton = document.getElementById('pause-btn');
-
-            if (startButton) startButton.addEventListener('click', startGame);
-            if (pauseButton) pauseButton.addEventListener('click', togglePause);
-        });
-
-        // ✅ Final Safety Checks
+        // ✅ Final Safety Checks for Initialization
         window.addEventListener('error', (event) => {
             console.error('Global Error:', event.message);
         });
 
-        console.log('%cGame Initialized Successfully!', 'color: green; font-weight: bold;');
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+        });
+
+        console.log('%cGame Controls Initialized Successfully!', 'color: green; font-weight: bold;');
+        // ✅ Ensure Clean Initialization on Page Load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // ✅ Extract GAME_ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                GAME_ID = urlParams.get('gameId');
+
+                if (!GAME_ID) throw new Error('Game ID is missing from the URL.');
+
+                // ✅ Fetch Game Data from Firebase
+                const gameRef = doc(db, 'daily_games', GAME_ID);
+                const gameSnap = await getDoc(gameRef);
+
+                if (!gameSnap.exists()) {
+                    throw new Error(`Game ${GAME_ID} not found.`);
+                }
+
+                TARGET_WORD = gameSnap.data()?.targetWord || 'ERROR';
+                displayTargetWord(TARGET_WORD);
+
+                // ✅ Initialize Leaderboard
+                setupLeaderboardListener();
+
+                // ✅ Start Game
+                initGame();
+                setupEventListeners();
+
+                console.log('%cGame Initialized Successfully!', 'color: green; font-weight: bold;');
+            } catch (error) {
+                console.error('Initialization Error:', error.message);
+                document.body.innerHTML = `
+                    <h2 style="color: red; text-align: center; margin-top: 50px;">
+                        Error: ${error.message}
+                    </h2>`;
+            }
+        });
+
+        // ✅ Final Safety Net for Unexpected Errors
+        window.addEventListener('error', (event) => {
+            console.error('Global Error:', event.message);
+        });
+
+        // ✅ Helper: Debug Game State (Optional)
+        function debugGameState() {
+            console.log('%cGame State Debug:', 'color: blue; font-weight: bold;');
+            console.log('TARGET_WORD:', TARGET_WORD);
+            console.log('GAME_ID:', GAME_ID);
+            console.log('Game Time:', gameTime);
+            console.log('Paused:', isPaused);
+            console.log('Game Over:', isGameOver);
+            console.log('Current Block:', currentBlock);
+            console.log('Next Block:', nextBlock);
+            console.log('Grid:', grid);
+        }
+
+        // ✅ Force Reload Button (For Testing Purposes)
+        const debugButton = document.createElement('button');
+        debugButton.innerText = 'Debug State';
+        debugButton.style.position = 'fixed';
+        debugButton.style.bottom = '10px';
+        debugButton.style.right = '10px';
+        debugButton.style.zIndex = '1000';
+        debugButton.style.background = '#f44336';
+        debugButton.style.color = 'white';
+        debugButton.style.padding = '5px 10px';
+        debugButton.style.border = 'none';
+        debugButton.style.borderRadius = '4px';
+        debugButton.style.cursor = 'pointer';
+
+        debugButton.addEventListener('click', debugGameState);
+        document.body.appendChild(debugButton);
+
+        console.log('%cFinal Initialization Complete!', 'color: purple; font-weight: bold;');
     </script>
 </body>
 </html>
