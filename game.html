@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
     <style>
+        /* ✅ Global Styles */
         * {
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
@@ -22,6 +23,7 @@
             min-height: 100vh;
         }
 
+        /* ✅ Game Wrapper */
         .game-wrapper {
             width: 100%;
             max-width: 320px;
@@ -33,6 +35,7 @@
             overflow: hidden;
         }
 
+        /* ✅ Title Styling */
         #leximax-title {
             display: flex;
             gap: 0;
@@ -50,6 +53,7 @@
             color: white;
         }
 
+        /* ✅ Target Word */
         #target-word-container {
             text-align: center;
             margin-bottom: 8px;
@@ -95,6 +99,7 @@
             pointer-events: none;
         }
 
+        /* ✅ Game Grid */
         #game-grid {
             width: 100%;
             aspect-ratio: 8/10;
@@ -137,136 +142,6 @@
             font-size: 16px;
             transition: transform 0.1s ease-out;
         }
-
-        #mobile-controls {
-            width: 100%;
-            max-width: 320px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .mobile-btn {
-            aspect-ratio: 1;
-            width: calc((320px - 16px) / 3);
-            background-color: #003366;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 45px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #time-display {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        #controls {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .time-container {
-            padding: 6px;
-            text-align: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-            line-height: 1.2;
-            border-radius: 2px;
-        }
-
-        #timer-container {
-            background-color: #004d40;
-        }
-
-        #best-time-container {
-            background-color: #d32f2f;
-        }
-
-        #game-buttons {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .game-btn {
-            background-color: #003366;
-            color: white;
-            border: none;
-            border-radius: 2px;
-            padding: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        #leaderboard {
-            width: 100%;
-            max-width: 320px;
-            margin-top: 15px;
-            border-collapse: collapse;
-            background-color: #f0f0f0;
-            color: #000000;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        #leaderboard caption {
-            background-color: #003366;
-            color: white;
-            padding: 8px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        #leaderboard th, #leaderboard td {
-            padding: 6px 12px;
-            text-align: left;
-            border-bottom: 1px solid #cccccc;
-            font-size: 14px;
-        }
-
-        .game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            z-index: 1000;
-        }
-
-        .game-over input {
-            margin: 10px 0;
-            padding: 5px;
-            width: 200px;
-        }
-
-        .game-over button {
-            background-color: #003366;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -287,7 +162,6 @@
         </div>
 
         <div id="game-grid"></div>
-
         <div id="controls">
             <div id="mobile-controls">
                 <button class="mobile-btn" id="left-btn">◀</button>
@@ -322,7 +196,8 @@
         </thead>
         <tbody></tbody>
     </table>
- <script type="module">
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
             getFirestore, 
@@ -336,7 +211,7 @@
             onSnapshot 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Firebase Configuration
+        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -346,11 +221,11 @@
             appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
-        // Initialize Firebase
+        // ✅ Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Game variables
+        // ✅ Core Game Variables
         let TARGET_WORD = '';
         let GAME_ID = '';
         const GRID_WIDTH = 8;
@@ -369,7 +244,7 @@
         let isMoving = false;
         let bestTime = localStorage.getItem('bestTime') || null;
 
-        // Helper functions
+        // ✅ Helper Functions
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
@@ -390,7 +265,6 @@
                     time: Number(time),
                     timestamp: new Date().toISOString()
                 };
-                
                 await addDoc(collection(db, 'daily_games', GAME_ID, 'leaderboard'), entry);
             } catch (error) {
                 console.error("Error adding leaderboard entry:", error);
@@ -420,7 +294,7 @@
             const gameGrid = document.getElementById('game-grid');
             gameGrid.innerHTML = '';
 
-            // Create empty grid
+            // Create grid cells dynamically
             for (let y = 0; y < GRID_HEIGHT; y++) {
                 for (let x = 0; x < GRID_WIDTH; x++) {
                     const cell = document.createElement('div');
@@ -442,7 +316,6 @@
                 }
             }
         }
-
         function moveBlock(dx, dy) {
             if (isPaused || isGameOver || !currentBlock || isMoving) return;
 
@@ -609,7 +482,6 @@
                 console.error('Error setting up leaderboard:', error);
             }
         }
-
         async function startGame() {
             // Reset game state
             grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
@@ -703,6 +575,134 @@
         
         // Initialize game on load
         window.addEventListener('load', initializeGame);
+
+        // ✅ Debug State Button (Optional)
+        function debugGameState() {
+            console.log('%cGame State Debug:', 'color: blue; font-weight: bold;');
+            console.log('TARGET_WORD:', TARGET_WORD);
+            console.log('GAME_ID:', GAME_ID);
+            console.log('Game Time:', gameTime);
+            console.log('Paused:', isPaused);
+            console.log('Game Over:', isGameOver);
+            console.log('Current Block:', currentBlock);
+            console.log('Next Block:', nextBlock);
+            console.log('Grid:', grid);
+        }
+
+        const debugButton = document.createElement('button');
+        debugButton.innerText = 'Debug State';
+        debugButton.style.position = 'fixed';
+        debugButton.style.bottom = '10px';
+        debugButton.style.right = '10px';
+        debugButton.style.zIndex = '1000';
+        debugButton.style.background = '#f44336';
+        debugButton.style.color = 'white';
+        debugButton.style.padding = '5px 10px';
+        debugButton.style.border = 'none';
+        debugButton.style.borderRadius = '4px';
+        debugButton.style.cursor = 'pointer';
+
+        debugButton.addEventListener('click', debugGameState);
+        document.body.appendChild(debugButton);
+
+        console.log('%cFinal Initialization Complete!', 'color: purple; font-weight: bold;');
+        // ✅ Final Safety Net for Unexpected Errors
+        window.addEventListener('error', (event) => {
+            console.error('Global Error:', event.message);
+        });
+
+        // ✅ Safety Net for Unhandled Rejections
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled Promise Rejection:', event.reason);
+        });
+
+        // ✅ Restart Game Function
+        function restartGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            isGameOver = false;
+            isPaused = false;
+            gameTime = 0;
+
+            initGrid();
+            currentBlock = createBlock();
+            nextBlock = createBlock();
+            drawBlock(currentBlock);
+
+            document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
+            document.querySelector('#pause-btn').textContent = 'PAUSE';
+
+            gameInterval = setInterval(() => {
+                if (!isPaused && !isGameOver) {
+                    moveBlock(0, 1);
+                    updateTimer();
+                }
+            }, 1000);
+        }
+
+        // ✅ Clean up Firebase Listeners on Unload
+        window.addEventListener('beforeunload', () => {
+            if (window.leaderboardUnsubscribe) {
+                window.leaderboardUnsubscribe();
+            }
+        });
+
+        // ✅ Ensure Target Word Displays Immediately on Load
+        async function ensureTargetWordDisplays() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const gameId = `Game${today}`;
+                const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
+
+                if (gameDoc.exists()) {
+                    TARGET_WORD = gameDoc.data().targetWord;
+                    const targetWordDiv = document.getElementById('target-word');
+                    if (targetWordDiv) {
+                        targetWordDiv.innerHTML = '';
+                        for (const letter of TARGET_WORD) {
+                            const letterDiv = document.createElement('div');
+                            letterDiv.className = 'target-letter';
+                            letterDiv.textContent = letter;
+                            targetWordDiv.appendChild(letterDiv);
+                        }
+                    }
+                } else {
+                    console.error('Target word not found in Firestore');
+                }
+            } catch (error) {
+                console.error('Error ensuring target word displays:', error.message);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', ensureTargetWordDisplays);
+
+        // ✅ Show Game Status Overlay
+        function showOverlay(message) {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '50%';
+            overlay.style.left = '50%';
+            overlay.style.transform = 'translate(-50%, -50%)';
+            overlay.style.backgroundColor = 'white';
+            overlay.style.padding = '20px';
+            overlay.style.borderRadius = '8px';
+            overlay.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            overlay.style.zIndex = '1000';
+            overlay.style.fontWeight = 'bold';
+            overlay.style.textAlign = 'center';
+            overlay.innerHTML = message;
+            document.body.appendChild(overlay);
+        }
+
+        // ✅ Handle Game Over
+        function handleGameOver(message) {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            isGameOver = true;
+            showOverlay(`<h2>${message}</h2><p>Final Time: ${formatTime(gameTime)}</p>`);
+        }
+
+        console.log('%cGame Initialized Successfully!', 'color: green; font-weight: bold;');
     </script>
 </body>
-</html>   
+</html>
