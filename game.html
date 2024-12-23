@@ -52,48 +52,17 @@
                     return null;
                 }
             },
-
-            async getBestTime() {
-                try {
-                    const docSnap = await getDoc(doc(db, "bestTimes", "global"));
-                    if (docSnap.exists()) {
-                        console.log("Current best time:", docSnap.data().time);
-                        return docSnap.data().time;
-                    }
-                    return null;
-                } catch (error) {
-                    console.error("Error fetching best time:", error);
-                    return null;
-                }
-            },
-            
-            async updateBestTime(newTime) {
-                try {
-                    const currentBest = await this.getBestTime();
-                    if (!currentBest || newTime < currentBest) {
-                        await setDoc(doc(db, "bestTimes", "global"), { 
-                            time: newTime,
-                            updatedAt: new Date().toISOString()
-                        });
-                        console.log("Best time updated to:", newTime);
-                        return true;
-                    }
-                    return false;
-                } catch (error) {
-                    console.error("Error updating best time:", error);
-                    return false;
-                }
-            },
             
             async addLeaderboardEntry(gameId, name, time) {
                 try {
                     const entry = {
-                        name: name.slice(0, 12),
-                        time: time,
+                        name: String(name).slice(0, 12),
+                        time: Number(time),
                         timestamp: new Date().toISOString()
                     };
-                    console.log("Adding leaderboard entry:", entry);
-                    await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), entry);
+                    // Ensure the data is properly formatted
+                    const sanitizedEntry = JSON.parse(JSON.stringify(entry));
+                    await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), sanitizedEntry);
                     return true;
                 } catch (error) {
                     console.error("Error adding leaderboard entry:", error);
@@ -220,6 +189,7 @@
             position: relative;
             width: 100%;
             height: 100%;
+            transition: transform 0.15s ease-out;
         }
 
         .grid-cell::after {
@@ -240,7 +210,6 @@
             font-weight: bold;
             color: white;
             font-size: 16px;
-            transition: transform 0.1s ease-out;
         }
 
         #mobile-controls {
@@ -264,6 +233,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .mobile-btn:active {
+            background-color: #002244;
         }
 
         #time-display {
@@ -315,6 +289,11 @@
             cursor: pointer;
             text-transform: uppercase;
             font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .game-btn:active {
+            background-color: #002244;
         }
 
         #leaderboard {
@@ -359,8 +338,11 @@
 
         .game-over input {
             margin: 10px 0;
-            padding: 5px;
+            padding: 8px;
             width: 200px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
         }
 
         .game-over button {
@@ -371,6 +353,16 @@
             border-radius: 4px;
             cursor: pointer;
             margin-top: 10px;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+
+        .game-over button:hover {
+            background-color: #004488;
+        }
+
+        .game-over button:active {
+            background-color: #002244;
         }
     </style>
 </head>
@@ -467,8 +459,9 @@
             const downBtn = document.getElementById('down-btn');
             const rightBtn = document.getElementById('right-btn');
             const timerDisplay = document.querySelector('#timer-container');
+            const bestTimeDisplay = document.querySelector('#best-time-container');
 
-            // Initialize target word immediately
+            // Initialize target word and setup leaderboard immediately
             async function initializeTargetWord() {
                 const gameData = await window.firebaseOps.getGameData();
                 if (gameData) {
@@ -540,6 +533,7 @@
                     cell.textContent = '';
                 }
             }
+
             function isCollision(block) {
                 if (!block) return true;
                 if (block.x < 0 || block.x >= GRID_WIDTH) return true;
@@ -547,26 +541,21 @@
                 if (block.y >= 0 && grid[block.y][block.x] !== null) return true;
                 return false;
             }
-
             async function moveBlock(dx, dy) {
                 if (!currentBlock || isPaused || isGameOver || isMoving) return;
                 
                 isMoving = true;
-                clearBlock(currentBlock);
-                
                 const newX = currentBlock.x + dx;
                 const newY = currentBlock.y + dy;
                 const testBlock = { ...currentBlock, x: newX, y: newY };
                 
                 if (!isCollision(testBlock)) {
+                    clearBlock(currentBlock);
                     currentBlock.x = newX;
                     currentBlock.y = newY;
                     drawBlock(currentBlock);
                 } else if (dy > 0) {
-                    drawBlock(currentBlock);
                     placeBlock();
-                } else {
-                    drawBlock(currentBlock);
                 }
                 
                 isMoving = false;
@@ -620,6 +609,16 @@
                 return TARGET_WORD.includes(letter);
             }
 
+            function checkAdjacentMatch(x1, y1, x2, y2) {
+                const block1 = grid[y1][x1];
+                const block2 = grid[y2][x2];
+                
+                if (!block1 || !block2) return false;
+                if (isPartOfTargetWord(block1.letter) || isPartOfTargetWord(block2.letter)) return false;
+                
+                return block1.color === block2.color || block1.letter === block2.letter;
+            }
+
             function clearCell(x, y) {
                 grid[y][x] = null;
                 const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
@@ -630,20 +629,10 @@
                         cell.style.transform = '';
                         cell.style.backgroundColor = '';
                         cell.textContent = '';
-                    }, 100);
+                    }, 150);
                 }
             }
 
-            // Helper function to check adjacent matches
-            function checkAdjacentMatch(x1, y1, x2, y2) {
-                const block1 = grid[y1][x1];
-                const block2 = grid[y2][x2];
-                
-                if (!block1 || !block2) return false;
-                if (isPartOfTargetWord(block1.letter) || isPartOfTargetWord(block2.letter)) return false;
-                
-                return block1.color === block2.color || block1.letter === block2.letter;
-            }
             function checkMatches() {
                 const toRemove = new Set();
                 
@@ -677,12 +666,11 @@
                     });
                     setTimeout(() => {
                         shiftDownCells();
-                    }, 150);
+                    }, 200);
                     return true;
                 }
                 return false;
             }
-
             function shiftDownCells() {
                 let moved;
                 do {
@@ -716,49 +704,14 @@
                     }
                 } while (moved);
                 
-                // Check for new matches after shifting
-                if (checkMatches()) {
-                    return;
-                }
+                // After all shifts are complete, check for new matches
+                setTimeout(() => {
+                    if (!checkMatches()) {
+                        checkWin();
+                    }
+                }, 100);
             }
 
-            async function checkWin() {
-                // Only check for horizontal matches
-                for (let y = 0; y < GRID_HEIGHT; y++) {
-                    for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
-                        let word = '';
-                        let isValid = true;
-                        
-                        for (let i = 0; i < TARGET_WORD.length; i++) {
-                            if (!grid[y][x + i]) {
-                                isValid = false;
-                                break;
-                            }
-                            word += grid[y][x + i].letter;
-                        }
-                        
-                        if (isValid && word === TARGET_WORD) {
-                            isGameOver = true;
-                            clearInterval(gameInterval);
-                            clearInterval(timerInterval);
-                            
-                            const timeStr = formatTime(gameTime);
-                            const message = `YOU DID IT IN ${timeStr}!`;
-                            
-                            // Highlight winning word
-                            for (let i = 0; i < TARGET_WORD.length; i++) {
-                                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x + i}"][data-y="${y}"]`);
-                                if (cell) {
-                                    cell.style.transform = 'scale(1.1)';
-                                }
-                            }
-                            
-                            endGame(message, true);
-                            return;
-                        }
-                    }
-                }
-            }
             function setupLeaderboard() {
                 if (!GAME_ID) return;
 
@@ -772,23 +725,72 @@
                     const tbody = document.querySelector('#leaderboard tbody');
                     if (tbody) {
                         tbody.innerHTML = '';
+                        let rank = 1;
+                        
                         snapshot.forEach((doc, index) => {
                             const data = doc.data();
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td>${index + 1}</td>
+                                <td>${rank}</td>
                                 <td>${data.name}</td>
                                 <td>${formatTime(data.time)}</td>
                             `;
                             tbody.appendChild(row);
+                            
+                            // Update best time from first leaderboard entry
+                            if (index === 0 && bestTimeDisplay) {
+                                bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(data.time)}`;
+                            }
+                            
+                            rank++;
                         });
                     }
                 });
             }
 
+            async function checkWin() {
+                // Only check for horizontal matches
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
+                        let word = '';
+                        let isValid = true;
+                        let winningCells = [];
+                        
+                        for (let i = 0; i < TARGET_WORD.length; i++) {
+                            if (!grid[y][x + i]) {
+                                isValid = false;
+                                break;
+                            }
+                            word += grid[y][x + i].letter;
+                            winningCells.push([x + i, y]);
+                        }
+                        
+                        if (isValid && word === TARGET_WORD) {
+                            isGameOver = true;
+                            clearInterval(gameInterval);
+                            clearInterval(timerInterval);
+                            
+                            // Highlight winning word with animation
+                            winningCells.forEach(([wx, wy]) => {
+                                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${wx}"][data-y="${wy}"]`);
+                                if (cell) {
+                                    cell.style.transform = 'scale(1.1)';
+                                }
+                            });
+                            
+                            const timeStr = formatTime(gameTime);
+                            const message = `YOU DID IT IN ${timeStr}!`;
+                            
+                            setTimeout(() => {
+                                endGame(message, true);
+                            }, 500);
+                            return;
+                        }
+                    }
+                }
+            }
+
             function endGame(message, isWin = false) {
-                clearInterval(gameInterval);
-                clearInterval(timerInterval);
                 isGameOver = true;
                 
                 const overlay = document.createElement('div');
@@ -803,7 +805,6 @@
                 
                 document.getElementById('game-grid').appendChild(overlay);
             }
-
             async function startGame() {
                 // Remove any existing game over overlay
                 const overlay = document.querySelector('.game-over');
@@ -849,11 +850,13 @@
             window.submitScore = async function() {
                 const nameInput = document.getElementById('player-name');
                 const name = nameInput.value.trim() || 'Anonymous';
+                const overlay = document.querySelector('.game-over');
                 
                 try {
                     await window.firebaseOps.addLeaderboardEntry(GAME_ID, name, gameTime);
-                    nameInput.disabled = true;
-                    nameInput.nextElementSibling.disabled = true;
+                    if (overlay) {
+                        overlay.remove();
+                    }
                 } catch (error) {
                     console.error('Error submitting score:', error);
                 }
