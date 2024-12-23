@@ -337,6 +337,145 @@
         let isPaused = false;
         let isGameOver = false;
         let isMoving = false;
+        let bestTime = localStorage.getItem('bestTime') || null;
+
+        // Game functions
+        function createBlock() {
+            const letter = Math.random() < 0.3 ? 
+                VOWELS[Math.floor(Math.random() * VOWELS.length)] : 
+                LETTERS[Math.floor(Math.random() * LETTERS.length)];
+            
+            return {
+                letter,
+                color: COLORS[Math.floor(Math.random() * COLORS.length)],
+                x: Math.floor(GRID_WIDTH / 2),
+                y: 0
+            };
+        }
+
+        function checkCollision(x, y) {
+            if (x < 0 || x >= GRID_WIDTH || y >= GRID_HEIGHT) return true;
+            if (y < 0) return false;
+            return grid[y][x] !== null;
+        }
+
+        function updateGrid() {
+            const gameGrid = document.getElementById('game-grid');
+            gameGrid.innerHTML = '';
+
+            // Create empty grid
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    
+                    if (grid[y][x]) {
+                        cell.classList.add('filled');
+                        cell.textContent = grid[y][x].letter;
+                        cell.style.backgroundColor = grid[y][x].color;
+                    }
+                    
+                    if (currentBlock && currentBlock.x === x && currentBlock.y === y) {
+                        cell.classList.add('filled');
+                        cell.textContent = currentBlock.letter;
+                        cell.style.backgroundColor = currentBlock.color;
+                    }
+                    
+                    gameGrid.appendChild(cell);
+                }
+            }
+        }
+
+        function moveBlock(dx, dy) {
+            if (isPaused || isGameOver || !currentBlock || isMoving) return;
+
+            const newX = currentBlock.x + dx;
+            const newY = currentBlock.y + dy;
+
+            if (!checkCollision(newX, newY)) {
+                currentBlock.x = newX;
+                currentBlock.y = newY;
+                updateGrid();
+            } else if (dy > 0) {
+                placeBlock();
+            }
+        }
+
+        function dropBlock() {
+            if (isPaused || isGameOver || !currentBlock || isMoving) return;
+            
+            while (!checkCollision(currentBlock.x, currentBlock.y + 1)) {
+                currentBlock.y++;
+            }
+            
+            placeBlock();
+        }
+
+        function getWord(cells) {
+            return cells.map(([x, y]) => grid[y][x].letter).join('');
+        }
+
+        function checkForWords() {
+            // Check for vertical words
+            for (let x = 0; x < GRID_WIDTH; x++) {
+                for (let y = 0; y <= GRID_HEIGHT - TARGET_WORD.length; y++) {
+                    const cells = Array.from({ length: TARGET_WORD.length }, (_, i) => [x, y + i]);
+                    if (cells.every(([cx, cy]) => grid[cy][cx]) && 
+                        getWord(cells) === TARGET_WORD) {
+                        clearCells(cells);
+                        shiftDownCells();
+                        return;
+                    }
+                }
+            }
+        }
+
+        function clearCells(cells) {
+            for (const [x, y] of cells) {
+                grid[y][x] = null;
+            }
+        }
+
+        function shiftDownCells() {
+            for (let x = 0; x < GRID_WIDTH; x++) {
+                let writeY = GRID_HEIGHT - 1;
+                for (let readY = GRID_HEIGHT - 1; readY >= 0; readY--) {
+                    if (grid[readY][x]) {
+                        if (writeY !== readY) {
+                            grid[writeY][x] = grid[readY][x];
+                            grid[readY][x] = null;
+                        }
+                        writeY--;
+                    }
+                }
+            }
+            updateGrid();
+        }
+
+        function placeBlock() {
+            if (!currentBlock) return;
+            
+            grid[currentBlock.y][currentBlock.x] = {
+                letter: currentBlock.letter,
+                color: currentBlock.color
+            };
+
+            checkForWords();
+            currentBlock = nextBlock;
+            nextBlock = createBlock();
+            
+            if (checkCollision(currentBlock.x, currentBlock.y)) {
+                endGame();
+            }
+            
+            updateGrid();
+        }
+
+        function togglePause() {
+            if (isGameOver) return;
+            isPaused = !isPaused;
+            document.querySelector('#pause-btn').textContent = isPaused ? 'RESUME' : 'PAUSE';
+        }
 
         // Helper functions
         function formatTime(seconds) {
@@ -364,6 +503,142 @@
             }
         }
 
+        function endGame() {
+            isGameOver = true;
+            clearInterval(gameInterval);
+            
+            const gameOverScreen = document.createElement('div');
+            gameOverScreen.className = 'game-over';
+            gameOverScreen.innerHTML = `
+                <h2>Game Over!</h2>
+                <p>Your time: ${formatTime(gameTime)}</p>
+                ${bestTime ? `<p>Best time: ${formatTime(bestTime)}</p>` : ''}
+                <input type="text" id="player-name" placeholder="Enter your name">
+                <button onclick="submitScore()">Submit Score</button>
+            `;
+            
+            document.getElementById('game-grid').appendChild(gameOverScreen);
+            
+            if (!bestTime || gameTime < bestTime) {
+                bestTime = gameTime;
+                localStorage.setItem('bestTime', bestTime);
+                document.querySelector('#best-time-container').innerHTML = 
+                    `Best Time:<br>${formatTime(bestTime)}`;
+            }
+        }
+
+        window.submitScore = async function() {
+            const nameInput = document.getElementById('player-name');
+            const playerName = nameInput.value.trim();
+            
+            if (playerName) {
+                await addLeaderboardEntry(playerName, gameTime);
+                nameInput.disabled = true;
+                document.querySelector('.game-over button').disabled = true;
+            }
+        };
+
+        async function startGame() {
+            // Reset game state
+            grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
+            gameTime = 0;
+            isPaused = false;
+            isGameOver = false;
+            
+            // Get today's word from Firestore
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const gameDoc = await getDoc(doc(db, 'daily_games', today));
+                if (!gameDoc.exists()) {
+                    console.error("No word found for today");
+                    return;
+                }
+                TARGET_WORD = gameDoc.data().word;
+                GAME_ID = today;
+
+                // Display target word
+                const targetWordDiv = document.getElementById('target-word');
+                targetWordDiv.innerHTML = '';
+                for (const letter of TARGET_WORD) {
+                    const letterDiv = document.createElement('div');
+                    letterDiv.className = 'target-letter';
+                    letterDiv.textContent = letter;
+                    targetWordDiv.appendChild(letterDiv);
+                }
+
+                // Initialize blocks
+                currentBlock = createBlock();
+                nextBlock = createBlock();
+                
+                // Start game loop
+                if (gameInterval) clearInterval(gameInterval);
+                gameInterval = setInterval(() => {
+                    if (!isPaused && !isGameOver) {
+                        moveBlock(0, 1);
+                    }
+                }, 1000);
+
+                // Start timer
+                setInterval(updateTimer, 1000);
+                
+                // Update grid
+                updateGrid();
+                
+                // Setup leaderboard
+                setupLeaderboard();
+            } catch (error) {
+                console.error("Error starting game:", error);
+            }
+        }
+
+        function setupLeaderboard() {
+            const leaderboardQuery = query(
+                collection(db, 'daily_games', GAME_ID, 'leaderboard'),
+                orderBy('time'),
+                limit(10)
+            );
+
+            onSnapshot(leaderboardQuery, (snapshot) => {
+                const tbody = document.querySelector('#leaderboard tbody');
+                tbody.innerHTML = '';
+                
+                snapshot.docs.forEach((doc, index) => {
+                    const data = doc.data();
+                    const row = tbody.insertRow();
+                    row.insertCell().textContent = index + 1;
+                    row.insertCell().textContent = data.name;
+                    row.insertCell().textContent = formatTime(data.time);
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('start-btn').addEventListener('click', startGame);
+            document.getElementById('pause-btn').addEventListener('click', togglePause);
+            document.getElementById('left-btn').addEventListener('click', () => moveBlock(-1, 0));
+            document.getElementById('right-btn').addEventListener('click', () => moveBlock(1, 0));
+            document.getElementById('down-btn').addEventListener('click', dropBlock);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
+                if (e.key === 'ArrowRight') moveBlock(1, 0);
+                if (e.key === 'ArrowDown') dropBlock();
+                if (e.key === ' ') togglePause();
+            });
+        }
+
+        function initializeGame() {
+            setupEventListeners();
+            if (bestTime) {
+                document.querySelector('#best-time-container').innerHTML = 
+                    `Best Time:<br>${formatTime(bestTime)}`;
+            }
+        }
+
+        // Make functions globally accessible
+        window.initializeGame = initializeGame;
+        window.submitScore = submitScore;
+        
         // Initialize game on load
         window.addEventListener('load', initializeGame);
     </script>
