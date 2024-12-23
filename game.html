@@ -513,7 +513,6 @@
                 document.body.appendChild(overlay);
             }
         }
-
         // ✅ Add Score to Leaderboard
         async function addLeaderboardEntry(gameId, playerName, time) {
             try {
@@ -528,29 +527,28 @@
                 console.error('Failed to add leaderboard entry:', error.message);
             }
         }
-
         // ✅ Restart Game
-        function restartGame() {
-            clearInterval(gameInterval);
-            isGameOver = false;
-            isPaused = false;
-            gameTime = 0;
+function restartGame() {
+    clearInterval(gameInterval);
+    isGameOver = false;
+    isPaused = false;
+    gameTime = 0;
 
-            initGrid();
-            currentBlock = createBlock();
-            nextBlock = createBlock();
-            drawBlock(currentBlock);
+    initGrid();
+    currentBlock = createBlock();
+    nextBlock = createBlock();
+    drawBlock(currentBlock);
 
-            document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
-            document.querySelector('#pause-btn').textContent = 'PAUSE';
+    document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
+    document.querySelector('#pause-btn').textContent = 'PAUSE';
 
-            gameInterval = setInterval(() => {
-                if (!isPaused && !isGameOver) {
-                    moveBlock(0, 1);
-                    updateTimer();
-                }
-            }, 1000);
+    gameInterval = setInterval(() => {
+        if (!isPaused && !isGameOver) {
+            moveBlock(0, 1);
+            updateTimer();
         }
+    }, 1000);
+}
         // ✅ Setup Event Listeners for Controls
         function setupEventListeners() {
             // ✅ Mobile Controls
@@ -624,31 +622,7 @@
                 document.querySelector('#timer-container').innerHTML = `Time:<br>${formatTime(gameTime)}`;
             }
         }
-
-        // ✅ Restart Game Logic
-        function restartGame() {
-            clearInterval(gameInterval);
-            isGameOver = false;
-            isPaused = false;
-            gameTime = 0;
-
-            initGrid();
-            currentBlock = createBlock();
-            nextBlock = createBlock();
-            drawBlock(currentBlock);
-
-            document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
-            document.querySelector('#pause-btn').textContent = 'PAUSE';
-
-            gameInterval = setInterval(() => {
-                if (!isPaused && !isGameOver) {
-                    moveBlock(0, 1);
-                    updateTimer();
-                }
-            }, 1000);
-        }
-
-        // ✅ Final Safety Checks for Initialization
+      // ✅ Final Safety Checks for Initialization
         window.addEventListener('error', (event) => {
             console.error('Global Error:', event.message);
         });
