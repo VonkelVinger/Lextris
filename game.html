@@ -35,10 +35,35 @@
         window.firebaseOps = {
             async getGameData() {
                 try {
-                    const today = new Date().toISOString().split('T')[0];
-                    const gameId = `Game${today}`;
-                    console.log("Looking for game:", gameId);
-                    const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
+                    function getGameIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('gameId');
+}
+
+window.firebaseOps = {
+    async getGameData() {
+        try {
+            // Check if gameId is provided in the URL
+            const urlGameId = getGameIdFromUrl();
+            const gameId = urlGameId || `Game${new Date().toISOString().split('T')[0]}`;
+            console.log("Looking for game:", gameId);
+
+            const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
+            if (!gameDoc.exists()) {
+                console.error("No game found for the given gameId:", gameId);
+                return null;
+            }
+            return {
+                id: gameId,
+                ...gameDoc.data()
+            };
+        } catch (error) {
+            console.error("Error fetching game data:", error);
+            return null;
+        }
+    },
+};
+
                     if (!gameDoc.exists()) {
                         console.error("No game found for today");
                         return null;
