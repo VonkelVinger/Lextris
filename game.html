@@ -137,6 +137,7 @@
             font-size: 16px;
             transition: transform 0.1s ease-out;
         }
+
         #mobile-controls {
             width: 100%;
             max-width: 320px;
@@ -321,8 +322,9 @@
         </thead>
         <tbody></tbody>
     </table>
+
     <script type="module">
-        // ✅ Firebase Imports
+        // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
             getFirestore, 
@@ -336,7 +338,7 @@
             onSnapshot 
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ✅ Firebase Configuration
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -346,11 +348,11 @@
             appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
-        // ✅ Initialize Firebase
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Game Variables
+        // Game Variables
         let TARGET_WORD = '';
         let GAME_ID = '';
         const GRID_WIDTH = 8;
@@ -369,7 +371,37 @@
         let isMoving = false;
         let bestTime = localStorage.getItem('bestTime') || null;
 
-        // ✅ Utility Functions
+        // Fix 1: Add function to initialize target word display before game starts
+        async function initializeTargetWord() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const gameId = `Game${today}`;
+                console.log("Looking for game:", gameId);
+                const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
+                if (!gameDoc.exists()) {
+                    console.error("No word found for today");
+                    return false;
+                }
+                TARGET_WORD = gameDoc.data().targetWord;
+                GAME_ID = gameId;
+                console.log("Found word:", TARGET_WORD);
+
+                const targetWordDiv = document.getElementById('target-word');
+                targetWordDiv.innerHTML = '';
+                for (const letter of TARGET_WORD) {
+                    const letterDiv = document.createElement('div');
+                    letterDiv.className = 'target-letter';
+                    letterDiv.textContent = letter;
+                    targetWordDiv.appendChild(letterDiv);
+                }
+                return true;
+            } catch (error) {
+                console.error("Error initializing target word:", error);
+                return false;
+            }
+        }
+
+        // Utility Functions
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
@@ -382,7 +414,6 @@
                 document.querySelector('#timer-container').innerHTML = `Time:<br>${formatTime(gameTime)}`;
             }
         }
-
         async function addLeaderboardEntry(name, time) {
             try {
                 const entry = {
@@ -390,7 +421,6 @@
                     time: Number(time),
                     timestamp: new Date().toISOString()
                 };
-                
                 await addDoc(collection(db, 'daily_games', GAME_ID, 'leaderboard'), entry);
             } catch (error) {
                 console.error("Error adding leaderboard entry:", error);
@@ -416,10 +446,12 @@
             return grid[y][x] !== null;
         }
 
+        // Fix 2: Improved block movement and display
         function updateGrid() {
             const gameGrid = document.getElementById('game-grid');
             gameGrid.innerHTML = '';
 
+            // First render the grid
             for (let y = 0; y < GRID_HEIGHT; y++) {
                 for (let x = 0; x < GRID_WIDTH; x++) {
                     const cell = document.createElement('div');
@@ -431,17 +463,20 @@
                         cell.style.backgroundColor = grid[y][x].color;
                     }
                     
-                    if (currentBlock && currentBlock.x === x && currentBlock.y === y) {
-                        cell.classList.add('filled');
-                        cell.textContent = currentBlock.letter;
-                        cell.style.backgroundColor = currentBlock.color;
-                    }
-                    
                     gameGrid.appendChild(cell);
                 }
             }
+
+            // Then render the current block on top if it exists
+            if (currentBlock) {
+                const blockCell = gameGrid.children[currentBlock.y * GRID_WIDTH + currentBlock.x];
+                blockCell.classList.add('filled');
+                blockCell.textContent = currentBlock.letter;
+                blockCell.style.backgroundColor = currentBlock.color;
+            }
         }
 
+        // Fix 3: Improved block movement with state management
         function moveBlock(dx, dy) {
             if (isPaused || isGameOver || !currentBlock || isMoving) return;
 
@@ -449,82 +484,128 @@
             const newY = currentBlock.y + dy;
 
             if (!checkCollision(newX, newY)) {
+                isMoving = true;
                 currentBlock.x = newX;
                 currentBlock.y = newY;
                 updateGrid();
+                isMoving = false;
             } else if (dy > 0) {
                 placeBlock();
             }
         }
 
+        // Fix 4: Improved drop function
         function dropBlock() {
             if (isPaused || isGameOver || !currentBlock || isMoving) return;
             
-            while (!checkCollision(currentBlock.x, currentBlock.y + 1)) {
-                currentBlock.y++;
+            isMoving = true;
+            let newY = currentBlock.y;
+            
+            // Find the lowest position the block can go
+            while (!checkCollision(currentBlock.x, newY + 1)) {
+                newY++;
             }
             
+            currentBlock.y = newY;
+            updateGrid();
             placeBlock();
+            isMoving = false;
         }
-
         function getWord(cells) {
             return cells.map(([x, y]) => grid[y][x].letter).join('');
         }
 
+        // Fix: Improved word checking logic
         function checkForWords() {
+            let foundMatch = false;
+            
+            // Check vertical matches
             for (let x = 0; x < GRID_WIDTH; x++) {
                 for (let y = 0; y <= GRID_HEIGHT - TARGET_WORD.length; y++) {
-                    const cells = Array.from({ length: TARGET_WORD.length }, (_, i) => [x, y + i]);
-                    if (cells.every(([cx, cy]) => grid[cy][cx]) && 
-                        getWord(cells) === TARGET_WORD) {
-                        clearCells(cells);
-                        shiftDownCells();
-                        return;
+                    const cells = Array.from(
+                        { length: TARGET_WORD.length }, 
+                        (_, i) => [x, y + i]
+                    );
+                    
+                    if (cells.every(([cx, cy]) => grid[cy][cx])) {
+                        const word = getWord(cells);
+                        if (word === TARGET_WORD) {
+                            clearCells(cells);
+                            foundMatch = true;
+                        }
                     }
                 }
             }
+            
+            if (foundMatch) {
+                shiftDownCells();
+                return true;
+            }
+            return false;
         }
 
+        // Fix: Improved cell clearing with animation support
         function clearCells(cells) {
             for (const [x, y] of cells) {
-                grid[y][x] = null;
+                const index = y * GRID_WIDTH + x;
+                const cell = document.querySelector(`#game-grid .grid-cell:nth-child(${index + 1})`);
+                if (cell) {
+                    cell.style.transform = 'scale(0)';
+                    setTimeout(() => {
+                        grid[y][x] = null;
+                        updateGrid();
+                    }, 100);
+                } else {
+                    grid[y][x] = null;
+                }
             }
         }
 
+        // Fix: Improved gravity effect for falling blocks
         function shiftDownCells() {
-            for (let x = 0; x < GRID_WIDTH; x++) {
-                let writeY = GRID_HEIGHT - 1;
-                for (let readY = GRID_HEIGHT - 1; readY >= 0; readY--) {
-                    if (grid[readY][x]) {
-                        if (writeY !== readY) {
-                            grid[writeY][x] = grid[readY][x];
-                            grid[readY][x] = null;
+            let moved;
+            do {
+                moved = false;
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    for (let y = GRID_HEIGHT - 2; y >= 0; y--) {
+                        if (grid[y][x] && !grid[y + 1][x]) {
+                            grid[y + 1][x] = grid[y][x];
+                            grid[y][x] = null;
+                            moved = true;
                         }
-                        writeY--;
                     }
                 }
-            }
-            updateGrid();
+                updateGrid();
+            } while (moved);
         }
+
+        // Fix: Improved block placement with state management
         function placeBlock() {
             if (!currentBlock) return;
             
+            isMoving = true;
+            
+            // Place the current block
             grid[currentBlock.y][currentBlock.x] = {
                 letter: currentBlock.letter,
                 color: currentBlock.color
             };
 
-            checkForWords();
-
+            // Check for matches
+            const hasMatches = checkForWords();
+            
+            // Set up next block
             currentBlock = nextBlock;
             nextBlock = createBlock();
             
+            // Check for game over
             if (checkCollision(currentBlock.x, currentBlock.y)) {
                 endGame();
                 return;
             }
             
             updateGrid();
+            isMoving = false;
         }
 
         function togglePause() {
@@ -533,10 +614,19 @@
             document.querySelector('#pause-btn').textContent = isPaused ? 'RESUME' : 'PAUSE';
         }
 
+        // Fix: Improved game over handling
         function endGame() {
             isGameOver = true;
             if (gameInterval) clearInterval(gameInterval);
             if (timerInterval) clearInterval(timerInterval);
+            
+            // Update best time if applicable
+            if (!bestTime || gameTime < bestTime) {
+                bestTime = gameTime;
+                localStorage.setItem('bestTime', bestTime);
+                document.querySelector('#best-time-container').innerHTML = 
+                    `Best Time:<br>${formatTime(bestTime)}`;
+            }
             
             const gameOverScreen = document.createElement('div');
             gameOverScreen.className = 'game-over';
@@ -549,15 +639,8 @@
             `;
             
             document.getElementById('game-grid').appendChild(gameOverScreen);
-            
-            if (!bestTime || gameTime < bestTime) {
-                bestTime = gameTime;
-                localStorage.setItem('bestTime', bestTime);
-                document.querySelector('#best-time-container').innerHTML = 
-                    `Best Time:<br>${formatTime(bestTime)}`;
-            }
         }
-
+        // Make submitScore available globally
         window.submitScore = async function() {
             const nameInput = document.getElementById('player-name');
             const playerName = nameInput.value.trim();
@@ -604,59 +687,56 @@
             }
         }
 
+        // Fix: Improved game initialization
         async function startGame() {
+            // Reset game state
             grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
             gameTime = 0;
             isPaused = false;
             isGameOver = false;
+            isMoving = false;
             
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                const gameId = `Game${today}`;
-                console.log("Looking for game:", gameId);
-                const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
-                if (!gameDoc.exists()) {
-                    console.error("No word found for today");
+            // Initialize target word if not already done
+            if (!TARGET_WORD) {
+                const success = await initializeTargetWord();
+                if (!success) {
+                    console.error("Failed to initialize target word");
                     return;
                 }
-                TARGET_WORD = gameDoc.data().targetWord;
-                GAME_ID = gameId;
-                console.log("Found word:", TARGET_WORD);
-
-                const targetWordDiv = document.getElementById('target-word');
-                targetWordDiv.innerHTML = '';
-                for (const letter of TARGET_WORD) {
-                    const letterDiv = document.createElement('div');
-                    letterDiv.className = 'target-letter';
-                    letterDiv.textContent = letter;
-                    targetWordDiv.appendChild(letterDiv);
-                }
-
-                currentBlock = createBlock();
-                nextBlock = createBlock();
-                
-                if (gameInterval) clearInterval(gameInterval);
-                gameInterval = setInterval(() => {
-                    if (!isPaused && !isGameOver) {
-                        moveBlock(0, 1);
-                    }
-                }, 1000);
-
-                if (timerInterval) clearInterval(timerInterval);
-                timerInterval = setInterval(updateTimer, 1000);
-                
-                if (window.leaderboardUnsubscribe) {
-                    window.leaderboardUnsubscribe();
-                    window.leaderboardUnsubscribe = null;
-                }
-                
-                updateGrid();
-                setupLeaderboard();
-            } catch (error) {
-                console.error("Error starting game:", error);
             }
+
+            // Initialize blocks
+            currentBlock = createBlock();
+            nextBlock = createBlock();
+            
+            // Clear and setup intervals
+            if (gameInterval) clearInterval(gameInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            
+            gameInterval = setInterval(() => {
+                if (!isPaused && !isGameOver) {
+                    moveBlock(0, 1);
+                }
+            }, 1000);
+
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            // Clean up previous leaderboard listener
+            if (window.leaderboardUnsubscribe) {
+                window.leaderboardUnsubscribe();
+                window.leaderboardUnsubscribe = null;
+            }
+            
+            // Initialize UI
+            updateGrid();
+            setupLeaderboard();
+            
+            // Reset timer display
+            document.querySelector('#timer-container').innerHTML = 'Time:<br>00:00';
+            document.querySelector('#pause-btn').textContent = 'PAUSE';
         }
 
+        // Initialize event listeners
         function setupEventListeners() {
             document.getElementById('start-btn')?.addEventListener('click', startGame);
             document.getElementById('pause-btn')?.addEventListener('click', togglePause);
@@ -664,6 +744,7 @@
             document.getElementById('right-btn')?.addEventListener('click', () => moveBlock(1, 0));
             document.getElementById('down-btn')?.addEventListener('click', dropBlock);
 
+            // Keyboard controls
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') moveBlock(-1, 0);
                 if (e.key === 'ArrowRight') moveBlock(1, 0);
@@ -672,60 +753,24 @@
             });
         }
 
+        // Initialize the game
         function initializeGame() {
             setupEventListeners();
             if (bestTime) {
                 document.querySelector('#best-time-container').innerHTML = 
                     `Best Time:<br>${formatTime(bestTime)}`;
             }
-            updateGrid();
+            initializeTargetWord().then(() => {
+                updateGrid();
+            });
         }
 
+        // Make initialization functions available globally
         window.initializeGame = initializeGame;
         window.submitScore = submitScore;
 
+        // Initialize on load
         window.addEventListener('load', initializeGame);
-        // ✅ Ensure Game Initialization Completes Successfully
-        window.addEventListener('load', () => {
-            console.log('%cFinal Initialization Complete!', 'color: purple; font-weight: bold;');
-        });
-
-        // ✅ Final Safety Net for Unexpected Errors
-        window.addEventListener('error', (event) => {
-            console.error('Global Error:', event.message);
-        });
-
-        // ✅ Helper: Debug Game State (Optional)
-        function debugGameState() {
-            console.log('%cGame State Debug:', 'color: blue; font-weight: bold;');
-            console.log('TARGET_WORD:', TARGET_WORD);
-            console.log('GAME_ID:', GAME_ID);
-            console.log('Game Time:', gameTime);
-            console.log('Paused:', isPaused);
-            console.log('Game Over:', isGameOver);
-            console.log('Current Block:', currentBlock);
-            console.log('Next Block:', nextBlock);
-            console.log('Grid:', grid);
-        }
-
-        // ✅ Force Reload Button (For Testing Purposes)
-        const debugButton = document.createElement('button');
-        debugButton.innerText = 'Debug State';
-        debugButton.style.position = 'fixed';
-        debugButton.style.bottom = '10px';
-        debugButton.style.right = '10px';
-        debugButton.style.zIndex = '1000';
-        debugButton.style.background = '#f44336';
-        debugButton.style.color = 'white';
-        debugButton.style.padding = '5px 10px';
-        debugButton.style.border = 'none';
-        debugButton.style.borderRadius = '4px';
-        debugButton.style.cursor = 'pointer';
-
-        debugButton.addEventListener('click', debugGameState);
-        document.body.appendChild(debugButton);
-
-        console.log('%cFinal Initialization Complete and Ready!', 'color: green; font-weight: bold;');
     </script>
 </body>
 </html>
