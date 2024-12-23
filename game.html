@@ -468,7 +468,7 @@
         }
 
         // ✅ End Game Logic
-       function endGame(message, isWin = false) {
+      function endGame(message, isWin = false) {
     clearInterval(gameInterval);
     isGameOver = true;
 
@@ -493,7 +493,7 @@
                        maxlength="12" 
                        placeholder="Enter your name"
                        style="padding: 5px; border: 1px solid #004d40; border-radius: 4px;">
-                <button type="submit">Submit Score</button>
+                <button type="submit" style="margin-top: 10px; background-color: #004d40; color: white; padding: 5px; border: none; border-radius: 4px;">Submit Score</button>
             </form>
         `;
         document.body.appendChild(overlay);
@@ -586,32 +586,31 @@
         }
         // ✅ Initialize Game on Page Load
         document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                GAME_ID = urlParams.get('gameId');
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        GAME_ID = urlParams.get('gameId');
 
-                if (!GAME_ID) throw new Error('Game ID is missing from the URL.');
+        if (!GAME_ID) throw new Error('Game ID is missing from the URL.');
 
-                const gameRef = doc(db, 'daily_games', GAME_ID);
-                const gameSnap = await getDoc(gameRef);
+        const gameRef = doc(db, 'daily_games', GAME_ID);
+        const gameSnap = await getDoc(gameRef);
 
-                if (!gameSnap.exists()) {
-                    throw new Error(`Game ${GAME_ID} not found.`);
-                }
+        if (!gameSnap.exists()) {
+            throw new Error(`Game ${GAME_ID} not found.`);
+        }
 
-                TARGET_WORD = gameSnap.data()?.targetWord || 'ERROR';
-                displayTargetWord(TARGET_WORD);
+        TARGET_WORD = gameSnap.data()?.targetWord || 'ERROR';
+        displayTargetWord(TARGET_WORD);
 
-                // Start Leaderboard Listener
-                setupLeaderboardListener();
-                initGame();
-                setupEventListeners();
-            } catch (error) {
-                console.error('Initialization Error:', error.message);
-                document.body.innerHTML = `<h2 style="color: red; text-align: center; margin-top: 50px;">Error: ${error.message}</h2>`;
-            }
-        });
-
+        // Start Leaderboard Listener
+        setupLeaderboardListener();
+        initGame();
+        setupEventListeners();
+    } catch (error) {
+        console.error('Initialization Error:', error.message);
+        document.body.innerHTML = `<h2 style="color: red; text-align: center; margin-top: 50px;">Error: ${error.message}</h2>`;
+    }
+});
         // ✅ Restart Game
         function restartGame() {
     clearInterval(gameInterval);
