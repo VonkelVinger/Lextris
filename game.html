@@ -537,14 +537,14 @@
     // Get today's word from Firestore
     try {
         const today = new Date().toISOString().split('T')[0];
-        const gameId = `Game${today}`; // Add "Game" prefix to match admin panel format
+        const gameId = `Game${today}`;
         console.log("Looking for game:", gameId);
         const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
         if (!gameDoc.exists()) {
             console.error("No word found for today");
             return;
         }
-        TARGET_WORD = gameDoc.data().word;
+        TARGET_WORD = gameDoc.data().targetWord;  // Changed from .word to .targetWord
         GAME_ID = gameId;
         console.log("Found word:", TARGET_WORD);
 
@@ -582,7 +582,6 @@
         console.error("Error starting game:", error);
     }
 }
-
         function setupLeaderboard() {
             const leaderboardQuery = query(
                 collection(db, 'daily_games', GAME_ID, 'leaderboard'),
