@@ -17,7 +17,8 @@
             query, 
             orderBy, 
             limit, 
-            onSnapshot 
+            onSnapshot,
+            getDocs
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -37,43 +38,43 @@
             return urlParams.get('gameId');
         }
 
-       window.firebaseOps = {
-    async getGameData() {
-        try {
-            // First check for gameId in URL
-            let gameId = getGameIdFromUrl();
-            
-            // If no gameId in URL, find most recent game
-            if (!gameId) {
-                const gamesRef = collection(db, 'daily_games');
-                const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
-                const querySnapshot = await getDocs(q);
-                
-                if (!querySnapshot.empty) {
-                    gameId = querySnapshot.docs[0].id;
-                } else {
-                    console.error("No games found");
+        window.firebaseOps = {
+            async getGameData() {
+                try {
+                    // First check for gameId in URL
+                    let gameId = getGameIdFromUrl();
+                    
+                    // If no gameId in URL, find most recent game
+                    if (!gameId) {
+                        const gamesRef = collection(db, 'daily_games');
+                        const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
+                        const querySnapshot = await getDocs(q);
+                        
+                        if (!querySnapshot.empty) {
+                            gameId = querySnapshot.docs[0].id;
+                        } else {
+                            console.error("No games found");
+                            return null;
+                        }
+                    }
+                    
+                    console.log("Looking for game:", gameId);
+                    const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
+                    
+                    if (!gameDoc.exists()) {
+                        console.error("No game found for:", gameId);
+                        return null;
+                    }
+                    
+                    return {
+                        id: gameId,
+                        ...gameDoc.data()
+                    };
+                } catch (error) {
+                    console.error("Error fetching game data:", error);
                     return null;
                 }
-            }
-            
-            console.log("Looking for game:", gameId);
-            const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
-            
-            if (!gameDoc.exists()) {
-                console.error("No game found for:", gameId);
-                return null;
-            }
-            
-            return {
-                id: gameId,
-                ...gameDoc.data()
-            };
-        } catch (error) {
-            console.error("Error fetching game data:", error);
-            return null;
-        }
-    },
+            },
             
             async addLeaderboardEntry(gameId, name, time) {
                 try {
