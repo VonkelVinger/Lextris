@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
-    <!-- NEW: Added favicon and Font Awesome -->
-    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
@@ -23,6 +20,7 @@
             onSnapshot,
             getDocs
         } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -121,26 +119,6 @@
             min-height: 100vh;
         }
 
-        /* NEW: Footer Styles */
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #004d40;
-            color: white;
-            width: 100%;
-        }
-
-        footer a {
-            color: white;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        footer p {
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
         .game-wrapper {
             width: 100%;
             max-width: 320px;
@@ -422,6 +400,7 @@
             <div class="title-block" style="background-color: #0066FF;">A</div>
             <div class="title-block" style="background-color: #900C3F;">X</div>
         </div>
+
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
             <div id="target-word"></div>
@@ -463,18 +442,6 @@
         </thead>
         <tbody></tbody>
     </table>
-    <!-- NEW: Footer Section -->
-    <footer>
-        <a href="about-leximax.html">About Leximax</a> |
-        <a href="privacy-policy.html">Privacy Policy</a> |
-        <a href="contact.html">Contact Us</a>
-        <p>&copy; 2024 Leximax. All rights reserved.</p>
-        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-            data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
-            data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
-            data-font-color="#000000" data-coffee-color="#ffffff"></script>
-    </footer>
-
     <script type="module">
         document.addEventListener('DOMContentLoaded', async () => {
             // Import Firebase functions
@@ -506,6 +473,7 @@
             let isPaused = false;
             let isGameOver = false;
             let isMoving = false;
+
             // Initialize DOM elements
             const startBtn = document.getElementById('start-btn');
             const pauseBtn = document.getElementById('pause-btn');
