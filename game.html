@@ -397,9 +397,22 @@ footer {
     padding: 20px 0;
     font-size: 14px;
     margin-top: 40px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-footer a {
+.footer-content {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-links a {
     color: #FFC107;
     text-decoration: none;
     margin: 0 12px;
@@ -407,7 +420,7 @@ footer a {
     font-size: 14px;
 }
 
-footer a:hover {
+.footer-links a:hover {
     text-decoration: underline;
 }
 
@@ -952,20 +965,22 @@ footer p {
             initGrid();
         });
     </script>
-    <!-- ✅ Buy Me A Coffee Button -->
-<div class="coffee-button">
-    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-        data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
-        data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
-        data-font-color="#000000" data-coffee-color="#ffffff"></script>
-</div>
-
-<!-- ✅ Footer Section -->
+   <!-- ✅ Footer Section -->
 <footer>
-    <a href="about-leximax.html">About Leximax</a> |
-    <a href="privacy-policy.html">Privacy Policy</a> |
-    <a href="contact.html">Contact Us</a>
-    <p>&copy; 2024 Leximax. All rights reserved.</p>
+    <div class="footer-content">
+        <div class="coffee-button">
+            <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+                data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+                data-font-color="#000000" data-coffee-color="#ffffff"></script>
+        </div>
+        <div class="footer-links">
+            <a href="about-leximax.html">About Leximax</a> |
+            <a href="privacy-policy.html">Privacy Policy</a> |
+            <a href="contact.html">Contact Us</a>
+        </div>
+        <p>&copy; 2024 Leximax. All rights reserved.</p>
+    </div>
 </footer>
 
 </body>
