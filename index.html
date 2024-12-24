@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
-    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { 
@@ -43,8 +41,10 @@
         window.firebaseOps = {
             async getGameData() {
                 try {
+                    // First check for gameId in URL
                     let gameId = getGameIdFromUrl();
                     
+                    // If no gameId in URL, find most recent game
                     if (!gameId) {
                         const gamesRef = collection(db, 'daily_games');
                         const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
@@ -83,7 +83,9 @@
                         time: Number(time),
                         timestamp: new Date().toISOString()
                     };
-                    await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), entry);
+                    // Ensure the data is properly formatted
+                    const sanitizedEntry = JSON.parse(JSON.stringify(entry));
+                    await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), sanitizedEntry);
                     return true;
                 } catch (error) {
                     console.error("Error adding leaderboard entry:", error);
@@ -99,7 +101,6 @@
             return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
         };
     </script>
-
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -117,6 +118,7 @@
             padding: 20px;
             min-height: 100vh;
         }
+
         .game-wrapper {
             width: 100%;
             max-width: 320px;
@@ -125,6 +127,7 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
+            overflow: hidden;
         }
 
         #leximax-title {
@@ -175,38 +178,214 @@
             align-items: center;
             font-weight: bold;
             font-size: 16px;
+            position: relative;
         }
 
-        /* Footer Styling */
-        footer {
+        .target-letter::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        #game-grid {
+            width: 100%;
+            aspect-ratio: 8/10;
+            background-color: white;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 1px;
+            border: 1px solid #004d40;
+            padding: 1px;
+            margin-bottom: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-cell {
             background-color: #004d40;
-            color: #FFFFFF;
-            text-align: center;
-            padding: 10px 0;
-            font-size: 14px;
-            margin-top: 20px;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.15s ease-out;
         }
 
-        footer a {
-            color: #FFC107;
-            text-decoration: none;
-            margin: 0 8px;
+        .grid-cell::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .grid-cell.filled {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-weight: bold;
+            color: white;
+            font-size: 16px;
         }
 
-        footer a:hover {
-            text-decoration: underline;
+        #mobile-controls {
+            width: 100%;
+            max-width: 320px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
-        footer p {
-            margin-top: 5px;
-            font-size: 12px;
+        .mobile-btn {
+            aspect-ratio: 1;
+            width: calc((320px - 16px) / 3);
+            background-color: #003366;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 45px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s ease;
         }
 
-        /* Buy Me A Coffee Button Styling */
-        .coffee-button {
+        .mobile-btn:active {
+            background-color: #002244;
+        }
+
+        #time-display {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        #controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .time-container {
+            padding: 6px;
             text-align: center;
-            margin: 20px 0;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            line-height: 1.2;
+            border-radius: 2px;
+        }
+
+        #timer-container {
+            background-color: #004d40;
+        }
+
+        #best-time-container {
+            background-color: #d32f2f;
+        }
+
+        #game-buttons {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .game-btn {
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            padding: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .game-btn:active {
+            background-color: #002244;
+        }
+
+        #leaderboard {
+            width: 100%;
+            max-width: 320px;
+            margin-top: 15px;
+            border-collapse: collapse;
+            background-color: #f0f0f0;
+            color: #000000;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #leaderboard caption {
+            background-color: #003366;
+            color: white;
+            padding: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        #leaderboard th, #leaderboard td {
+            padding: 6px 12px;
+            text-align: left;
+            border-bottom: 1px solid #cccccc;
+            font-size: 14px;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .game-over input {
+            margin: 10px 0;
+            padding: 8px;
+            width: 200px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .game-over button {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+
+        .game-over button:hover {
+            background-color: #004488;
+        }
+
+        .game-over button:active {
+            background-color: #002244;
         }
     </style>
 </head>
@@ -265,6 +444,7 @@
     </table>
     <script type="module">
         document.addEventListener('DOMContentLoaded', async () => {
+            // Import Firebase functions
             const { 
                 getFirestore, 
                 collection, 
@@ -276,6 +456,7 @@
             
             const db = getFirestore();
             
+            // Game variables
             let TARGET_WORD = '';
             let GAME_ID = '';
             const GRID_WIDTH = 8;
@@ -293,6 +474,7 @@
             let isGameOver = false;
             let isMoving = false;
 
+            // Initialize DOM elements
             const startBtn = document.getElementById('start-btn');
             const pauseBtn = document.getElementById('pause-btn');
             const leftBtn = document.getElementById('left-btn');
@@ -300,7 +482,7 @@
             const rightBtn = document.getElementById('right-btn');
             const timerDisplay = document.querySelector('#timer-container');
             const bestTimeDisplay = document.querySelector('#best-time-container');
-            
+            // Initialize target word and setup leaderboard immediately
             async function initializeTargetWord() {
                 const gameData = await window.firebaseOps.getGameData();
                 if (gameData) {
@@ -380,6 +562,7 @@
                 if (block.y >= 0 && grid[block.y][block.x] !== null) return true;
                 return false;
             }
+
             function setupLeaderboard() {
                 if (!GAME_ID) return;
 
@@ -395,6 +578,7 @@
                         tbody.innerHTML = '';
                         let rank = 1;
                         
+                        // Get the best time from the first entry (if it exists)
                         if (!snapshot.empty) {
                             const bestTime = snapshot.docs[0].data().time;
                             const bestTimeDisplay = document.querySelector('#best-time-container');
@@ -402,6 +586,7 @@
                                 bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(bestTime)}`;
                             }
                         } else {
+                            // If no entries exist yet, show default display
                             const bestTimeDisplay = document.querySelector('#best-time-container');
                             if (bestTimeDisplay) {
                                 bestTimeDisplay.innerHTML = 'Best Time:<br>--:--';
@@ -422,7 +607,6 @@
                     }
                 });
             }
-
             async function moveBlock(dx, dy) {
                 if (!currentBlock || isPaused || isGameOver || isMoving) return;
                 
@@ -446,22 +630,27 @@
             function placeBlock() {
                 if (!currentBlock || currentBlock.y < 0) return;
                 
+                // Update the grid array
                 grid[currentBlock.y][currentBlock.x] = {
                     letter: currentBlock.letter,
                     color: currentBlock.color
                 };
                 
+                // Ensure the block is visually drawn
                 drawBlock(currentBlock);
                 
+                // Check for matches before checking win condition
                 if (!checkMatches()) {
                     checkWin();
                 }
                 
+                // Check for game over condition
                 if (nextBlock && isCollision(nextBlock)) {
                     endGame('GAME OVER');
                     return;
                 }
                 
+                // Set up next block
                 currentBlock = nextBlock;
                 nextBlock = createBlock();
                 if (currentBlock) drawBlock(currentBlock);
@@ -513,10 +702,12 @@
             function checkMatches() {
                 const toRemove = new Set();
                 
+                // Check for matches in all directions
                 for (let y = 0; y < GRID_HEIGHT; y++) {
                     for (let x = 0; x < GRID_WIDTH; x++) {
                         if (!grid[y][x]) continue;
                         
+                        // Check right
                         if (x < GRID_WIDTH - 1) {
                             if (checkAdjacentMatch(x, y, x + 1, y)) {
                                 toRemove.add(`${x},${y}`);
@@ -524,6 +715,7 @@
                             }
                         }
                         
+                        // Check down
                         if (y < GRID_HEIGHT - 1) {
                             if (checkAdjacentMatch(x, y, x, y + 1)) {
                                 toRemove.add(`${x},${y}`);
@@ -560,6 +752,7 @@
                         }
                     }
                     
+                    // Update visual representation
                     for (let x = 0; x < GRID_WIDTH; x++) {
                         for (let y = 0; y < GRID_HEIGHT; y++) {
                             const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
@@ -578,6 +771,7 @@
                     }
                 } while (moved);
                 
+                // After all shifts are complete, check for new matches
                 setTimeout(() => {
                     if (!checkMatches()) {
                         checkWin();
@@ -585,6 +779,7 @@
                 }, 100);
             }
             async function checkWin() {
+                // Only check for horizontal matches
                 for (let y = 0; y < GRID_HEIGHT; y++) {
                     for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
                         let word = '';
@@ -605,6 +800,7 @@
                             clearInterval(gameInterval);
                             clearInterval(timerInterval);
                             
+                            // Highlight winning word with animation
                             winningCells.forEach(([wx, wy]) => {
                                 const cell = document.querySelector(`#game-grid .grid-cell[data-x="${wx}"][data-y="${wy}"]`);
                                 if (cell) {
@@ -643,20 +839,24 @@
             }
 
             async function startGame() {
+                // Remove any existing game over overlay
                 const overlay = document.querySelector('.game-over');
                 if (overlay) overlay.remove();
                 
+                // Reset game state
                 grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
                 gameTime = 0;
                 isPaused = false;
                 isGameOver = false;
                 isMoving = false;
                 
+                // Initialize grid and blocks
                 initGrid();
                 currentBlock = createBlock();
                 nextBlock = createBlock();
                 drawBlock(currentBlock);
                 
+                // Set up intervals
                 if (gameInterval) clearInterval(gameInterval);
                 if (timerInterval) clearInterval(timerInterval);
                 
@@ -668,6 +868,7 @@
                 
                 timerInterval = setInterval(updateTimer, 1000);
                 
+                // Reset displays
                 timerDisplay.innerHTML = 'Time:<br>00:00';
                 pauseBtn.textContent = 'PAUSE';
             }
@@ -678,6 +879,7 @@
                 pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
             }
 
+            // Global submit score function
             window.submitScore = async function() {
                 const nameInput = document.getElementById('player-name');
                 const name = nameInput.value.trim() || 'Anonymous';
@@ -693,6 +895,7 @@
                 }
             };
 
+            // Set up event listeners
             startBtn.addEventListener('click', startGame);
             pauseBtn.addEventListener('click', togglePause);
             leftBtn.addEventListener('click', () => moveBlock(-1, 0));
@@ -709,26 +912,10 @@
                 }
             });
 
+            // Initialize target word and game grid immediately
             await initializeTargetWord();
             initGrid();
         });
     </script>
-
-    <!-- ✅ Buy Me A Coffee Button -->
-    <div class="coffee-button"></div>
-
-    <!-- ✅ Footer Section -->
-    <footer>
-        <a href="about-leximax.html">About Leximax</a> |
-        <a href="privacy-policy.html">Privacy Policy</a> |
-        <a href="contact.html">Contact Us</a>
-        <p>&copy; 2024 Leximax. All rights reserved.</p>
-        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-            data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
-            data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
-            data-font-color="#000000" data-coffee-color="#ffffff"></script>
-    </footer>
-
-    <script src="scripts.js"></script>
 </body>
 </html>
