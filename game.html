@@ -406,10 +406,16 @@ footer {
 .footer-content {
     width: 100%;
     max-width: 1200px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
+}
+
+/* ✅ Footer Links Styling */
+.footer-links {
+    margin-bottom: 10px;
 }
 
 .footer-links a {
@@ -424,15 +430,15 @@ footer {
     text-decoration: underline;
 }
 
+/* ✅ Footer Copyright Styling */
 footer p {
-    margin-top: 10px;
+    margin-bottom: 10px;
     font-size: 12px;
 }
 
-/* ✅ Buy Me A Coffee Button Styling */
+/* ✅ Coffee Button Styling */
 .coffee-button {
-    text-align: center;
-    margin: 30px auto;
+    margin-top: 10px;
 }
 
     </style>
@@ -968,19 +974,20 @@ footer p {
    <!-- ✅ Footer Section -->
 <footer>
     <div class="footer-content">
-                <div class="footer-links">
+        <div class="footer-links">
+            <a href="index.html">Home</a> |
             <a href="about-leximax.html">About Leximax</a> |
             <a href="privacy-policy.html">Privacy Policy</a> |
             <a href="contact.html">Contact Us</a>
- 
+        </div>
         <p>&copy; 2024 Leximax. All rights reserved.</p>
-    </div>
-    <div class="coffee-button">
+        <div class="coffee-button">
             <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
                 data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
                 data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
                 data-font-color="#000000" data-coffee-color="#ffffff"></script>
         </div>
+    </div>
 </footer>
 
 </body>
