@@ -431,16 +431,20 @@ footer {
 }
 
 /* ✅ Footer Copyright Styling */
-footer p {
-    margin-bottom: 10px;
+.footer-copyright {
+    font-family: 'Arial', sans-serif; /* Match index.html */
     font-size: 12px;
+    margin-bottom: 10px;
+    font-style: italic;
 }
 
 /* ✅ Coffee Button Styling */
 .coffee-button {
     margin-top: 10px;
+    font-family: 'Cookie', cursive; /* Handwritten style */
+    font-size: 16px;
+    text-align: center;
 }
-
     </style>
 </head>
 <body>
@@ -980,7 +984,9 @@ footer p {
             <a href="privacy-policy.html">Privacy Policy</a> |
             <a href="contact.html">Contact Us</a>
         </div>
-        <p>&copy; 2024 Leximax. All rights reserved.</p>
+        <div class="footer-copyright">
+            &copy; 2024 Leximax. All rights reserved.
+        </div>
         <div class="coffee-button">
             <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
                 data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
@@ -989,6 +995,5 @@ footer p {
         </div>
     </div>
 </footer>
-
 </body>
 </html>
