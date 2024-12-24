@@ -473,7 +473,6 @@
             const rightBtn = document.getElementById('right-btn');
             const timerDisplay = document.querySelector('#timer-container');
             const bestTimeDisplay = document.querySelector('#best-time-container');
-
             // Initialize target word and setup leaderboard immediately
             async function initializeTargetWord() {
                 const gameData = await window.firebaseOps.getGameData();
@@ -546,6 +545,7 @@
                     cell.textContent = '';
                 }
             }
+
             function isCollision(block) {
                 if (!block) return true;
                 if (block.x < 0 || block.x >= GRID_WIDTH) return true;
@@ -554,6 +554,41 @@
                 return false;
             }
 
+            function setupLeaderboard() {
+                if (!GAME_ID) return;
+
+                const leaderboardQuery = query(
+                    collection(db, 'daily_games', GAME_ID, 'leaderboard'),
+                    orderBy('time'),
+                    limit(10)
+                );
+
+                return onSnapshot(leaderboardQuery, (snapshot) => {
+                    const tbody = document.querySelector('#leaderboard tbody');
+                    if (tbody) {
+                        tbody.innerHTML = '';
+                        let rank = 1;
+                        
+                        snapshot.forEach((doc, index) => {
+                            const data = doc.data();
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${rank}</td>
+                                <td>${data.name}</td>
+                                <td>${formatTime(data.time)}</td>
+                            `;
+                            tbody.appendChild(row);
+                            
+                            // Update best time from first leaderboard entry
+                            if (index === 0 && bestTimeDisplay) {
+                                bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(data.time)}`;
+                            }
+                            
+                            rank++;
+                        });
+                    }
+                });
+            }
             async function moveBlock(dx, dy) {
                 if (!currentBlock || isPaused || isGameOver || isMoving) return;
                 
@@ -684,6 +719,7 @@
                 }
                 return false;
             }
+
             function shiftDownCells() {
                 let moved;
                 do {
@@ -724,43 +760,6 @@
                     }
                 }, 100);
             }
-
-            function setupLeaderboard() {
-                if (!GAME_ID) return;
-
-                const leaderboardQuery = query(
-                    collection(db, 'daily_games', GAME_ID, 'leaderboard'),
-                    orderBy('time'),
-                    limit(10)
-                );
-
-                return onSnapshot(leaderboardQuery, (snapshot) => {
-                    const tbody = document.querySelector('#leaderboard tbody');
-                    if (tbody) {
-                        tbody.innerHTML = '';
-                        let rank = 1;
-                        
-                        snapshot.forEach((doc, index) => {
-                            const data = doc.data();
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${rank}</td>
-                                <td>${data.name}</td>
-                                <td>${formatTime(data.time)}</td>
-                            `;
-                            tbody.appendChild(row);
-                            
-                            // Update best time from first leaderboard entry
-                            if (index === 0 && bestTimeDisplay) {
-                                bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(data.time)}`;
-                            }
-                            
-                            rank++;
-                        });
-                    }
-                });
-            }
-
             async function checkWin() {
                 // Only check for horizontal matches
                 for (let y = 0; y < GRID_HEIGHT; y++) {
@@ -805,6 +804,8 @@
 
             function endGame(message, isWin = false) {
                 isGameOver = true;
+                clearInterval(gameInterval);
+                clearInterval(timerInterval);
                 
                 const overlay = document.createElement('div');
                 overlay.className = 'game-over';
