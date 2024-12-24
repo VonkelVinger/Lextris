@@ -578,7 +578,22 @@
                         tbody.innerHTML = '';
                         let rank = 1;
                         
-                        snapshot.forEach((doc, index) => {
+                        // Get the best time from the first entry (if it exists)
+                        if (!snapshot.empty) {
+                            const bestTime = snapshot.docs[0].data().time;
+                            const bestTimeDisplay = document.querySelector('#best-time-container');
+                            if (bestTimeDisplay) {
+                                bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(bestTime)}`;
+                            }
+                        } else {
+                            // If no entries exist yet, show default display
+                            const bestTimeDisplay = document.querySelector('#best-time-container');
+                            if (bestTimeDisplay) {
+                                bestTimeDisplay.innerHTML = 'Best Time:<br>--:--';
+                            }
+                        }
+
+                        snapshot.forEach((doc) => {
                             const data = doc.data();
                             const row = document.createElement('tr');
                             row.innerHTML = `
@@ -587,12 +602,6 @@
                                 <td>${formatTime(data.time)}</td>
                             `;
                             tbody.appendChild(row);
-                            
-                            // Update best time from first leaderboard entry
-                            if (index === 0 && bestTimeDisplay) {
-                                bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(data.time)}`;
-                            }
-                            
                             rank++;
                         });
                     }
