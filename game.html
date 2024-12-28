@@ -5,103 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
     <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc, 
-            getDoc, 
-            collection, 
-            addDoc, 
-            query, 
-            orderBy, 
-            limit, 
-            onSnapshot,
-            getDocs
-        } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+</head>
+<body>
+    <div class="game-wrapper">
+        <!-- Title -->
+        <div id="leximax-title">
+            <div class="title-block" style="background-color: #2196f3;">L</div>
+            <div class="title-block" style="background-color: #f44336;">E</div>
+            <div class="title-block" style="background-color: #4caf50;">X</div>
+            <div class="title-block" style="background-color: #ffc107;">I</div>
+            <div class="title-block" style="background-color: #9c27b0;">M</div>
+            <div class="title-block" style="background-color: #003366;">A</div>
+            <div class="title-block" style="background-color: #009688;">X</div>
+        </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-            authDomain: "leximax-96299.firebaseapp.com",
-            projectId: "leximax-96299",
-            storageBucket: "leximax-96299.appspot.com",
-            messagingSenderId: "1067424610925",
-            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
-        };
+        <!-- Target Word -->
+        <div id="target-word-container">
+            <div id="target-word-label">Target Word</div>
+            <div id="target-word"></div>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        <!-- Game Grid -->
+        <div id="game-grid"></div>
 
-        function getGameIdFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('gameId');
-        }
+        <!-- Controls -->
+        <div id="controls">
+            <div id="score-container">Score: <span>0</span></div>
+            <div id="timer-container">Time: <span>00:00</span></div>
+            <div id="mobile-controls">
+                <button id="left-btn" class="mobile-btn">⬅️</button>
+                <button id="down-btn" class="mobile-btn">⬇️</button>
+                <button id="right-btn" class="mobile-btn">➡️</button>
+            </div>
+            <div id="game-buttons">
+                <button id="start-btn" class="game-btn">START</button>
+                <button id="pause-btn" class="game-btn">PAUSE</button>
+            </div>
+        </div>
 
-        window.firebaseOps = {
-            async getGameData() {
-                try {
-                    // First check for gameId in URL
-                    let gameId = getGameIdFromUrl();
-                    
-                    // If no gameId in URL, find most recent game
-                    if (!gameId) {
-                        const gamesRef = collection(db, 'daily_games');
-                        const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
-                        const querySnapshot = await getDocs(q);
-                        
-                        if (!querySnapshot.empty) {
-                            gameId = querySnapshot.docs[0].id;
-                        } else {
-                            console.error("No games found");
-                            return null;
-                        }
-                    }
-                    
-                    console.log("Looking for game:", gameId);
-                    const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
-                    
-                    if (!gameDoc.exists()) {
-                        console.error("No game found for:", gameId);
-                        return null;
-                    }
-                    
-                    return {
-                        id: gameId,
-                        ...gameDoc.data()
-                    };
-                } catch (error) {
-                    console.error("Error fetching game data:", error);
-                    return null;
-                }
-            },
-            
-            async addLeaderboardEntry(gameId, name, time) {
-                try {
-                    const entry = {
-                        name: String(name).slice(0, 12),
-                        time: Number(time),
-                        timestamp: new Date().toISOString()
-                    };
-                    // Ensure the data is properly formatted
-                    const sanitizedEntry = JSON.parse(JSON.stringify(entry));
-                    await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), sanitizedEntry);
-                    return true;
-                } catch (error) {
-                    console.error("Error adding leaderboard entry:", error);
-                    return false;
-                }
-            }
-        };
+        <!-- Leaderboard -->
+        <table id="leaderboard">
+            <caption>LEADERBOARD</caption>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-        window.formatTime = function(seconds) {
-            if (!seconds && seconds !== 0) return '--:--';
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        };
-    </script>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="index.html">Home</a> |
+                <a href="about-leximax.html">About Leximax</a> |
+                <a href="privacy-policy.html">Privacy Policy</a> |
+                <a href="contact.html">Contact Us</a>
+            </div>
+            <p class="footer-copyright">&copy; 2024 Leximax. All rights reserved.</p>
+            <div class="coffee-button">
+                <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                    data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+                    data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+                    data-font-color="#000000" data-coffee-color="#ffffff">
+                </script>
+            </div>
+        </div>
+    </footer>
+	<!-- Base Styles -->
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -131,6 +106,7 @@
             overflow: hidden;
         }
 
+        /* Title Styles */
         #leximax-title {
             display: flex;
             gap: 0;
@@ -148,6 +124,7 @@
             color: white;
         }
 
+        /* Target Word Styles */
         #target-word-container {
             text-align: center;
             margin-bottom: 8px;
@@ -192,7 +169,10 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             pointer-events: none;
         }
+    </style>
 
+    <!-- Grid Styles -->
+    <style>
         #game-grid {
             width: 100%;
             aspect-ratio: 8/10;
@@ -236,6 +216,42 @@
             font-size: 16px;
         }
 
+        .grid-cell.pop {
+            transform: scale(1.2);
+            opacity: 0;
+            transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+        }
+    </style>
+
+    <!-- Controls and Score Styles -->
+    <style>
+        #controls {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #score-container, #timer-container {
+            min-width: 120px;
+            text-align: right;
+            padding: 8px 12px;
+            margin: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #004d40;
+            border-radius: 2px;
+            color: white;
+        }
+
+        #score-container span, #timer-container span {
+            font-weight: bold;
+            font-size: 18px;
+            min-width: 80px;
+            text-align: right;
+        }
+
         #mobile-controls {
             width: 100%;
             max-width: 320px;
@@ -264,38 +280,6 @@
             background-color: #002244;
         }
 
-        #time-display {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        #controls {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .time-container {
-            padding: 6px;
-            text-align: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-            line-height: 1.2;
-            border-radius: 2px;
-        }
-
-        #timer-container {
-            background-color: #004d40;
-        }
-
-        #best-time-container {
-            background-color: #d32f2f;
-        }
-
         #game-buttons {
             width: 100%;
             display: grid;
@@ -319,7 +303,10 @@
         .game-btn:active {
             background-color: #002244;
         }
+    </style>
 
+    <!-- Leaderboard Styles -->
+    <style>
         #leaderboard {
             width: 100%;
             max-width: 320px;
@@ -340,13 +327,27 @@
             font-size: 14px;
         }
 
-        #leaderboard th, #leaderboard td {
+        #leaderboard th,
+        #leaderboard td {
             padding: 6px 12px;
             text-align: left;
             border-bottom: 1px solid #cccccc;
             font-size: 14px;
         }
 
+        #leaderboard td:last-child {
+            text-align: right;
+            min-width: 80px;
+            padding-right: 16px;
+            font-weight: bold;
+        }
+
+        #leaderboard th:last-child {
+            text-align: right;
+            padding-right: 16px;
+        }
+
+        /* Game Over Styles */
         .game-over {
             position: absolute;
             top: 50%;
@@ -358,12 +359,14 @@
             border-radius: 8px;
             text-align: center;
             z-index: 1000;
+            width: 90%;
+            max-width: 280px;
         }
 
         .game-over input {
             margin: 10px 0;
             padding: 8px;
-            width: 200px;
+            width: 100%;
             border: none;
             border-radius: 4px;
             font-size: 14px;
@@ -379,6 +382,7 @@
             margin-top: 10px;
             font-weight: bold;
             transition: background-color 0.2s ease;
+            width: 100%;
         }
 
         .game-over button:hover {
@@ -388,613 +392,644 @@
         .game-over button:active {
             background-color: #002244;
         }
-        
-/* ✅ Footer Styling */
-footer {
-    background-color: #004d40;
-    color: #FFFFFF;
-    text-align: center;
-    padding: 20px 0;
-    font-size: 14px;
-    margin-top: 40px;
-    width: 100%;
-}
+		<style>
+        .footer-content {
+            margin-top: 20px;
+            text-align: center;
+        }
 
-/* Footer Content */
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
+        .footer-links {
+            margin-bottom: 10px;
+        }
 
-/* Footer Links */
-.footer-links {
-    margin-bottom: 5px; /* Adjust spacing between links and copyright */
-    font-size: 14px;
-    font-weight: normal; /* Regular weight */
-}
+        .footer-links a {
+            color: #003366;
+            text-decoration: none;
+            margin: 0 8px;
+        }
 
-.footer-links a {
-    color: #FFC107;
-    text-decoration: none;
-    margin: 0 12px;
-    font-weight: normal; /* Remove bold */
-    font-size: 14px; /* Ensure consistent size */
-}
+        .footer-copyright {
+            color: #666666;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
 
-.footer-links a:hover {
-    text-decoration: underline;
-}
-
-/* Footer Copyright */
-.footer-copyright {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    font-weight: normal; /* Regular weight */
-    margin-top: 5px; /* Spacing between copyright and button */
-}
-
-/* Buy Me a Coffee Button */
-.coffee-button {
-    margin-top: 10px;
-    text-align: center;
-}
-
+        .coffee-button {
+            margin-top: 10px;
+        }
     </style>
-</head>
-<body>
-    <div class="game-wrapper">
-        <div id="leximax-title">
-            <div class="title-block" style="background-color: #2196f3;">L</div>
-            <div class="title-block" style="background-color: #f44336;">E</div>
-            <div class="title-block" style="background-color: #4caf50;">X</div>
-            <div class="title-block" style="background-color: #ffc107;">I</div>
-            <div class="title-block" style="background-color: #9c27b0;">M</div>
-            <div class="title-block" style="background-color: #0066FF;">A</div>
-            <div class="title-block" style="background-color: #900C3F;">X</div>
-        </div>
-
-        <div id="target-word-container">
-            <div id="target-word-label">TARGET WORD:</div>
-            <div id="target-word"></div>
-        </div>
-
-        <div id="game-grid"></div>
-
-        <div id="controls">
-            <div id="mobile-controls">
-                <button class="mobile-btn" id="left-btn">◀</button>
-                <button class="mobile-btn" id="down-btn">▼</button>
-                <button class="mobile-btn" id="right-btn">▶</button>
-            </div>
-
-            <div id="game-buttons">
-                <button class="game-btn" id="start-btn">START</button>
-                <button class="game-btn" id="pause-btn">PAUSE</button>
-            </div>
-
-            <div id="time-display">
-                <div id="timer-container" class="time-container">
-                    Time:<br>00:00
-                </div>
-                <div id="best-time-container" class="time-container">
-                    Best Time:<br>--:--
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <table id="leaderboard">
-        <caption>LEADERBOARD</caption>
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Name</th>
-                <th>Time</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+	<!-- Firebase Initialization -->
     <script type="module">
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Import Firebase functions
-            const { 
-                getFirestore, 
-                collection, 
-                query, 
-                orderBy, 
-                limit, 
-                onSnapshot
-            } = await import("https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js");
-            
-            const db = getFirestore();
-            
-            // Game variables
-            let TARGET_WORD = '';
-            let GAME_ID = '';
-            const GRID_WIDTH = 8;
-            const GRID_HEIGHT = 10;
-            const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
-            const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
-            const VOWELS = 'AEIOUY';
-            let grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
-            let currentBlock = null;
-            let nextBlock = null;
-            let gameInterval = null;
-            let timerInterval = null;
-            let gameTime = 0;
-            let isPaused = false;
-            let isGameOver = false;
-            let isMoving = false;
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            collection, 
+            addDoc, 
+            query, 
+            orderBy, 
+            limit, 
+            onSnapshot,
+            getDocs
+        } from "https://www.gstatic.com/firebasejs/9.17.1/firestore.js";
 
-            // Initialize DOM elements
-            const startBtn = document.getElementById('start-btn');
-            const pauseBtn = document.getElementById('pause-btn');
-            const leftBtn = document.getElementById('left-btn');
-            const downBtn = document.getElementById('down-btn');
-            const rightBtn = document.getElementById('right-btn');
-            const timerDisplay = document.querySelector('#timer-container');
-            const bestTimeDisplay = document.querySelector('#best-time-container');
-            // Initialize target word and setup leaderboard immediately
-            async function initializeTargetWord() {
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase services available globally
+        window.db = db;
+        window.firebaseCollection = collection;
+        window.firebaseQuery = query;
+        window.firebaseOrderBy = orderBy;
+        window.firebaseLimit = limit;
+        window.firebaseOnSnapshot = onSnapshot;
+
+        // Firebase Operations
+        window.firebaseOps = {
+            async getGameData() {
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let gameId = urlParams.get('gameId');
+                    
+                    if (!gameId) {
+                        const gamesRef = collection(db, 'daily_games');
+                        const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
+                        const querySnapshot = await getDocs(q);
+                        
+                        if (!querySnapshot.empty) {
+                            gameId = querySnapshot.docs[0].id;
+                        } else {
+                            console.error("No games found");
+                            return null;
+                        }
+                    }
+                    
+                    const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
+                    
+                    if (!gameDoc.exists()) {
+                        console.error("No game found for:", gameId);
+                        return null;
+                    }
+                    
+                    return {
+                        id: gameId,
+                        ...gameDoc.data()
+                    };
+                } catch (error) {
+                    console.error("Error fetching game data:", error);
+                    return null;
+                }
+            },
+            
+            async addLeaderboardEntry(gameId, name, score, time) {
+                try {
+                    const entry = {
+                        name: String(name).slice(0, 12),
+                        score: Number(score),
+                        time: Number(time),
+                        timestamp: new Date().toISOString()
+                    };
+                    await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), entry);
+                    return true;
+                } catch (error) {
+                    console.error("Error adding leaderboard entry:", error);
+                    return false;
+                }
+            }
+        };
+
+        // Utility Functions
+        window.formatTime = function(seconds) {
+            if (!seconds && seconds !== 0) return '--:--';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        };
+    </script>
+
+    <!-- Game Constants and State -->
+    <script type="module">
+        // Make game state available globally
+        window.gameState = {
+            GRID_WIDTH: 8,
+            GRID_HEIGHT: 10,
+            COLORS: ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'],
+            LETTERS: 'BCDFGHJKLMNPQRSTVWXZ',
+            VOWELS: 'AEIOUY',
+            TARGET_WORD: '',
+            GAME_ID: '',
+            grid: [],
+            currentBlock: null,
+            nextBlock: null,
+            gameInterval: null,
+            timerInterval: null,
+            gameTime: 0,
+            isPaused: false,
+            isGameOver: false,
+            isMoving: false,
+            currentScore: 0,
+            chainCount: 0
+        };
+    </script>
+	<!-- Core Game Functions -->
+    <script type="module">
+        const state = window.gameState;
+
+        // Initialize Game Data from Firebase
+        async function initGame() {
+            try {
                 const gameData = await window.firebaseOps.getGameData();
                 if (gameData) {
-                    TARGET_WORD = gameData.targetWord;
-                    GAME_ID = gameData.id;
-                    
+                    state.TARGET_WORD = gameData.targetWord;
+                    state.GAME_ID = gameData.id;
+
                     const targetWordDiv = document.getElementById('target-word');
                     targetWordDiv.innerHTML = '';
-                    for (const letter of TARGET_WORD) {
+                    for (const letter of state.TARGET_WORD) {
                         const letterDiv = document.createElement('div');
                         letterDiv.className = 'target-letter';
                         letterDiv.textContent = letter;
                         targetWordDiv.appendChild(letterDiv);
                     }
-                    
+
                     setupLeaderboard();
                     return true;
                 }
                 return false;
-            }
-
-            function updateTimer() {
-                if (!isPaused && !isGameOver) {
-                    gameTime++;
-                    timerDisplay.innerHTML = `Time:<br>${formatTime(gameTime)}`;
-                }
-            }
-
-            function initGrid() {
-                const gameGrid = document.getElementById('game-grid');
-                gameGrid.innerHTML = '';
-                grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
-                
-                for (let y = 0; y < GRID_HEIGHT; y++) {
-                    for (let x = 0; x < GRID_WIDTH; x++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'grid-cell';
-                        cell.setAttribute('data-x', x);
-                        cell.setAttribute('data-y', y);
-                        gameGrid.appendChild(cell);
-                    }
-                }
-            }
-
-            function createBlock() {
-                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-                const letter = Math.random() < 0.3 ? 
-                    VOWELS[Math.floor(Math.random() * VOWELS.length)] :
-                    LETTERS[Math.floor(Math.random() * LETTERS.length)];
-                return { color, letter, x: Math.floor(GRID_WIDTH / 2), y: 0 };
-            }
-
-            function drawBlock(block) {
-                if (!block || block.x < 0 || block.x >= GRID_WIDTH || block.y < 0 || block.y >= GRID_HEIGHT) return;
-                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
-                if (cell) {
-                    cell.className = 'grid-cell filled';
-                    cell.style.backgroundColor = block.color;
-                    cell.textContent = block.letter;
-                }
-            }
-
-            function clearBlock(block) {
-                if (!block || block.x < 0 || block.x >= GRID_WIDTH || block.y < 0 || block.y >= GRID_HEIGHT) return;
-                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
-                if (cell && !grid[block.y][block.x]) {
-                    cell.className = 'grid-cell';
-                    cell.style.backgroundColor = '';
-                    cell.textContent = '';
-                }
-            }
-
-            function isCollision(block) {
-                if (!block) return true;
-                if (block.x < 0 || block.x >= GRID_WIDTH) return true;
-                if (block.y >= GRID_HEIGHT) return true;
-                if (block.y >= 0 && grid[block.y][block.x] !== null) return true;
+            } catch (error) {
+                console.error('Error initializing game:', error);
                 return false;
             }
+        }
 
-            function setupLeaderboard() {
-                if (!GAME_ID) return;
-
-                const leaderboardQuery = query(
-                    collection(db, 'daily_games', GAME_ID, 'leaderboard'),
-                    orderBy('time'),
-                    limit(10)
-                );
-
-                return onSnapshot(leaderboardQuery, (snapshot) => {
-                    const tbody = document.querySelector('#leaderboard tbody');
-                    if (tbody) {
-                        tbody.innerHTML = '';
-                        let rank = 1;
-                        
-                        // Get the best time from the first entry (if it exists)
-                        if (!snapshot.empty) {
-                            const bestTime = snapshot.docs[0].data().time;
-                            const bestTimeDisplay = document.querySelector('#best-time-container');
-                            if (bestTimeDisplay) {
-                                bestTimeDisplay.innerHTML = `Best Time:<br>${formatTime(bestTime)}`;
-                            }
-                        } else {
-                            // If no entries exist yet, show default display
-                            const bestTimeDisplay = document.querySelector('#best-time-container');
-                            if (bestTimeDisplay) {
-                                bestTimeDisplay.innerHTML = 'Best Time:<br>--:--';
-                            }
-                        }
-
-                        snapshot.forEach((doc) => {
-                            const data = doc.data();
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${rank}</td>
-                                <td>${data.name}</td>
-                                <td>${formatTime(data.time)}</td>
-                            `;
-                            tbody.appendChild(row);
-                            rank++;
-                        });
-                    }
-                });
-            }
-            async function moveBlock(dx, dy) {
-                if (!currentBlock || isPaused || isGameOver || isMoving) return;
-                
-                isMoving = true;
-                const newX = currentBlock.x + dx;
-                const newY = currentBlock.y + dy;
-                const testBlock = { ...currentBlock, x: newX, y: newY };
-                
-                if (!isCollision(testBlock)) {
-                    clearBlock(currentBlock);
-                    currentBlock.x = newX;
-                    currentBlock.y = newY;
-                    drawBlock(currentBlock);
-                } else if (dy > 0) {
-                    placeBlock();
-                }
-                
-                isMoving = false;
-            }
-
-            function placeBlock() {
-                if (!currentBlock || currentBlock.y < 0) return;
-                
-                // Update the grid array
-                grid[currentBlock.y][currentBlock.x] = {
-                    letter: currentBlock.letter,
-                    color: currentBlock.color
-                };
-                
-                // Ensure the block is visually drawn
-                drawBlock(currentBlock);
-                
-                // Check for matches before checking win condition
-                if (!checkMatches()) {
-                    checkWin();
-                }
-                
-                // Check for game over condition
-                if (nextBlock && isCollision(nextBlock)) {
-                    endGame('GAME OVER');
-                    return;
-                }
-                
-                // Set up next block
-                currentBlock = nextBlock;
-                nextBlock = createBlock();
-                if (currentBlock) drawBlock(currentBlock);
-            }
-
-            function dropBlock() {
-                if (!currentBlock || isPaused || isGameOver || isMoving) return;
-                
-                isMoving = true;
-                clearBlock(currentBlock);
-                
-                while (!isCollision({ ...currentBlock, y: currentBlock.y + 1 })) {
-                    currentBlock.y++;
-                }
-                
-                drawBlock(currentBlock);
-                placeBlock();
-                isMoving = false;
-            }
-
-            function isPartOfTargetWord(letter) {
-                return TARGET_WORD.includes(letter);
-            }
-
-            function checkAdjacentMatch(x1, y1, x2, y2) {
-                const block1 = grid[y1][x1];
-                const block2 = grid[y2][x2];
-                
-                if (!block1 || !block2) return false;
-                if (isPartOfTargetWord(block1.letter) || isPartOfTargetWord(block2.letter)) return false;
-                
-                return block1.color === block2.color || block1.letter === block2.letter;
-            }
-
-            function clearCell(x, y) {
-                grid[y][x] = null;
-                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
-                if (cell) {
-                    cell.style.transform = 'scale(0)';
-                    setTimeout(() => {
-                        cell.className = 'grid-cell';
-                        cell.style.transform = '';
-                        cell.style.backgroundColor = '';
-                        cell.textContent = '';
-                    }, 150);
-                }
-            }
-
-            function checkMatches() {
-                const toRemove = new Set();
-                
-                // Check for matches in all directions
-                for (let y = 0; y < GRID_HEIGHT; y++) {
-                    for (let x = 0; x < GRID_WIDTH; x++) {
-                        if (!grid[y][x]) continue;
-                        
-                        // Check right
-                        if (x < GRID_WIDTH - 1) {
-                            if (checkAdjacentMatch(x, y, x + 1, y)) {
-                                toRemove.add(`${x},${y}`);
-                                toRemove.add(`${x + 1},${y}`);
-                            }
-                        }
-                        
-                        // Check down
-                        if (y < GRID_HEIGHT - 1) {
-                            if (checkAdjacentMatch(x, y, x, y + 1)) {
-                                toRemove.add(`${x},${y}`);
-                                toRemove.add(`${x},${y + 1}`);
-                            }
-                        }
-                    }
-                }
-                
-                if (toRemove.size > 0) {
-                    toRemove.forEach(pos => {
-                        const [x, y] = pos.split(',').map(Number);
-                        clearCell(x, y);
+        // Leaderboard Setup
+        function setupLeaderboard() {
+            if (!state.GAME_ID) return;
+            const leaderboardRef = window.firebaseCollection(window.db, 'daily_games', state.GAME_ID, 'leaderboard');
+            const q = window.firebaseQuery(leaderboardRef, window.firebaseOrderBy('score', 'desc'), window.firebaseLimit(10));
+            
+            return window.firebaseOnSnapshot(q, (snapshot) => {
+                const tbody = document.querySelector('#leaderboard tbody');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    let rank = 1;
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${rank}</td>
+                            <td>${data.name}</td>
+                            <td>${data.score.toLocaleString()}</td>
+                        `;
+                        tbody.appendChild(row);
+                        rank++;
                     });
-                    setTimeout(() => {
-                        shiftDownCells();
-                    }, 200);
-                    return true;
-                }
-                return false;
-            }
-
-            function shiftDownCells() {
-                let moved;
-                do {
-                    moved = false;
-                    for (let x = 0; x < GRID_WIDTH; x++) {
-                        for (let y = GRID_HEIGHT - 2; y >= 0; y--) {
-                            if (grid[y][x] && !grid[y + 1][x]) {
-                                grid[y + 1][x] = grid[y][x];
-                                grid[y][x] = null;
-                                moved = true;
-                            }
-                        }
-                    }
-                    
-                    // Update visual representation
-                    for (let x = 0; x < GRID_WIDTH; x++) {
-                        for (let y = 0; y < GRID_HEIGHT; y++) {
-                            const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
-                            if (cell) {
-                                if (grid[y][x]) {
-                                    cell.className = 'grid-cell filled';
-                                    cell.style.backgroundColor = grid[y][x].color;
-                                    cell.textContent = grid[y][x].letter;
-                                } else {
-                                    cell.className = 'grid-cell';
-                                    cell.style.backgroundColor = '';
-                                    cell.textContent = '';
-                                }
-                            }
-                        }
-                    }
-                } while (moved);
-                
-                // After all shifts are complete, check for new matches
-                setTimeout(() => {
-                    if (!checkMatches()) {
-                        checkWin();
-                    }
-                }, 100);
-            }
-            async function checkWin() {
-                // Only check for horizontal matches
-                for (let y = 0; y < GRID_HEIGHT; y++) {
-                    for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
-                        let word = '';
-                        let isValid = true;
-                        let winningCells = [];
-                        
-                        for (let i = 0; i < TARGET_WORD.length; i++) {
-                            if (!grid[y][x + i]) {
-                                isValid = false;
-                                break;
-                            }
-                            word += grid[y][x + i].letter;
-                            winningCells.push([x + i, y]);
-                        }
-                        
-                        if (isValid && word === TARGET_WORD) {
-                            isGameOver = true;
-                            clearInterval(gameInterval);
-                            clearInterval(timerInterval);
-                            
-                            // Highlight winning word with animation
-                            winningCells.forEach(([wx, wy]) => {
-                                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${wx}"][data-y="${wy}"]`);
-                                if (cell) {
-                                    cell.style.transform = 'scale(1.1)';
-                                }
-                            });
-                            
-                            const timeStr = formatTime(gameTime);
-                            const message = `YOU DID IT IN ${timeStr}!`;
-                            
-                            setTimeout(() => {
-                                endGame(message, true);
-                            }, 500);
-                            return;
-                        }
-                    }
-                }
-            }
-
-            function endGame(message, isWin = false) {
-                isGameOver = true;
-                clearInterval(gameInterval);
-                clearInterval(timerInterval);
-                
-                const overlay = document.createElement('div');
-                overlay.className = 'game-over';
-                overlay.innerHTML = `
-                    <h2>${message}</h2>
-                    ${isWin ? `
-                        <input type="text" id="player-name" maxlength="12" placeholder="Enter your name">
-                        <button onclick="submitScore()">Submit Score</button>
-                    ` : ''}
-                `;
-                
-                document.getElementById('game-grid').appendChild(overlay);
-            }
-
-            async function startGame() {
-                // Remove any existing game over overlay
-                const overlay = document.querySelector('.game-over');
-                if (overlay) overlay.remove();
-                
-                // Reset game state
-                grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
-                gameTime = 0;
-                isPaused = false;
-                isGameOver = false;
-                isMoving = false;
-                
-                // Initialize grid and blocks
-                initGrid();
-                currentBlock = createBlock();
-                nextBlock = createBlock();
-                drawBlock(currentBlock);
-                
-                // Set up intervals
-                if (gameInterval) clearInterval(gameInterval);
-                if (timerInterval) clearInterval(timerInterval);
-                
-                gameInterval = setInterval(() => {
-                    if (!isPaused && !isGameOver) {
-                        moveBlock(0, 1);
-                    }
-                }, 1000);
-                
-                timerInterval = setInterval(updateTimer, 1000);
-                
-                // Reset displays
-                timerDisplay.innerHTML = 'Time:<br>00:00';
-                pauseBtn.textContent = 'PAUSE';
-            }
-
-            function togglePause() {
-                if (isGameOver) return;
-                isPaused = !isPaused;
-                pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
-            }
-
-            // Global submit score function
-            window.submitScore = async function() {
-                const nameInput = document.getElementById('player-name');
-                const name = nameInput.value.trim() || 'Anonymous';
-                const overlay = document.querySelector('.game-over');
-                
-                try {
-                    await window.firebaseOps.addLeaderboardEntry(GAME_ID, name, gameTime);
-                    if (overlay) {
-                        overlay.remove();
-                    }
-                } catch (error) {
-                    console.error('Error submitting score:', error);
-                }
-            };
-
-            // Set up event listeners
-            startBtn.addEventListener('click', startGame);
-            pauseBtn.addEventListener('click', togglePause);
-            leftBtn.addEventListener('click', () => moveBlock(-1, 0));
-            rightBtn.addEventListener('click', () => moveBlock(1, 0));
-            downBtn.addEventListener('click', dropBlock);
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
-                if (e.key === 'ArrowRight') moveBlock(1, 0);
-                if (e.key === 'ArrowDown') moveBlock(0, 1);
-                if (e.key === ' ') {
-                    e.preventDefault();
-                    dropBlock();
                 }
             });
+        }
 
-            // Initialize target word and game grid immediately
-            await initializeTargetWord();
-            initGrid();
+        // Timer Update
+        function updateTimer() {
+            if (!state.isPaused && !state.isGameOver) {
+                state.gameTime++;
+                document.querySelector('#timer-container span').textContent = window.formatTime(state.gameTime);
+            }
+        }
+
+        // Update Score
+        function updateScore(points) {
+            state.currentScore += points;
+            document.querySelector('#score-container span').textContent = state.currentScore.toLocaleString();
+        }
+
+        // Initialize Game Grid
+        function initGrid() {
+            const gameGrid = document.getElementById('game-grid');
+            gameGrid.innerHTML = '';
+            state.grid = Array(state.GRID_HEIGHT).fill().map(() => Array(state.GRID_WIDTH).fill(null));
+
+            for (let y = 0; y < state.GRID_HEIGHT; y++) {
+                for (let x = 0; x < state.GRID_WIDTH; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.setAttribute('data-x', x);
+                    cell.setAttribute('data-y', y);
+                    gameGrid.appendChild(cell);
+                }
+            }
+        }
+
+        // Create New Block
+        function createBlock() {
+            const color = state.COLORS[Math.floor(Math.random() * state.COLORS.length)];
+            const letter = Math.random() < 0.3 ? 
+                state.VOWELS[Math.floor(Math.random() * state.VOWELS.length)] :
+                state.LETTERS[Math.floor(Math.random() * state.LETTERS.length)];
+            return { color, letter, x: Math.floor(state.GRID_WIDTH / 2), y: 0 };
+        }
+
+        // Draw Block
+        function drawBlock(block) {
+            if (!block || block.x < 0 || block.x >= state.GRID_WIDTH || block.y < 0 || block.y >= state.GRID_HEIGHT) return;
+            const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
+            if (cell) {
+                cell.className = 'grid-cell filled';
+                cell.style.backgroundColor = block.color;
+                cell.textContent = block.letter;
+            }
+        }
+
+        // Clear Block
+        function clearBlock(block) {
+            if (!block || block.x < 0 || block.x >= state.GRID_WIDTH || block.y < 0 || block.y >= state.GRID_HEIGHT) return;
+            const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
+            if (cell) {
+                cell.className = 'grid-cell';
+                cell.style.backgroundColor = '#004d40';
+                cell.textContent = '';
+            }
+        }
+
+        // Handle Collisions
+        function isCollision(block) {
+            if (!block) return true;
+            if (block.x < 0 || block.x >= state.GRID_WIDTH) return true;
+            if (block.y >= state.GRID_HEIGHT) return true;
+            if (block.y >= 0 && state.grid[block.y][block.x] !== null) return true;
+            return false;
+        }
+
+        // Make functions available globally
+        Object.assign(window.gameState, {
+            initGame,
+            setupLeaderboard,
+            updateTimer,
+            updateScore,
+            initGrid,
+            createBlock,
+            drawBlock,
+            clearBlock,
+            isCollision
         });
     </script>
-   <!-- ✅ Footer Section -->
-<footer>
-    <div class="footer-content">
-        <!-- Footer Links -->
-        <div class="footer-links">
-            <a href="index.html">Home</a> |
-            <a href="about-leximax.html">About Leximax</a> |
-            <a href="privacy-policy.html">Privacy Policy</a> |
-            <a href="contact.html">Contact Us</a>
-        </div>
-        
-        <!-- Footer Copyright -->
-        <p class="footer-copyright">&copy; 2024 Leximax. All rights reserved.</p>
-        
-        <!-- Buy Me a Coffee Button -->
-        <div class="coffee-button">
-            <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-                data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
-                data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
-                data-font-color="#000000" data-coffee-color="#ffffff"></script>
-        </div>
-    </div>
-</footer>
+	<!-- Game Movement and State Management -->
+    <script type="module">
+        const state = window.gameState;
+
+        // Move Block
+        function moveBlock(dx, dy) {
+            if (state.isPaused || state.isGameOver || state.isMoving) return;
+
+            state.clearBlock(state.currentBlock);
+            const newBlock = { ...state.currentBlock, x: state.currentBlock.x + dx, y: state.currentBlock.y + dy };
+
+            if (!state.isCollision(newBlock)) {
+                state.currentBlock = newBlock;
+                state.drawBlock(state.currentBlock);
+            } else if (dy > 0) { // Block has landed
+    state.drawBlock(state.currentBlock);
+    state.grid[state.currentBlock.y][state.currentBlock.x] = state.currentBlock;
+    state.currentBlock = state.nextBlock;
+    state.nextBlock = state.createBlock();
+    state.updateScore(10); // Add points for landing block
+    checkGameOver();
+    checkWin();
+}
+            } else { // Horizontal collision
+                state.drawBlock(state.currentBlock);
+            }
+        }
+
+        // Drop Block
+        function dropBlock() {
+            if (state.isPaused || state.isGameOver || state.isMoving) return;
+            state.isMoving = true;
+
+            const dropInterval = setInterval(() => {
+                state.clearBlock(state.currentBlock);
+                const newBlock = { ...state.currentBlock, y: state.currentBlock.y + 1 };
+
+                if (!state.isCollision(newBlock)) {
+                    state.currentBlock = newBlock;
+                    state.drawBlock(state.currentBlock);
+                } else {
+                    state.drawBlock(state.currentBlock);
+                    state.grid[state.currentBlock.y][state.currentBlock.x] = state.currentBlock;
+                    state.currentBlock = state.nextBlock;
+                    state.nextBlock = state.createBlock();
+                    checkGameOver();
+                    checkWin();
+                    clearInterval(dropInterval);
+                    state.isMoving = false;
+                }
+            }, 50);
+        }
+
+        // Start Game
+        function startGame() {
+            const overlay = document.querySelector('.game-over');
+            if (overlay) overlay.remove();
+
+            clearInterval(state.gameInterval);
+            clearInterval(state.timerInterval);
+            state.isGameOver = false;
+            state.isPaused = false;
+            state.gameTime = 0;
+            state.currentScore = 0;
+            state.chainCount = 0;
+
+            state.initGrid();
+            state.currentBlock = state.createBlock();
+            state.nextBlock = state.createBlock();
+            state.drawBlock(state.currentBlock);
+
+            document.querySelector('#timer-container span').textContent = '00:00';
+            document.querySelector('#score-container span').textContent = '0';
+            document.getElementById('pause-btn').textContent = 'PAUSE';
+
+            state.gameInterval = setInterval(() => {
+                if (!state.isPaused && !state.isGameOver) {
+                    moveBlock(0, 1);
+                }
+            }, 1000);
+
+            state.timerInterval = setInterval(state.updateTimer, 1000);
+        }
+
+        // Toggle Pause
+        function togglePause() {
+            if (state.isGameOver) return;
+            state.isPaused = !state.isPaused;
+            document.getElementById('pause-btn').textContent = state.isPaused ? 'RESUME' : 'PAUSE';
+        }
+
+        // Check Game Over
+        function checkGameOver() {
+            if (state.nextBlock && state.isCollision(state.nextBlock)) {
+                endGame('GAME OVER');
+            }
+        }
+
+        // Check Win
+        async function checkWin() {
+            for (let y = 0; y < state.GRID_HEIGHT; y++) {
+                for (let x = 0; x <= state.GRID_WIDTH - state.TARGET_WORD.length; x++) {
+                    let word = '';
+                    let isValid = true;
+                    let winningCells = [];
+                    
+                    for (let i = 0; i < state.TARGET_WORD.length; i++) {
+                        if (!state.grid[y][x + i]) {
+                            isValid = false;
+                            break;
+                        }
+                        word += state.grid[y][x + i].letter;
+                        winningCells.push([x + i, y]);
+                    }
+                    
+                    if (isValid && word === state.TARGET_WORD) {
+                        state.isGameOver = true;
+                        clearInterval(state.gameInterval);
+                        clearInterval(state.timerInterval);
+						const timeBonus = Math.max(0, 1000 - state.gameTime * 2); // Faster completion = higher bonus
+    state.updateScore(1000 + timeBonus); // Base completion bonus + time bonus
+    
+    winningCells.forEach(([wx, wy]) => {
+                        
+                        winningCells.forEach(([wx, wy]) => {
+                            const cell = document.querySelector(`#game-grid .grid-cell[data-x="${wx}"][data-y="${wy}"]`);
+                            if (cell) {
+                                cell.style.transform = 'scale(1.1)';
+                            }
+                        });
+
+                        setTimeout(() => {
+                            endGame('YOU DID IT!', true);
+                        }, 500);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // End Game
+        function endGame(message, isWin = false) {
+            state.isGameOver = true;
+            clearInterval(state.gameInterval);
+            clearInterval(state.timerInterval);
+
+            const overlay = document.createElement('div');
+            overlay.className = 'game-over';
+
+            if (isWin) {
+                // Get leaderboard scores
+                const leaderboardScores = Array.from(document.querySelectorAll('#leaderboard tbody tr td:last-child'))
+                    .map(td => parseInt(td.textContent.replace(/,/g, '')))
+                    .sort((a, b) => b - a);
+
+                const rankIndex = leaderboardScores.findIndex(score => state.currentScore > score);
+                const isTopTen = rankIndex !== -1 || leaderboardScores.length < 10;
+
+                const rankWords = ["ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN"];
+                const rankWord = rankWords[rankIndex] || (leaderboardScores.length < 10 ? rankWords[leaderboardScores.length] : null);
+
+                const shareMessage = isTopTen
+                    ? `I am now number ${rankWord} on the leaderboard for ${state.TARGET_WORD} at https://playleximax.com/game.html?gameId=${state.GAME_ID} with a score of ${state.currentScore.toLocaleString()}. Can you beat me?`
+                    : `I built ${state.TARGET_WORD} at https://playleximax.com/game.html?gameId=${state.GAME_ID} with a score of ${state.currentScore.toLocaleString()}. Can you beat me?`;
+
+                overlay.innerHTML = `
+                    <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+                        ${isTopTen 
+                            ? `WOW! Enter your name below to record your score of <b>${state.currentScore.toLocaleString()}</b> at number <b>${rankWord}</b> on the leaderboard.` 
+                            : `GREAT! You built <b>${state.TARGET_WORD}</b> with a score of <b>${state.currentScore.toLocaleString()}</b>.`}
+                    </div>
+                    ${isTopTen ? `
+                        <input type="text" id="player-name" 
+                               maxlength="12" 
+                               placeholder="Enter your name"
+                               style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;"
+                        >` : ''}
+                    <button id="share-btn" style="
+                        width: 100%;
+                        padding: 12px;
+                        background-color: #003366;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        font-size: 16px;
+                        cursor: pointer;
+                        margin-bottom: 10px;
+                    ">
+                        SHARE
+                    </button>
+                    <button id="close-overlay-btn" style="
+                        width: 100%;
+                        padding: 12px;
+                        background-color: #666;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        font-size: 16px;
+                        cursor: pointer;
+                    ">
+                        CLOSE
+                    </button>
+                `;
+
+                document.getElementById('game-grid').appendChild(overlay);
+
+                // Share Button
+                const shareBtn = document.getElementById('share-btn');
+                shareBtn.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(shareMessage);
+                        shareBtn.textContent = 'COPIED!';
+                        shareBtn.style.backgroundColor = '#002244';
+                        setTimeout(() => {
+                            shareBtn.textContent = 'SHARE';
+                            shareBtn.style.backgroundColor = '#003366';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Failed to copy:', err);
+                        shareBtn.textContent = 'COPY FAILED';
+                        shareBtn.style.backgroundColor = '#d32f2f';
+                    }
+                });
+
+                // Close Button
+                const closeBtn = document.getElementById('close-overlay-btn');
+                closeBtn.addEventListener('click', () => overlay.remove());
+
+                // Leaderboard Entry Submission
+                if (isTopTen) {
+                    const nameInput = document.getElementById('player-name');
+                    nameInput.focus();
+                    nameInput.addEventListener('keypress', async (e) => {
+                        if (e.key === 'Enter') {
+                            const name = nameInput.value.trim() || 'Anonymous';
+                            try {
+                                await window.firebaseOps.addLeaderboardEntry(state.GAME_ID, name, state.currentScore, state.gameTime);
+                                overlay.remove();
+                            } catch (error) {
+                                console.error('Error submitting score:', error);
+                            }
+                        }
+                    });
+                }
+
+            } else {
+                overlay.innerHTML = `
+                    <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
+                        ${message}
+                    </div>
+                    <p>Final Score: ${state.currentScore.toLocaleString()}</p>
+                    <button id="close-overlay-btn" style="
+                        width: 100%;
+                        padding: 12px;
+                        background-color: #666;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        font-size: 16px;
+                        cursor: pointer;
+                        margin-top: 15px;
+                    ">
+                        CLOSE
+                    </button>
+                `;
+                document.getElementById('game-grid').appendChild(overlay);
+
+                const closeBtn = document.getElementById('close-overlay-btn');
+                closeBtn.addEventListener('click', () => overlay.remove());
+            }
+        }
+
+        // Add game functions to global state
+        Object.assign(window.gameState, {
+            moveBlock,
+            dropBlock,
+            startGame,
+            togglePause,
+            checkGameOver,
+            checkWin,
+            endGame
+        });
+    </script>
+	<!-- Game Initialization and Event Listeners -->
+    <script type="module">
+        const state = window.gameState;
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('Initializing Leximax Game...');
+                
+                // Initialize game grid and load Firebase data
+                await state.initGame();
+                state.initGrid();
+                
+                // Set up button event listeners
+                const startBtn = document.getElementById('start-btn');
+                const pauseBtn = document.getElementById('pause-btn');
+                const leftBtn = document.getElementById('left-btn');
+                const downBtn = document.getElementById('down-btn');
+                const rightBtn = document.getElementById('right-btn');
+
+                startBtn.addEventListener('click', state.startGame);
+                pauseBtn.addEventListener('click', state.togglePause);
+                leftBtn.addEventListener('click', () => state.moveBlock(-1, 0));
+                rightBtn.addEventListener('click', () => state.moveBlock(1, 0));
+                downBtn.addEventListener('click', state.dropBlock);
+
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft') state.moveBlock(-1, 0);
+                    if (e.key === 'ArrowRight') state.moveBlock(1, 0);
+                    if (e.key === 'ArrowDown') state.moveBlock(0, 1);
+                    if (e.key === 'Space') state.dropBlock();
+                });
+                
+                // Display initial game state
+                state.currentBlock = state.createBlock();
+                state.nextBlock = state.createBlock();
+                state.drawBlock(state.currentBlock);
+
+                // Initialize timer and game loop
+                state.timerInterval = setInterval(state.updateTimer, 1000);
+                state.gameInterval = setInterval(() => {
+                    if (!state.isPaused && !state.isGameOver) {
+                        state.moveBlock(0, 1);
+                    }
+                }, 1000);
+
+                console.log('Leximax Game initialized successfully!');
+            } catch (error) {
+                console.error('Error during game initialization:', error);
+            }
+        });
+
+        // Error Handling
+        window.addEventListener('error', (event) => {
+            console.error('Unhandled Error:', event.message);
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled Promise Rejection:', event.reason);
+        });
+    </script>
 </body>
 </html>
