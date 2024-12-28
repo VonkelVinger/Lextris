@@ -19,55 +19,63 @@
             appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
+        // ✅ Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Function to create a new game
+        // ✅ Attach `createGame` to the window for global access
         window.createGame = async function createGame() {
             const gameId = document.getElementById('gameId').value.trim();
             const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
 
-            if (!gameId || !targetWord) {
-                alert('Both Game ID and Target Word are required.');
-                return;
-            }
-
             const logs = document.getElementById('logs');
             logs.innerHTML = '';
 
-            // ✅ Validate gameId and targetWord
+            // ✅ Input Validations
+            if (!gameId || !targetWord) {
+                logs.innerHTML += '❌ Both Game ID and Target Word are required.<br>';
+                return;
+            }
+
             const gameIdPattern = /^Game\d{4}-\d{2}-\d{2}$/;
             if (!gameIdPattern.test(gameId)) {
-                logs.innerHTML += '❌ Error: Game ID must be in the format "GameYYYY-MM-DD"<br>';
+                logs.innerHTML += '❌ Game ID must be in the format "GameYYYY-MM-DD".<br>';
                 return;
             }
             if (!/^[A-Z]+$/.test(targetWord)) {
-                logs.innerHTML += '❌ Error: Target word must contain only letters<br>';
+                logs.innerHTML += '❌ Target word must contain only uppercase letters.<br>';
+                return;
+            }
+            if (targetWord.length < 3 || targetWord.length > 12) {
+                logs.innerHTML += '❌ Target Word must be between 3 and 12 letters.<br>';
                 return;
             }
 
+            // ✅ Firebase Operation
             try {
                 logs.innerHTML += '⏳ Creating game document...<br>';
 
-                // ✅ Create the main game document
                 await setDoc(doc(db, 'daily_games', gameId), {
                     targetWord: targetWord,
                     createdAt: serverTimestamp(),
                     active: true
                 });
-                logs.innerHTML += `✅ Game '${gameId}' created successfully!<br>`;
 
+                logs.innerHTML += `✅ Game '${gameId}' created successfully!<br>`;
                 alert(`✅ Game '${gameId}' set up successfully!`);
+
+                // ✅ Clear Inputs
                 document.getElementById('gameId').value = '';
                 document.getElementById('targetWord').value = '';
             } catch (error) {
                 console.error('❌ Error creating game:', error);
                 logs.innerHTML += `❌ Error: ${error.message}<br>`;
-                alert('Error creating game. Check the logs below.');
+                alert('❌ Error creating game. Check the logs below.');
             }
         };
     </script>
     <style>
+        /* ✅ General Styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -126,6 +134,7 @@
     </style>
 </head>
 <body>
+    <!-- ✅ Admin Panel UI -->
     <div class="admin-container">
         <h1>Leximax Admin Panel</h1>
         <div class="form-group">
@@ -141,14 +150,29 @@
         </div>
         <div class="logs" id="logs"></div>
     </div>
+
     <script>
-        document.getElementById('create-game-btn').addEventListener('click', () => {
-            if (window.createGame) {
-                window.createGame();
-            } else {
-                console.error('❌ createGame function is not available.');
-            }
+        // ✅ Ensure Button Click Calls `createGame`
+        document.addEventListener('DOMContentLoaded', () => {
+            const createGameBtn = document.getElementById('create-game-btn');
+            createGameBtn.addEventListener('click', () => {
+                if (window.createGame) {
+                    window.createGame();
+                } else {
+                    console.error('❌ createGame function is not available.');
+                }
+            });
         });
+
+        // ✅ Error Handling for JSON.parse (if needed elsewhere)
+        window.safeParseJSON = (string) => {
+            try {
+                return JSON.parse(string);
+            } catch (error) {
+                console.error('❌ Invalid JSON:', error);
+                return null;
+            }
+        };
     </script>
 </body>
 </html>
