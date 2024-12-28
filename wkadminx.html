@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin Panel</title>
     <script type="module">
-        // ✅ Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.17.1/firestore.js";
+        // ✅ Import Firebase Modules (Correct Versions)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
         // ✅ Firebase Configuration
         const firebaseConfig = {
@@ -151,8 +151,8 @@
         <div class="logs" id="logs"></div>
     </div>
 
+    <!-- ✅ Button Event Listener -->
     <script>
-        // ✅ Ensure Button Click Calls `createGame`
         document.addEventListener('DOMContentLoaded', () => {
             const createGameBtn = document.getElementById('create-game-btn');
             createGameBtn.addEventListener('click', () => {
@@ -164,7 +164,7 @@
             });
         });
 
-        // ✅ Error Handling for JSON.parse (if needed elsewhere)
+        // ✅ Safe JSON Parsing Utility (if needed later)
         window.safeParseJSON = (string) => {
             try {
                 return JSON.parse(string);
