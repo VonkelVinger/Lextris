@@ -253,12 +253,16 @@
     font-size: 14px;
 }
 
-#leaderboard th,
-#leaderboard td {
-    padding: 6px 12px;
-    text-align: left;
-    border-bottom: 1px solid #cccccc;
-    font-size: 14px;
+#leaderboard td:last-child {
+    min-width: 100px;
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    padding-right: 16px;
+}
+
+#leaderboard th:last-child {
+    text-align: right;
+    padding-right: 16px;
 }
 
 .game-over {
@@ -420,21 +424,20 @@
                 }
             },
             
-            async addLeaderboardEntry(gameId, name, score, time) {
-                try {
-                    const entry = {
-                        name: String(name).slice(0, 12),
-                        score: Number(score),
-                        time: Number(time),
-                        timestamp: new Date().toISOString()
-                    };
-                    await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), entry);
-                    return true;
-                } catch (error) {
-                    console.error("Error adding leaderboard entry:", error);
-                    return false;
-                }
-            }
+            async addLeaderboardEntry(gameId, name, score) {  
+    try {
+        const entry = {
+            name: String(name).slice(0, 12),
+            score: Number(score),
+            timestamp: new Date().toISOString()  
+        };
+        await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), entry);
+        return true;
+    } catch (error) {
+        console.error("Error adding leaderboard entry:", error);
+        return false;
+    }
+}
         };
 
         window.formatTime = function(seconds) {
@@ -961,19 +964,19 @@
                     if (isTopTen) {
                         const nameInput = document.getElementById('player-name');
                         if (nameInput) {
-                            nameInput.focus();
-                            nameInput.addEventListener('keypress', async (e) => {
-                                if (e.key === 'Enter') {
-                                    const name = nameInput.value.trim() || 'Anonymous';
-                                    try {
-                                        await window.firebaseOps.addLeaderboardEntry(GAME_ID, name, currentScore, gameTime);
-                                        overlay.remove();
-                                    } catch (error) {
-                                        console.error('Error submitting score:', error);
-                                    }
-                                }
-                            });
-                        }
+    nameInput.focus();
+    nameInput.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            const name = nameInput.value.trim() || 'Anonymous';
+            try {
+                await window.firebaseOps.addLeaderboardEntry(GAME_ID, name, currentScore);  // Remove gameTime
+                overlay.remove();
+            } catch (error) {
+                console.error('Error submitting score:', error);
+            }
+        }
+    });
+}
                     }
                 } else {
                     overlay.innerHTML = `
