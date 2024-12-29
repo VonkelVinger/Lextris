@@ -360,33 +360,36 @@
 }
     </style>
 <script type="module">
-   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    getDoc, 
-    collection, 
-    addDoc, 
-    query, 
-    orderBy, 
-    limit, 
-    onSnapshot,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { 
+        getFirestore, 
+        doc, 
+        setDoc, 
+        getDoc, 
+        collection, 
+        addDoc, 
+        query, 
+        orderBy, 
+        limit, 
+        onSnapshot, 
+        getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-    apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-    authDomain: "leximax-96299.firebaseapp.com",
-    projectId: "leximax-96299",
-    storageBucket: "leximax-96299.appspot.com",
-    messagingSenderId: "1067424610925",
-    appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
-};
-// ✅ Ensure this is at the top-level scope
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-console.log('✅ Firebase Initialized:', db);
+    // ✅ Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+        authDomain: "leximax-96299.firebaseapp.com",
+        projectId: "leximax-96299",
+        storageBucket: "leximax-96299.appspot.com",
+        messagingSenderId: "1067424610925",
+        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+    };
+
+    // ✅ Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    console.log('✅ Firebase Initialized:', db);
+</script>
 
         window.firebaseOps = {
             async getGameData() {
