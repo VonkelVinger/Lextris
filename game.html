@@ -547,30 +547,42 @@ console.log('✅ Firebase Initialized:', db);
 
             // Initialize game data from Firebase
             async function initGame() {
-                try {
-                    const gameData = await window.firebaseOps.getGameData();
-                    if (gameData) {
-                        TARGET_WORD = gameData.targetWord;
-                        GAME_ID = gameData.id;
-                        
-                        const targetWordDiv = document.getElementById('target-word');
-                        targetWordDiv.innerHTML = '';
-                        for (const letter of TARGET_WORD) {
-                            const letterDiv = document.createElement('div');
-                            letterDiv.className = 'target-letter';
-                            letterDiv.textContent = letter;
-                            targetWordDiv.appendChild(letterDiv);
-                        }
-                        
-                        setupLeaderboard();
-                        return true;
-                    }
-                    return false;
-                } catch (error) {
-                    console.error('Error initializing game:', error);
-                    return false;
-                }
+    try {
+        const gameData = await window.firebaseOps.getGameData();
+        if (gameData) {
+            TARGET_WORD = gameData.targetWord;
+            GAME_ID = gameData.id;
+
+            // Debugging Logs
+            console.log('✅ Is GAME_ID Defined?', typeof GAME_ID); 
+            console.log('✅ GAME_ID Value:', GAME_ID); 
+
+            const targetWordDiv = document.getElementById('target-word');
+            targetWordDiv.innerHTML = '';
+            for (const letter of TARGET_WORD) {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'target-letter';
+                letterDiv.textContent = letter;
+                targetWordDiv.appendChild(letterDiv);
             }
+
+            if (GAME_ID) {
+                console.log('✅ GAME_ID is valid, proceeding to setupLeaderboard.');
+                setupLeaderboard();
+            } else {
+                console.warn('❌ GAME_ID is still undefined after initialization.');
+            }
+
+            return true;
+        } else {
+            console.warn('❌ No game data returned from Firebase.');
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error initializing game:', error);
+        return false;
+    }
+}
 
            function setupLeaderboard() {
     if (!GAME_ID) {
