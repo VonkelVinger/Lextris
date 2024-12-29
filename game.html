@@ -388,13 +388,22 @@
 
     // ✅ Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const db = getFirestore(app);
+console.log('✅ Firebase Initialized:', db);
 
-    // ✅ Attach db to the global window object
-    window.db = db; 
-
-    console.log('✅ Firebase Initialized:', db);
-
+// ✅ Attach Firestore functions to the window object for global access
+window.firebaseUtils = {
+    collection,
+    doc,
+    setDoc,
+    getDoc,
+    addDoc,
+    query,
+    orderBy,
+    limit,
+    onSnapshot,
+    getDocs
+};
     // ✅ Firebase Operations
     window.firebaseOps = {
         async getGameData() {
