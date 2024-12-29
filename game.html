@@ -390,68 +390,73 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // ✅ Attach db to the global window object
+    window.db = db; 
+
     console.log('✅ Firebase Initialized:', db);
-</script>
-        window.firebaseOps = {
-            async getGameData() {
-                try {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    let gameId = urlParams.get('gameId');
+
+    // ✅ Firebase Operations
+    window.firebaseOps = {
+        async getGameData() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                let gameId = urlParams.get('gameId');
+                
+                if (!gameId) {
+                    const gamesRef = collection(db, 'daily_games');
+                    const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
+                    const querySnapshot = await getDocs(q);
                     
-                    if (!gameId) {
-                        const gamesRef = collection(db, 'daily_games');
-                        const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
-                        const querySnapshot = await getDocs(q);
-                        
-                        if (!querySnapshot.empty) {
-                            gameId = querySnapshot.docs[0].id;
-                        } else {
-                            console.error("No games found");
-                            return null;
-                        }
-                    }
-                    
-                    console.log("Looking for game:", gameId);
-                    const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
-                    
-                    if (!gameDoc.exists()) {
-                        console.error("No game found for:", gameId);
+                    if (!querySnapshot.empty) {
+                        gameId = querySnapshot.docs[0].id;
+                    } else {
+                        console.error("❌ No games found");
                         return null;
                     }
-                    
-                    return {
-                        id: gameId,
-                        ...gameDoc.data()
-                    };
-                } catch (error) {
-                    console.error("Error fetching game data:", error);
+                }
+                
+                console.log("🔍 Looking for game:", gameId);
+                const gameDoc = await getDoc(doc(db, 'daily_games', gameId));
+                
+                if (!gameDoc.exists()) {
+                    console.error("❌ No game found for:", gameId);
                     return null;
                 }
-            },
-            
-            async addLeaderboardEntry(gameId, name, score) {  
-    try {
-        const entry = {
-            name: String(name).slice(0, 12),
-            score: Number(score),
-            timestamp: new Date().toISOString()  
-        };
-        await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), entry);
-        return true;
-    } catch (error) {
-        console.error("Error adding leaderboard entry:", error);
-        return false;
-    }
-}
-        };
+                
+                return {
+                    id: gameId,
+                    ...gameDoc.data()
+                };
+            } catch (error) {
+                console.error("❌ Error fetching game data:", error);
+                return null;
+            }
+        },
 
-        window.formatTime = function(seconds) {
-            if (!seconds && seconds !== 0) return '--:--';
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        };
-    </script>
+        async addLeaderboardEntry(gameId, name, score) {  
+            try {
+                const entry = {
+                    name: String(name).slice(0, 12),
+                    score: Number(score),
+                    timestamp: new Date().toISOString()  
+                };
+                await addDoc(collection(db, 'daily_games', gameId, 'leaderboard'), entry);
+                return true;
+            } catch (error) {
+                console.error("❌ Error adding leaderboard entry:", error);
+                return false;
+            }
+        }
+    };
+
+    // ✅ Utility Function
+    window.formatTime = function(seconds) {
+        if (!seconds && seconds !== 0) return '--:--';
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
+</script>
 </head>
 <body>
     <div class="game-wrapper">
