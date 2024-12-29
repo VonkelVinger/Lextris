@@ -404,6 +404,9 @@ window.firebaseUtils = {
     onSnapshot,
     getDocs
 };
+// ✅ Attach `db` to the window object
+window.db = db; // ✅ Explicitly expose db globally
+
     // ✅ Firebase Operations
     window.firebaseOps = {
         async getGameData() {
