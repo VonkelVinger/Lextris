@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin Panel</title>
     <script type="module">
-        // ✅ Import Firebase Modules (Correct Versions)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -19,11 +17,9 @@
             appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
-        // ✅ Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Attach `createGame` to the window for global access
         window.createGame = async function createGame() {
             const gameId = document.getElementById('gameId').value.trim();
             const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
@@ -31,7 +27,6 @@
             const logs = document.getElementById('logs');
             logs.innerHTML = '';
 
-            // ✅ Input Validations
             if (!gameId || !targetWord) {
                 logs.innerHTML += '❌ Both Game ID and Target Word are required.<br>';
                 return;
@@ -51,7 +46,6 @@
                 return;
             }
 
-            // ✅ Firebase Operation
             try {
                 logs.innerHTML += '⏳ Creating game document...<br>';
 
@@ -64,7 +58,6 @@
                 logs.innerHTML += `✅ Game '${gameId}' created successfully!<br>`;
                 alert(`✅ Game '${gameId}' set up successfully!`);
 
-                // ✅ Clear Inputs
                 document.getElementById('gameId').value = '';
                 document.getElementById('targetWord').value = '';
             } catch (error) {
@@ -75,7 +68,6 @@
         };
     </script>
     <style>
-        /* ✅ General Styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -134,7 +126,6 @@
     </style>
 </head>
 <body>
-    <!-- ✅ Admin Panel UI -->
     <div class="admin-container">
         <h1>Leximax Admin Panel</h1>
         <div class="form-group">
@@ -151,7 +142,6 @@
         <div class="logs" id="logs"></div>
     </div>
 
-    <!-- ✅ Button Event Listener -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const createGameBtn = document.getElementById('create-game-btn');
@@ -163,16 +153,6 @@
                 }
             });
         });
-
-        // ✅ Safe JSON Parsing Utility (if needed later)
-        window.safeParseJSON = (string) => {
-            try {
-                return JSON.parse(string);
-            } catch (error) {
-                console.error('❌ Invalid JSON:', error);
-                return null;
-            }
-        };
     </script>
 </body>
 </html>
