@@ -547,6 +547,10 @@ console.log('✅ Firebase Initialized:', db);
 
             // Initialize game data from Firebase
             async function initGame() {
+		    if (!db) {
+  console.error('❌ db is not defined. Please check your Firebase initialization.');
+  return false;
+}
     try {
         const gameData = await window.firebaseOps.getGameData();
         if (gameData) {
