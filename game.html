@@ -888,7 +888,7 @@ console.log('✅ Firebase Initialized:', db);
 
                     const timeStr = window.formatTime(gameTime);
                     const messageContent = isTopTen 
-                        ? `WOW! Enter your name or nickname below to record your score of <b>${currentScore.toLocaleString()}</b> at number <b>${rankWord}</b> on the leaderboard for <b>${TARGET_WORD}</b>. Challenge your friends to beat your score by clicking on SHARE to copy this message on your clipboard.`
+                        ? `WOW! Enter your name and score of <b>${currentScore.toLocaleString()}</b> at number <b>${rankWord}</b> on the leaderboard for <b>${TARGET_WORD}</b>. Challenge your friends to beat your score by clicking on SHARE to copy this message on your clipboard.`
                         : `GREAT! You built <b>${TARGET_WORD}</b> with a score of <b>${currentScore.toLocaleString()}</b>. Challenge your friends to beat your score by clicking on SHARE to copy this message on your clipboard.`;
 
                     const shareMessage = isTopTen
