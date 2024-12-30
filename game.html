@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>#leaderboard {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
@@ -317,6 +317,90 @@
     #leaderboard td {
         padding: 6px;
     }
+.leaderboard-container {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #004d40;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+/* ✅ LEADERBOARD HEADER */
+.leaderboard-container caption {
+    background-color: #003366;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px;
+    text-transform: uppercase;
+}
+
+/* ✅ TABLE HEADINGS */
+.leaderboard-container thead {
+    background-color: #004d40;
+    color: #ffffff;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.leaderboard-container th {
+    padding: 10px;
+    font-weight: bold;
+}
+
+/* ✅ TABLE ROWS */
+.leaderboard-container tbody tr {
+    background-color: #ffffff;
+    transition: background-color 0.3s ease;
+}
+
+.leaderboard-container tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.leaderboard-container tbody tr:hover {
+    background-color: #e0f7fa;
+}
+
+/* ✅ HIGHLIGHT FIRST PLACE */
+.leaderboard-container tbody tr:first-child {
+    background-color: #FFD700;
+    font-weight: bold;
+    color: #000;
+}
+
+/* ✅ CELL STYLING */
+.leaderboard-container td {
+    padding: 8px 10px;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.leaderboard-container td:first-child {
+    font-weight: bold;
+    color: #003366;
+}
+
+.leaderboard-container td:last-child {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-align: right;
+}
+
+/* ✅ RESPONSIVE STYLING */
+@media (max-width: 480px) {
+    .leaderboard-container {
+        font-size: 12px;
+    }
+    .leaderboard-container th,
+    .leaderboard-container td {
+        padding: 6px;
+    }
+}
 }
 </style>
 
