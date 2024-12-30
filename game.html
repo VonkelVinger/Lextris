@@ -186,64 +186,6 @@
 .mobile-btn:active {
     background-color: #002244;
 }
-.game-over {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.9);
-    color: white;
-    padding: 30px;
-    border-radius: 8px;
-    text-align: center;
-    z-index: 1000;
-    width: 80%;
-    max-width: 400px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.game-over h2 {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    text-transform: uppercase;
-    color: #FFC107;
-}
-
-.game-over p {
-    font-size: 16px;
-    margin: 10px 0;
-    color: #FFFFFF;
-}
-
-.game-over .final-score {
-    font-size: 18px;
-    font-weight: bold;
-    color: #FFD700;
-    margin: 10px 0;
-}
-
-.game-over button {
-    background-color: #003366;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 20px;
-    transition: background-color 0.2s ease;
-}
-
-.game-over button:hover {
-    background-color: #004488;
-}
-
-.game-over button:active {
-    background-color: #002244;
-}
-</style>
     </style>
 
     <!-- Controls Styles (Next Section) -->
@@ -293,71 +235,76 @@
 
 #leaderboard {
     width: 100%;
-    max-width: 400px;
-    margin-top: 20px;
-    border-radius: 8px;
+    max-width: 320px;
+    margin-top: 15px;
+    border-collapse: collapse;
+    background-color: #f0f0f0;
+    color: #000000;
+    border-radius: 2px;
     overflow: hidden;
-    text-align: center;
-    border: 1px solid #004d40;
-    font-family: Arial, sans-serif;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 #leaderboard caption {
     background-color: #003366;
-    color: #ffffff;
-    font-size: 18px;
+    color: white;
+    padding: 8px;
     font-weight: bold;
-    padding: 10px;
     text-transform: uppercase;
-}
-
-#leaderboard thead {
-    background-color: #004d40;
-    color: #ffffff;
     font-size: 14px;
-}
-
-#leaderboard th {
-    padding: 10px;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
-#leaderboard tbody tr {
-    background-color: #ffffff;
-    transition: background-color 0.3s ease;
-}
-
-#leaderboard tbody tr:nth-child(odd) {
-    background-color: #f9f9f9;
-}
-
-#leaderboard tbody tr:hover {
-    background-color: #e0f7fa;
-}
-
-#leaderboard tbody tr:first-child {
-    background-color: #FFD700;
-    font-weight: bold;
-    color: #000;
-}
-
-#leaderboard td {
-    padding: 8px 10px;
-    font-size: 14px;
-    border-bottom: 1px solid #ddd;
-}
-
-#leaderboard td:first-child {
-    font-weight: bold;
-    color: #003366;
 }
 
 #leaderboard td:last-child {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    min-width: 100px;
     text-align: right;
+    font-family: 'Courier New', monospace;
+    padding-right: 16px;
+}
+
+#leaderboard th:last-child {
+    text-align: right;
+    padding-right: 16px;
+}
+
+.game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.game-over input {
+    margin: 10px 0;
+    padding: 8px;
+    width: 200px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.game-over button {
+    background-color: #003366;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.game-over button:hover {
+    background-color: #004488;
+}
+
+.game-over button:active {
+    background-color: #002244;
 }
     </style>
 
@@ -986,7 +933,7 @@ console.log('✅ GAME_ID Value:', GAME_ID);
 
                     const timeStr = window.formatTime(gameTime);
                     const messageContent = isTopTen 
-                        ? `WOW! Enter your name and score of <b>${currentScore.toLocaleString()}</b> at number <b>${rankWord}</b> on the leaderboard for <b>${TARGET_WORD}</b>. Challenge your friends to beat your score by clicking on SHARE to copy this message to your clipboard.`
+                        ? `WOW! Enter your name and score of <b>${currentScore.toLocaleString()}</b> at number <b>${rankWord}</b> on the leaderboard for <b>${TARGET_WORD}</b>. Challenge your friends to beat your score by clicking on SHARE to copy this message on your clipboard.`
                         : `GREAT! You built <b>${TARGET_WORD}</b> with a score of <b>${currentScore.toLocaleString()}</b>. Challenge your friends to beat your score by clicking on SHARE to copy this message on your clipboard.`;
 
                     const shareMessage = isTopTen
@@ -1167,7 +1114,7 @@ console.log('✅ GAME_ID Value:', GAME_ID);
             downBtn.addEventListener('click', dropBlock);
 
             document.addEventListener('keydown', (e) => {
-                if (e.kconst overlay =ey === 'ArrowLeft') moveBlock(-1, 0);
+                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
                 if (e.key === 'ArrowRight') moveBlock(1, 0);
                 if (e.key === 'ArrowDown') moveBlock(0, 1);
                 if (e.key === ' ') {
