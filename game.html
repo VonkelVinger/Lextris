@@ -235,34 +235,72 @@
 
 #leaderboard {
     width: 100%;
-    max-width: 320px;
-    margin-top: 15px;
-    border-collapse: collapse;
-    background-color: #f0f0f0;
-    color: #000000;
-    border-radius: 2px;
+    max-width: 400px;
+    margin: 20px auto;
+    border-radius: 8px;
     overflow: hidden;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    border: 1px solid #004d40;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 #leaderboard caption {
     background-color: #003366;
-    color: white;
-    padding: 8px;
+    color: #ffffff;
+    font-size: 18px;
     font-weight: bold;
+    padding: 10px;
     text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#leaderboard thead {
+    background-color: #004d40;
+    color: #ffffff;
     font-size: 14px;
+    text-transform: uppercase;
+}
+
+#leaderboard th {
+    padding: 10px;
+    font-weight: bold;
+}
+
+#leaderboard tbody tr {
+    background-color: #ffffff;
+    transition: background-color 0.3s ease;
+}
+
+#leaderboard tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+#leaderboard tbody tr:hover {
+    background-color: #e0f7fa;
+}
+
+#leaderboard tbody tr:first-child {
+    background-color: #FFD700; /* Gold for top rank */
+    font-weight: bold;
+    color: #000;
+}
+
+#leaderboard td {
+    padding: 10px;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+}
+
+#leaderboard td:first-child {
+    font-weight: bold;
+    color: #003366;
 }
 
 #leaderboard td:last-child {
-    min-width: 100px;
-    text-align: right;
     font-family: 'Courier New', monospace;
-    padding-right: 16px;
-}
-
-#leaderboard th:last-child {
+    font-weight: bold;
     text-align: right;
-    padding-right: 16px;
 }
 
 .game-over {
