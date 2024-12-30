@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>#leaderboard {
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LEXIMAX</title>
@@ -235,172 +235,36 @@
 
 #leaderboard {
     width: 100%;
-    max-width: 400px;
-    margin-top: 20px;
-    border-radius: 8px;
+    max-width: 320px;
+    margin-top: 15px;
+    border-collapse: collapse;
+    background-color: #f0f0f0;
+    color: #000000;
+    border-radius: 2px;
     overflow: hidden;
-    text-align: center;
-    border: 1px solid #004d40;
-    font-family: Arial, sans-serif;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* ✅ Leaderboard Header */
 #leaderboard caption {
     background-color: #003366;
-    color: #ffffff;
-    font-size: 18px;
+    color: white;
+    padding: 8px;
     font-weight: bold;
-    padding: 10px;
     text-transform: uppercase;
-}
-
-/* ✅ Leaderboard Table Headings */
-#leaderboard thead {
-    background-color: #004d40;
-    color: #ffffff;
     font-size: 14px;
-}
-
-#leaderboard th {
-    padding: 10px;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
-/* ✅ Leaderboard Rows */
-#leaderboard tbody tr {
-    background-color: #ffffff;
-    transition: background-color 0.3s ease;
-}
-
-#leaderboard tbody tr:nth-child(odd) {
-    background-color: #f9f9f9;
-}
-
-#leaderboard tbody tr:hover {
-    background-color: #e0f7fa;
-}
-
-/* ✅ Highlight First Place */
-#leaderboard tbody tr:first-child {
-    background-color: #FFD700;
-    font-weight: bold;
-    color: #000;
-}
-
-/* ✅ Leaderboard Table Cells */
-#leaderboard td {
-    padding: 8px 10px;
-    font-size: 14px;
-    border-bottom: 1px solid #ddd;
-}
-
-#leaderboard td:first-child {
-    font-weight: bold;
-    color: #003366;
 }
 
 #leaderboard td:last-child {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    min-width: 100px;
     text-align: right;
-}
-
-/* ✅ Responsive Design */
-@media (max-width: 480px) {
-    #leaderboard {
-        font-size: 12px;
-    }
-
-    #leaderboard th,
-    #leaderboard td {
-        padding: 6px;
-    }
-.leaderboard-container {
-    margin-top: 20px;
-    width: 100%;
-    max-width: 400px;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #004d40;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
-}
-
-/* ✅ LEADERBOARD HEADER */
-.leaderboard-container caption {
-    background-color: #003366;
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 12px;
-    text-transform: uppercase;
-}
-
-/* ✅ TABLE HEADINGS */
-.leaderboard-container thead {
-    background-color: #004d40;
-    color: #ffffff;
-    text-transform: uppercase;
-    font-size: 14px;
-}
-
-.leaderboard-container th {
-    padding: 10px;
-    font-weight: bold;
-}
-
-/* ✅ TABLE ROWS */
-.leaderboard-container tbody tr {
-    background-color: #ffffff;
-    transition: background-color 0.3s ease;
-}
-
-.leaderboard-container tbody tr:nth-child(odd) {
-    background-color: #f9f9f9;
-}
-
-.leaderboard-container tbody tr:hover {
-    background-color: #e0f7fa;
-}
-
-/* ✅ HIGHLIGHT FIRST PLACE */
-.leaderboard-container tbody tr:first-child {
-    background-color: #FFD700;
-    font-weight: bold;
-    color: #000;
-}
-
-/* ✅ CELL STYLING */
-.leaderboard-container td {
-    padding: 8px 10px;
-    font-size: 14px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-}
-
-.leaderboard-container td:first-child {
-    font-weight: bold;
-    color: #003366;
-}
-
-.leaderboard-container td:last-child {
     font-family: 'Courier New', monospace;
-    font-weight: bold;
-    text-align: right;
+    padding-right: 16px;
 }
 
-/* ✅ RESPONSIVE STYLING */
-@media (max-width: 480px) {
-    .leaderboard-container {
-        font-size: 12px;
-    }
-    .leaderboard-container th,
-    .leaderboard-container td {
-        padding: 6px;
-    }
+#leaderboard th:last-child {
+    text-align: right;
+    padding-right: 16px;
 }
+
 .game-over {
     position: absolute;
     top: 50%;
@@ -412,39 +276,37 @@
     border-radius: 8px;
     text-align: center;
     z-index: 1000;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.game-over h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-.game-over p {
-    font-size: 18px;
-    margin: 5px 0;
+.game-over input {
+    margin: 10px 0;
+    padding: 8px;
+    width: 200px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
 }
 
 .game-over button {
-    background-color: #666;
+    background-color: #003366;
     color: white;
     border: none;
-    padding: 10px 20px;
-    margin-top: 15px;
+    padding: 8px 16px;
     border-radius: 4px;
-    font-weight: bold;
-    font-size: 16px;
     cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
     transition: background-color 0.2s ease;
 }
 
 .game-over button:hover {
-    background-color: #444;
+    background-color: #004488;
 }
-</style>
+
+.game-over button:active {
+    background-color: #002244;
+}
+    </style>
 
     <!-- Footer Styles (Next Section) -->
     <style>
