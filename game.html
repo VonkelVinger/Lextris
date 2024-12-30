@@ -186,6 +186,64 @@
 .mobile-btn:active {
     background-color: #002244;
 }
+.game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1000;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.game-over h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    color: #FFC107;
+}
+
+.game-over p {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #FFFFFF;
+}
+
+.game-over .final-score {
+    font-size: 18px;
+    font-weight: bold;
+    color: #FFD700;
+    margin: 10px 0;
+}
+
+.game-over button {
+    background-color: #003366;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: background-color 0.2s ease;
+}
+
+.game-over button:hover {
+    background-color: #004488;
+}
+
+.game-over button:active {
+    background-color: #002244;
+}
+</style>
     </style>
 
     <!-- Controls Styles (Next Section) -->
@@ -1109,7 +1167,7 @@ console.log('✅ GAME_ID Value:', GAME_ID);
             downBtn.addEventListener('click', dropBlock);
 
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
+                if (e.kconst overlay =ey === 'ArrowLeft') moveBlock(-1, 0);
                 if (e.key === 'ArrowRight') moveBlock(1, 0);
                 if (e.key === 'ArrowDown') moveBlock(0, 1);
                 if (e.key === ' ') {
