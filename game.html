@@ -267,53 +267,44 @@
 
 .game-over {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-color: rgba(0, 0, 0, 0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 20px;
     color: white;
+    padding: 20px;
+    border-radius: 8px;
     text-align: center;
-}
-
-.game-over-content {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    z-index: 1000;
 }
 
 .game-over input {
-    width: 100%;
-    padding: 10px;
-    border: 2px solid #004d40;
-    border-radius: 4px;
-    background: white;
-}
-
-#share-btn,
-#close-overlay-btn {
-    width: 100%;
-    padding: 12px;
+    margin: 10px 0;
+    padding: 8px;
+    width: 200px;
     border: none;
     border-radius: 4px;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
+    font-size: 14px;
 }
 
-#share-btn {
+.game-over button {
     background-color: #003366;
     color: white;
-    margin-bottom: 10px;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
 }
 
-#close-overlay-btn {
-    background-color: #666;
-    color: white;
+.game-over button:hover {
+    background-color: #004488;
+}
+
+.game-over button:active {
+    background-color: #002244;
 }
     </style>
 
@@ -950,18 +941,18 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                         : `I built ${TARGET_WORD} at https://playleximax.com/game.html?gameId=${GAME_ID} with a score of ${currentScore.toLocaleString()}. Can you beat me?`;
 
                     overlay.innerHTML = `
-    <div class="game-over-content">
-        <div>${messageContent}</div>
-        ${isTopTen ? `
-            <input type="text" 
-                   id="player-name" 
-                   maxlength="12" 
-                   placeholder="Enter your name">
-        ` : ''}
-        <button id="share-btn">SHARE</button>
-        <button id="close-overlay-btn">CLOSE</button>
-    </div>
-`;
+                        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+                            ${messageContent}
+                        </div>
+                        ${isTopTen ? `
+                            <div style="margin-bottom: 20px;">
+                                <input type="text" id="player-name" 
+                                       maxlength="12" 
+                                       placeholder="Enter your name"
+                                       style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;"
+                                >
+                            </div>
+                        ` : ''}
                         <button id="share-btn" style="
                             width: 100%;
                             padding: 12px;
