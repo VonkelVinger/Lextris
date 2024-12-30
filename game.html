@@ -950,18 +950,18 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                         : `I built ${TARGET_WORD} at https://playleximax.com/game.html?gameId=${GAME_ID} with a score of ${currentScore.toLocaleString()}. Can you beat me?`;
 
                     overlay.innerHTML = `
-                        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                            ${messageContent}
-                        </div>
-                        ${isTopTen ? `
-                            <div style="margin-bottom: 20px;">
-                                <input type="text" id="player-name" 
-                                       maxlength="12" 
-                                       placeholder="Enter your name"
-                                       style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;"
-                                >
-                            </div>
-                        ` : ''}
+    <div class="game-over-content">
+        <div>${messageContent}</div>
+        ${isTopTen ? `
+            <input type="text" 
+                   id="player-name" 
+                   maxlength="12" 
+                   placeholder="Enter your name">
+        ` : ''}
+        <button id="share-btn">SHARE</button>
+        <button id="close-overlay-btn">CLOSE</button>
+    </div>
+`;
                         <button id="share-btn" style="
                             width: 100%;
                             padding: 12px;
