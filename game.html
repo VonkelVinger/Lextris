@@ -1027,32 +1027,37 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                     document.getElementById('game-grid').appendChild(overlay);
 
                     // Share functionality
-                    const shareBtn = document.getElementById('share-btn');
-                    if (shareBtn) {
-                        shareBtn.addEventListener('click', async () => {
-                            try {
-                                await navigator.clipboard.writeText(shareMessage);
-                                const originalText = shareBtn.textContent;
-                                shareBtn.textContent = 'COPIED!';
-                                shareBtn.style.backgroundColor = '#002244';
-                                setTimeout(() => {
-                                    shareBtn.textContent = originalText;
-                                    shareBtn.style.backgroundColor = '#003366';
-                                }, 2000);
-                            } catch (err) {
-                                console.error('Failed to copy:', err);
-                                shareBtn.textContent = 'COPY FAILED';
-                                shareBtn.style.backgroundColor = '#d32f2f';
-                            }
-                        });
-                    }
+                    const shareCloseBtn = document.getElementById('share-close-btn');
+if (shareCloseBtn) {
+    shareCloseBtn.addEventListener('click', async () => {
+        try {
+            // Retrieve the player's name from the input field
+            const nameInput = document.getElementById('player-name');
+            const playerName = nameInput?.value.trim() || 'Anonymous';
 
-                    const closeBtn = document.getElementById('close-overlay-btn');
-                    if (closeBtn) {
-                        closeBtn.addEventListener('click', () => {
-                            overlay.remove();
-                        });
-                    }
+            // ✅ Submit to Firebase Leaderboard
+            await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
+            console.log('✅ Score submitted to leaderboard:', playerName, currentScore);
+
+            // ✅ Copy Share Message to Clipboard
+            await navigator.clipboard.writeText(shareMessage);
+            shareCloseBtn.textContent = 'COPIED & SAVED!';
+            shareCloseBtn.style.backgroundColor = '#002244';
+
+            setTimeout(() => {
+                overlay.remove();
+            }, 1000); // Delay to allow user to see feedback
+        } catch (err) {
+            console.error('❌ Error:', err);
+            shareCloseBtn.textContent = 'ERROR, TRY AGAIN';
+            shareCloseBtn.style.backgroundColor = '#d32f2f';
+
+            setTimeout(() => {
+                overlay.remove();
+            }, 1000); // Ensure overlay still closes on failure
+        }
+    });
+}
 
                     if (isTopTen) {
                         const nameInput = document.getElementById('player-name');
