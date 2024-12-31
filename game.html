@@ -1027,38 +1027,64 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                     document.getElementById('game-grid').appendChild(overlay);
 
                     // Share functionality
-                    const shareCloseBtn = document.getElementById('share-close-btn');
-if (shareCloseBtn) {
-    shareCloseBtn.addEventListener('click', async () => {
+                    const shareBtn = document.getElementById('share-btn');
+const closeBtn = document.getElementById('close-overlay-btn');
+
+// ✅ SHARE Button Logic
+if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
         try {
-            // Retrieve the player's name from the input field
+            // Retrieve player's name from the input
             const nameInput = document.getElementById('player-name');
             const playerName = nameInput?.value.trim() || 'Anonymous';
 
-            // ✅ Submit to Firebase Leaderboard
+            // ✅ Submit to Firebase Leaderboard (if not already done)
             await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
             console.log('✅ Score submitted to leaderboard:', playerName, currentScore);
 
             // ✅ Copy Share Message to Clipboard
             await navigator.clipboard.writeText(shareMessage);
-            shareCloseBtn.textContent = 'COPIED & SAVED!';
-            shareCloseBtn.style.backgroundColor = '#002244';
+            shareBtn.textContent = 'COPIED & SAVED!';
+            shareBtn.style.backgroundColor = '#002244';
 
             setTimeout(() => {
-                overlay.remove();
-            }, 1000); // Delay to allow user to see feedback
+                shareBtn.textContent = 'SHARE';
+                shareBtn.style.backgroundColor = '#003366';
+            }, 2000);
         } catch (err) {
             console.error('❌ Error:', err);
-            shareCloseBtn.textContent = 'ERROR, TRY AGAIN';
-            shareCloseBtn.style.backgroundColor = '#d32f2f';
-
-            setTimeout(() => {
-                overlay.remove();
-            }, 1000); // Ensure overlay still closes on failure
+            shareBtn.textContent = 'ERROR, TRY AGAIN';
+            shareBtn.style.backgroundColor = '#d32f2f';
         }
     });
 }
 
+// ✅ CLOSE Button Logic
+if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+        const overlay = document.querySelector('.game-over');
+        if (overlay) {
+            overlay.remove();
+        }
+    });
+}
+
+// ✅ Enter Key Submission Logic (Optional Improvement)
+const nameInput = document.getElementById('player-name');
+if (nameInput) {
+    nameInput.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            const playerName = nameInput.value.trim() || 'Anonymous';
+            try {
+                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
+                console.log('✅ Score submitted via Enter:', playerName, currentScore);
+                nameInput.blur(); // Remove focus to avoid repeat submissions
+            } catch (error) {
+                console.error('❌ Error submitting score via Enter:', error);
+            }
+        }
+    });
+}
                     if (isTopTen) {
                         const nameInput = document.getElementById('player-name');
                         if (nameInput) {
