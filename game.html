@@ -1027,7 +1027,8 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                     document.getElementById('game-grid').appendChild(overlay);
 
                     // Share functionality
-                    const shareBtn = document.getElementById('share-btn');
+                    const nameInput = document.getElementById('player-name');
+const shareBtn = document.getElementById('share-btn');
 const closeBtn = document.getElementById('close-overlay-btn');
 
 let isScoreRecorded = false; // ✅ Track if score has been recorded
@@ -1038,7 +1039,7 @@ async function recordScore() {
         const playerName = nameInput?.value.trim() || 'Anonymous';
         try {
             await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
-            console.log('✅ Score submitted to leaderboard:', playerName, currentScore);
+            console.log('✅ Score successfully recorded:', playerName, currentScore);
             isScoreRecorded = true; // Mark as recorded
         } catch (error) {
             console.error('❌ Error submitting score:', error);
@@ -1047,23 +1048,26 @@ async function recordScore() {
 }
 
 // ✅ SHARE Button Logic
-if (shareBtn) {
+if (shareBtn && !shareBtn.hasListenerAttached) {
+    shareBtn.hasListenerAttached = true; // Prevent duplicate listeners
     shareBtn.addEventListener('click', async () => {
         try {
-            // ✅ Record score first if not already recorded
+            // ✅ Record score first
             await recordScore();
 
-            // ✅ Copy Share Message to Clipboard
+            // ✅ Attempt to copy share message
+            const shareMessage = `I scored ${currentScore.toLocaleString()} in LEXIMAX! Play here: https://playleximax.com/game.html?gameId=${GAME_ID}`;
             await navigator.clipboard.writeText(shareMessage);
+
             shareBtn.textContent = 'COPIED & SAVED!';
-            shareBtn.style.backgroundColor = '#002244';
+            shareBtn.style.backgroundColor = '#004d40';
 
             setTimeout(() => {
                 shareBtn.textContent = 'SHARE';
                 shareBtn.style.backgroundColor = '#003366';
             }, 2000);
         } catch (err) {
-            console.error('❌ Error:', err);
+            console.error('❌ Clipboard Error:', err);
             shareBtn.textContent = 'ERROR, TRY AGAIN';
             shareBtn.style.backgroundColor = '#d32f2f';
         }
@@ -1071,10 +1075,11 @@ if (shareBtn) {
 }
 
 // ✅ CLOSE Button Logic
-if (closeBtn) {
+if (closeBtn && !closeBtn.hasListenerAttached) {
+    closeBtn.hasListenerAttached = true; // Prevent duplicate listeners
     closeBtn.addEventListener('click', async () => {
         try {
-            // ✅ Record score first if not already recorded
+            // ✅ Record score before closing
             await recordScore();
 
             // ✅ Remove overlay
@@ -1084,6 +1089,17 @@ if (closeBtn) {
             }
         } catch (err) {
             console.error('❌ Error on CLOSE:', err);
+        }
+    });
+}
+
+// ✅ Enter Key Submission Logic
+if (nameInput && !nameInput.hasListenerAttached) {
+    nameInput.hasListenerAttached = true; // Prevent duplicate listeners
+    nameInput.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            await recordScore();
+            nameInput.blur(); // Remove focus to prevent repeat submissions
         }
     });
 }
