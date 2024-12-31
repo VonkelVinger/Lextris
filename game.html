@@ -840,71 +840,62 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                 return points;
             }
 
-            async function checkMatches() {
-                const toRemove = new Set();
-                let matchPoints = 0;
-                
-                for (let y = 0; y < GRID_HEIGHT; y++) {
-                    for (let x = 0; x < GRID_WIDTH; x++) {
-                        if (grid[y][x] && !isPartOfTargetWord(grid[y][x].letter)) {
-                            const points = checkNeighborsWithScoring(x, y, toRemove);
-                            matchPoints += points;
-                        }
-                    }
-                }
-                
-                if (toRemove.size > 0) {
-                    chainCount++;
-                    const chainBonus = Math.pow(1.2, chainCount - 1);
-                    const avgHeight = Array.from(toRemove)
-                        .map(pos => parseInt(pos.split(',')[1]))
-                        .reduce((a, b) => a + b, 0) / toRemove.size;
-                    const heightMultiplier = avgHeight < GRID_HEIGHT / 3 ? 2.0 :
-                                           avgHeight < (2 * GRID_HEIGHT) / 3 ? 1.5 : 1.0;
-                    const timeMultiplier = Math.max(0.5, 1 - (Math.floor(gameTime / 30) * 0.1));
-                    const finalPoints = Math.round(matchPoints * chainBonus * heightMultiplier * timeMultiplier);
-                    
-                    updateScore(finalPoints);
-                    
-                    const removePromises = Array.from(toRemove).map(pos => {
-                        return new Promise(resolve => {
-                            const [x, y] = pos.split(',').map(Number);
-                            const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
-                            if (cell) {
-                                cell.classList.add('pop');
-                                setTimeout(() => {
-                                    grid[y][x] = null;
-                                    clearBlock({ x, y });
-                                    resolve();
-                                }, 150);
-                            } else {
-                                resolve();
-                            }
-                        });
-                    });
-                    
-                    await Promise.all(removePromises);
-                    dropColumns();
-                } else {
-                    chainCount = 0;
+async function checkMatches() {
+    let hasMatches = false; // Track if matches were found
+
+    do {
+        const toRemove = new Set();
+        let matchPoints = 0;
+
+        for (let y = 0; y < GRID_HEIGHT; y++) {
+            for (let x = 0; x < GRID_WIDTH; x++) {
+                if (grid[y][x] && !isPartOfTargetWord(grid[y][x].letter)) {
+                    const points = checkNeighborsWithScoring(x, y, toRemove);
+                    matchPoints += points;
                 }
             }
-			function dropColumns() {
-                for (let x = 0; x < GRID_WIDTH; x++) {
-                    let writeY = GRID_HEIGHT - 1;
-                    for (let y = GRID_HEIGHT - 1; y >= 0; y--) {
-                        if (grid[y][x] !== null) {
-                            if (y !== writeY) {
-                                grid[writeY][x] = grid[y][x];
-                                grid[y][x] = null;
-                                clearBlock({ x, y });
-                                drawBlock({ ...grid[writeY][x], x, y: writeY });
-                            }
-                            writeY--;
-                        }
+        }
+
+        if (toRemove.size > 0) {
+            hasMatches = true; // Matches were found
+            chainCount++;
+            const chainBonus = Math.pow(1.2, chainCount - 1);
+            const avgHeight = Array.from(toRemove)
+                .map(pos => parseInt(pos.split(',')[1]))
+                .reduce((a, b) => a + b, 0) / toRemove.size;
+            const heightMultiplier = avgHeight < GRID_HEIGHT / 3 ? 2.0 :
+                                   avgHeight < (2 * GRID_HEIGHT) / 3 ? 1.5 : 1.0;
+            const timeMultiplier = Math.max(0.5, 1 - (Math.floor(gameTime / 30) * 0.1));
+            const finalPoints = Math.round(matchPoints * chainBonus * heightMultiplier * timeMultiplier);
+
+            updateScore(finalPoints);
+
+            const removePromises = Array.from(toRemove).map(pos => {
+                return new Promise(resolve => {
+                    const [x, y] = pos.split(',').map(Number);
+                    const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
+                    if (cell) {
+                        cell.classList.add('pop');
+                        setTimeout(() => {
+                            grid[y][x] = null;
+                            clearBlock({ x, y });
+                            resolve();
+                        }, 150);
+                    } else {
+                        resolve();
                     }
-                }
-            }
+                });
+            });
+
+            await Promise.all(removePromises);
+            dropColumns();
+        } else {
+            hasMatches = false; // No more matches
+            chainCount = 0; // Reset chain count
+        }
+
+    } while (hasMatches); // Repeat until no more matches are detected
+}
 
             async function checkWin() {
                 for (let y = 0; y < GRID_HEIGHT; y++) {
