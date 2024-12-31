@@ -1070,6 +1070,66 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                 pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
             }
 
+function displayShareWindow(playerName, score, word) {
+    const overlay = document.createElement('div');
+    overlay.className = 'game-over';
+
+    const shareMessage = `
+        I scored ${score.toLocaleString()} points building the word '${word}' in Leximax!
+        Play here: https://playleximax.com/game.html?gameId=${GAME_ID}
+    `;
+
+    overlay.innerHTML = `
+        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+            Congrats <b>${playerName}</b>! Your score of <b>${score.toLocaleString()}</b> has been saved.
+        </div>
+        <button id="share-btn" style="
+            width: 100%;
+            padding: 12px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        ">SHARE</button>
+        <button id="close-share-btn" style="
+            width: 100%;
+            padding: 12px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+        ">CLOSE WITHOUT SHARING</button>
+    `;
+
+    document.getElementById('game-grid').appendChild(overlay);
+
+    const shareBtn = document.getElementById('share-btn');
+    shareBtn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(shareMessage);
+            shareBtn.textContent = 'COPIED!';
+            shareBtn.style.backgroundColor = '#002244';
+            setTimeout(() => {
+                shareBtn.textContent = 'SHARE';
+                shareBtn.style.backgroundColor = '#003366';
+            }, 2000);
+        } catch (err) {
+            console.error('❌ Failed to copy to clipboard:', err);
+            shareBtn.textContent = 'COPY FAILED';
+            shareBtn.style.backgroundColor = '#d32f2f';
+        }
+    });
+
+    const closeBtn = document.getElementById('close-share-btn');
+    closeBtn.addEventListener('click', () => overlay.remove());
+}
+
             // Event listeners
             const startBtn = document.getElementById('start-btn');
             const pauseBtn = document.getElementById('pause-btn');
