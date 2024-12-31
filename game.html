@@ -1079,56 +1079,37 @@ function showSuccessOverlay(playerName) {
     document.getElementById('game-grid').appendChild(overlay);
 
     const shareBtn = document.getElementById('share-btn');
-    const closeBtn = document.getElementById('close-success-btn');
+    const closeSuccessBtn = document.getElementById('close-success-btn');
 
     // SHARE Button
     shareBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(shareMessage)
-        .then(() => {
-            shareBtn.textContent = 'COPIED!';
-            shareBtn.style.backgroundColor = '#002244';
-            
-            setTimeout(() => {
-                shareBtn.textContent = 'SHARE';
-                shareBtn.style.backgroundColor = '#003366';
-            }, 2000);
-        })
-        .catch((err) => {
-            console.error('Failed to copy:', err);
-            shareBtn.textContent = 'COPY FAILED';
-            shareBtn.style.backgroundColor = '#d32f2f';
-            
-            setTimeout(() => {
-                shareBtn.textContent = 'SHARE';
-                shareBtn.style.backgroundColor = '#003366';
-            }, 2000);
-        });
-});
+        navigator.clipboard.writeText(shareMessage)
+            .then(() => {
+                shareBtn.textContent = 'COPIED!';
+                shareBtn.style.backgroundColor = '#002244';
 
-                    const closeBtn = document.getElementById('close-overlay-btn');
-                    if (closeBtn) {
-                        closeBtn.addEventListener('click', () => {
-                            overlay.remove();
-                        });
-                    }
+                setTimeout(() => {
+                    shareBtn.textContent = 'SHARE';
+                    shareBtn.style.backgroundColor = '#003366';
+                }, 2000);
+            })
+            .catch((err) => {
+                console.error('Failed to copy:', err);
+                shareBtn.textContent = 'COPY FAILED';
+                shareBtn.style.backgroundColor = '#d32f2f';
 
-                    if (isTopTen) {
-                        const nameInput = document.getElementById('player-name');
-                        if (nameInput) {
-    nameInput.focus();
-    nameInput.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            const name = nameInput.value.trim() || 'Anonymous';
-            try {
-                await window.firebaseOps.addLeaderboardEntry(GAME_ID, name, currentScore);  // Remove gameTime
-                overlay.remove();
-            } catch (error) {
-                console.error('Error submitting score:', error);
-            }
-        }
+                setTimeout(() => {
+                    shareBtn.textContent = 'SHARE';
+                    shareBtn.style.backgroundColor = '#003366';
+                }, 2000);
+            });
+    });
+
+    // CLOSE Button
+    closeSuccessBtn.addEventListener('click', () => {
+        overlay.remove();
     });
 }
-                    }
                 } else {
                     overlay.innerHTML = `
                         <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
