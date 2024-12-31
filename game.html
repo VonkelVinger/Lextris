@@ -1027,109 +1027,33 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                     document.getElementById('game-grid').appendChild(overlay);
 
                     // Share functionality
-                    const nameInput = document.getElementById('player-name');
-const shareBtn = document.getElementById('share-btn');
-const closeBtn = document.getElementById('close-overlay-btn');
+                    const shareBtn = document.getElementById('share-btn');
+                    if (shareBtn) {
+                        shareBtn.addEventListener('click', async () => {
+                            try {
+                                await navigator.clipboard.writeText(shareMessage);
+                                const originalText = shareBtn.textContent;
+                                shareBtn.textContent = 'COPIED!';
+                                shareBtn.style.backgroundColor = '#002244';
+                                setTimeout(() => {
+                                    shareBtn.textContent = originalText;
+                                    shareBtn.style.backgroundColor = '#003366';
+                                }, 2000);
+                            } catch (err) {
+                                console.error('Failed to copy:', err);
+                                shareBtn.textContent = 'COPY FAILED';
+                                shareBtn.style.backgroundColor = '#d32f2f';
+                            }
+                        });
+                    }
 
-let isScoreRecorded = false; // ✅ Track if score has been recorded
+                    const closeBtn = document.getElementById('close-overlay-btn');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            overlay.remove();
+                        });
+                    }
 
-// ✅ Function to Record Score
-async function recordScore() {
-    if (!isScoreRecorded) {
-        const playerName = nameInput?.value.trim() || 'Anonymous';
-        try {
-            await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
-            console.log('✅ Score successfully recorded:', playerName, currentScore);
-            isScoreRecorded = true; // Mark as recorded
-        } catch (error) {
-            console.error('❌ Error submitting score:', error);
-        }
-    }
-}
-
-// ✅ SHARE Button Logic
-if (shareBtn && !shareBtn.hasListenerAttached) {
-    shareBtn.hasListenerAttached = true; // Prevent duplicate listeners
-    shareBtn.addEventListener('click', async () => {
-        try {
-            // ✅ Record score first
-            await recordScore();
-
-            // ✅ Attempt to copy share message
-            const shareMessage = `I scored ${currentScore.toLocaleString()} in LEXIMAX! Play here: https://playleximax.com/game.html?gameId=${GAME_ID}`;
-            await navigator.clipboard.writeText(shareMessage);
-
-            shareBtn.textContent = 'COPIED & SAVED!';
-            shareBtn.style.backgroundColor = '#004d40';
-
-            setTimeout(() => {
-                shareBtn.textContent = 'SHARE';
-                shareBtn.style.backgroundColor = '#003366';
-            }, 2000);
-        } catch (err) {
-            console.error('❌ Clipboard Error:', err);
-            shareBtn.textContent = 'ERROR, TRY AGAIN';
-            shareBtn.style.backgroundColor = '#d32f2f';
-        }
-    });
-}
-
-// ✅ CLOSE Button Logic
-if (closeBtn && !closeBtn.hasListenerAttached) {
-    closeBtn.hasListenerAttached = true; // Prevent duplicate listeners
-    closeBtn.addEventListener('click', async () => {
-        try {
-            // ✅ Record score before closing
-            await recordScore();
-
-            // ✅ Remove overlay
-            const overlay = document.querySelector('.game-over');
-            if (overlay) {
-                overlay.remove();
-            }
-        } catch (err) {
-            console.error('❌ Error on CLOSE:', err);
-        }
-    });
-}
-
-// ✅ Enter Key Submission Logic
-if (nameInput && !nameInput.hasListenerAttached) {
-    nameInput.hasListenerAttached = true; // Prevent duplicate listeners
-    nameInput.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            await recordScore();
-            nameInput.blur(); // Remove focus to prevent repeat submissions
-        }
-    });
-}
-
-// ✅ Enter Key Submission Logic
-if (nameInput) {
-    nameInput.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            await recordScore();
-            nameInput.blur(); // Remove focus to prevent repeat submissions
-        }
-    });
-}
-
-// ✅ Enter Key Submission Logic (Optional Improvement)
-const nameInput = document.getElementById('player-name');
-if (nameInput) {
-    nameInput.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            const playerName = nameInput.value.trim() || 'Anonymous';
-            try {
-                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
-                console.log('✅ Score submitted via Enter:', playerName, currentScore);
-                nameInput.blur(); // Remove focus to avoid repeat submissions
-            } catch (error) {
-                console.error('❌ Error submitting score via Enter:', error);
-            }
-        }
-    });
-}
                     if (isTopTen) {
                         const nameInput = document.getElementById('player-name');
                         if (nameInput) {
