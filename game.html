@@ -67,38 +67,28 @@
             color: #666666;
         }
 
-        #target-word {
-            display: flex;
-            gap: 1px;
-            justify-content: center;
-            background-color: white;
-            padding: 1px;
-            border: 1px solid #004d40;
-        }
+       #target-word {
+    display: inline-flex; /* Align letters in a single row */
+    gap: 1px; /* Minimal spacing between letters */
+    justify-content: center; /* Center the letters horizontally */
+    align-items: center; /* Align letters vertically */
+    background-color: #004d40; /* Ensure background matches the game grid */
+    padding: 2px; /* Adjust padding for spacing */
+    border: none; /* Remove border if unnecessary */
+}
 
-        .target-letter {
-            width: 25px;
-            height: 25px;
-            background-color: #004d40;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 16px;
-            position: relative;
-        }
-
-        .target-letter::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-        }
+.target-letter {
+    width: 30px; /* Fixed width for each letter block */
+    height: 30px; /* Fixed height for each letter block */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    background-color: #004d40;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
     </style>
 
     <!-- Grid Styles (Next Section) -->
