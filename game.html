@@ -1033,6 +1033,7 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                 margin-top: 15px;
             ">CLOSE</button>
         `;
+
         document.getElementById('game-grid').appendChild(overlay);
 
         const closeBtn = document.getElementById('close-overlay-btn');
@@ -1082,66 +1083,33 @@ function showSuccessOverlay(playerName) {
     const closeSuccessBtn = document.getElementById('close-success-btn');
 
     // SHARE Button
-    shareBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(shareMessage)
-            .then(() => {
-                shareBtn.textContent = 'COPIED!';
-                shareBtn.style.backgroundColor = '#002244';
+    shareBtn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(shareMessage);
+            shareBtn.textContent = 'COPIED!';
+            shareBtn.style.backgroundColor = '#002244';
 
-                setTimeout(() => {
-                    shareBtn.textContent = 'SHARE';
-                    shareBtn.style.backgroundColor = '#003366';
-                }, 2000);
-            })
-            .catch((err) => {
-                console.error('Failed to copy:', err);
-                shareBtn.textContent = 'COPY FAILED';
-                shareBtn.style.backgroundColor = '#d32f2f';
+            setTimeout(() => {
+                shareBtn.textContent = 'SHARE';
+                shareBtn.style.backgroundColor = '#003366';
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            shareBtn.textContent = 'COPY FAILED';
+            shareBtn.style.backgroundColor = '#d32f2f';
 
-                setTimeout(() => {
-                    shareBtn.textContent = 'SHARE';
-                    shareBtn.style.backgroundColor = '#003366';
-                }, 2000);
-            });
+            setTimeout(() => {
+                shareBtn.textContent = 'SHARE';
+                shareBtn.style.backgroundColor = '#003366';
+            }, 2000);
+        }
     });
 
     // CLOSE Button
     closeSuccessBtn.addEventListener('click', () => {
         overlay.remove();
     });
-                } else {
-                    overlay.innerHTML = `
-                        <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
-                            ${message}
-                        </div>
-                        <p>Final Score: ${currentScore.toLocaleString()}</p>
-                        <button id="close-overlay-btn" style="
-                            width: 100%;
-                            padding: 12px;
-                            background-color: #666;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            font-weight: bold;
-                            font-size: 16px;
-                            cursor: pointer;
-                            margin-top: 15px;
-                            transition: background-color 0.2s ease;
-                        ">
-                            CLOSE
-                        </button>
-                    `;
-                    
-                    document.getElementById('game-grid').appendChild(overlay);
-                    
-                    const closeBtn = document.getElementById('close-overlay-btn');
-                    if (closeBtn) {
-                        closeBtn.addEventListener('click', () => {
-                            overlay.remove();
-                        });
-                    }
-                }
-            }
+}
 			function startGame() {
                 const overlay = document.querySelector('.game-over');
                 if (overlay) overlay.remove();
