@@ -976,9 +976,11 @@ function endGame(message, isWin = false) {
         const shareMessage = `I built ${TARGET_WORD} at https://playleximax.com/game.html?gameId=${GAME_ID} with a score of ${currentScore.toLocaleString()}. Can you beat me?`;
 
         overlay.innerHTML = `
-            <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                ${messageContent}
-            </div>
+    <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
+        Test Message
+    </div>
+    <p>Final Score: 0</p>
+`;
             <div style="margin-bottom: 20px;">
                 <input type="text" id="player-name" 
                        maxlength="12" 
