@@ -858,7 +858,15 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                         .reduce((a, b) => a + b, 0) / toRemove.size;
                     const heightMultiplier = avgHeight < GRID_HEIGHT / 3 ? 2.0 :
                                            avgHeight < (2 * GRID_HEIGHT) / 3 ? 1.5 : 1.0;
-                    const timeMultiplier = Math.max(0.5, 1 - (Math.floor(gameTime / 30) * 0.1));
+                    let timeMultiplier = 1;
+
+if (gameTime < 60) {
+    timeMultiplier = 1.5;
+} else if (gameTime < 120) {
+    timeMultiplier = 1.2;
+} else {
+    timeMultiplier = 1;
+}
                     const finalPoints = Math.round(matchPoints * chainBonus * heightMultiplier * timeMultiplier);
                     
                     updateScore(finalPoints);
