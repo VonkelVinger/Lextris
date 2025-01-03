@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -67,38 +67,35 @@
             color: #666666;
         }
 
-        #target-word {
-            display: flex;
-            gap: 1px;
-            justify-content: center;
-            background-color: white;
-            padding: 1px;
-            border: 1px solid #004d40;
-        }
+       #target-word {
+    display: inline-flex; /* Align letters in a single row */
+    gap: 1px; /* Minimal spacing between letters */
+    justify-content: center; /* Center the letters horizontally */
+    align-items: center; /* Align letters vertically */
+    background-color: #004d40; /* Ensure background matches the game grid */
+    padding: 2px; /* Adjust padding for spacing */
+    border: none; /* Remove border if unnecessary */
+}
 
-        .target-letter {
-            width: 25px;
-            height: 25px;
-            background-color: #004d40;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 16px;
-            position: relative;
-        }
-
-        .target-letter::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-        }
+.target-letter {
+    width: 30px; /* Fixed width for each letter block */
+    height: 30px; /* Fixed height for each letter block */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    background-color: #004d40;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+@media (max-width: 600px) {
+    .target-letter {
+        width: 25px;
+        height: 25px;
+        font-size: 14px;
+    }
+}
     </style>
 
     <!-- Grid Styles (Next Section) -->
@@ -861,7 +858,21 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                         .reduce((a, b) => a + b, 0) / toRemove.size;
                     const heightMultiplier = avgHeight < GRID_HEIGHT / 3 ? 2.0 :
                                            avgHeight < (2 * GRID_HEIGHT) / 3 ? 1.5 : 1.0;
-                    const timeMultiplier = Math.max(0.5, 1 - (Math.floor(gameTime / 30) * 0.1));
+                   let timeMultiplier = 1;
+
+if (gameTime < 30) {
+    timeMultiplier = 10.0; // Under 30 seconds
+} else if (gameTime < 60) {
+    timeMultiplier = 5.0; // 30–60 seconds
+} else if (gameTime < 90) {
+    timeMultiplier = 3.0; // 60–90 seconds
+} else if (gameTime < 120) {
+    timeMultiplier = 2.0; // 90–120 seconds
+} else if (gameTime < 150) {
+    timeMultiplier = 1.5; // 120–150 seconds
+} else {
+    timeMultiplier = 1.0; // 150+ seconds
+}
                     const finalPoints = Math.round(matchPoints * chainBonus * heightMultiplier * timeMultiplier);
                     
                     updateScore(finalPoints);
@@ -950,160 +961,90 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                 }
             }
 
-            function endGame(message, isWin = false) {
-                isGameOver = true;
-                clearInterval(gameInterval);
-                clearInterval(timerInterval);
-                
-                const overlay = document.createElement('div');
-                overlay.className = 'game-over';
-                
-                if (isWin) {
-                    // Get current leaderboard data to determine rank
-                    const leaderboardTimes = Array.from(document.querySelectorAll('#leaderboard tbody tr td:last-child'))
-                        .map(td => parseInt(td.textContent.replace(/,/g, '')))
-                        .sort((a, b) => b - a);
-                    
-                    const rankIndex = leaderboardTimes.findIndex(score => currentScore > score);
-                    const isTopTen = rankIndex !== -1 || leaderboardTimes.length < 10;
-                    
-                    // Convert rank number to word
-                    const rankWords = ["ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN"];
-                    const rankWord = rankWords[rankIndex] || (leaderboardTimes.length < 10 ? rankWords[leaderboardTimes.length] : null);
+           function endGame(message, isWin = false) {
+    isGameOver = true;
+    clearInterval(gameInterval);
+    clearInterval(timerInterval);
 
-                    const timeStr = window.formatTime(gameTime);
-                    const messageContent = isTopTen 
-                        ? `WOW! Enter your name and score of <b>${currentScore.toLocaleString()}</b> at number <b>${rankWord}</b> on the leaderboard for <b>${TARGET_WORD}</b>. Challenge your friends to beat your score by clicking on SHARE to copy this message on your clipboard.`
-                        : `GREAT! You built <b>${TARGET_WORD}</b> with a score of <b>${currentScore.toLocaleString()}</b>. Challenge your friends to beat your score by clicking on SHARE to copy this message on your clipboard.`;
+    const overlay = document.createElement('div');
+    overlay.className = 'game-over';
 
-                    const shareMessage = isTopTen
-                        ? `I am now number ${rankWord} on the leaderboard for ${TARGET_WORD} at https://playleximax.com/game.html?gameId=${GAME_ID} with a score of ${currentScore.toLocaleString()}. Can you beat me?`
-                        : `I built ${TARGET_WORD} at https://playleximax.com/game.html?gameId=${GAME_ID} with a score of ${currentScore.toLocaleString()}. Can you beat me?`;
+    if (isWin) {
+        // 🎯 Winning Scenario: Prompt for Name Submission
+        overlay.innerHTML = `
+            <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+                WOW! Enter your name to save your score of <b>${currentScore.toLocaleString()}</b> for the word <b>${TARGET_WORD}</b>.
+            </div>
+            <input type="text" id="player-name"
+                   maxlength="12"
+                   placeholder="Enter your name"
+                   style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
+            <button id="submit-name-btn" style="
+                width: 100%;
+                padding: 12px;
+                background-color: #003366;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                margin-bottom: 15px;
+            ">SUBMIT</button>
+        `;
 
-                    overlay.innerHTML = `
-                        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                            ${messageContent}
-                        </div>
-                        ${isTopTen ? `
-                            <div style="margin-bottom: 20px;">
-                                <input type="text" id="player-name" 
-                                       maxlength="12" 
-                                       placeholder="Enter your name"
-                                       style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;"
-                                >
-                            </div>
-                        ` : ''}
-                        <button id="share-btn" style="
-                            width: 100%;
-                            padding: 12px;
-                            background-color: #003366;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            font-weight: bold;
-                            font-size: 16px;
-                            cursor: pointer;
-                            transition: background-color 0.2s ease;
-                            margin-bottom: 15px;
-                        ">
-                            SHARE
-                        </button>
-                        <button id="close-overlay-btn" style="
-                            width: 100%;
-                            padding: 12px;
-                            background-color: #666;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            font-weight: bold;
-                            font-size: 16px;
-                            cursor: pointer;
-                            transition: background-color 0.2s ease;
-                        ">
-                            CLOSE
-                        </button>
-                    `;
+        document.getElementById('game-grid').appendChild(overlay);
 
-                    document.getElementById('game-grid').appendChild(overlay);
+        const submitBtn = document.getElementById('submit-name-btn');
+        const nameInput = document.getElementById('player-name');
 
-                    // Share functionality
-                    const shareBtn = document.getElementById('share-btn');
-                    if (shareBtn) {
-                        shareBtn.addEventListener('click', async () => {
-                            try {
-                                await navigator.clipboard.writeText(shareMessage);
-                                const originalText = shareBtn.textContent;
-                                shareBtn.textContent = 'COPIED!';
-                                shareBtn.style.backgroundColor = '#002244';
-                                setTimeout(() => {
-                                    shareBtn.textContent = originalText;
-                                    shareBtn.style.backgroundColor = '#003366';
-                                }, 2000);
-                            } catch (err) {
-                                console.error('Failed to copy:', err);
-                                shareBtn.textContent = 'COPY FAILED';
-                                shareBtn.style.backgroundColor = '#d32f2f';
-                            }
-                        });
-                    }
+        const handleSubmission = async () => {
+            const playerName = nameInput.value.trim() || 'Anonymous';
 
-                    const closeBtn = document.getElementById('close-overlay-btn');
-                    if (closeBtn) {
-                        closeBtn.addEventListener('click', () => {
-                            overlay.remove();
-                        });
-                    }
-
-                    if (isTopTen) {
-                        const nameInput = document.getElementById('player-name');
-                        if (nameInput) {
-    nameInput.focus();
-    nameInput.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            const name = nameInput.value.trim() || 'Anonymous';
             try {
-                await window.firebaseOps.addLeaderboardEntry(GAME_ID, name, currentScore);  // Remove gameTime
+                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
                 overlay.remove();
+                displayShareWindow(playerName, currentScore, TARGET_WORD);
             } catch (error) {
-                console.error('Error submitting score:', error);
+                console.error('❌ Error submitting score:', error);
+                nameInput.value = 'Submission Failed, Try Again';
             }
-        }
-    });
+        };
+
+        submitBtn.addEventListener('click', handleSubmission);
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSubmission();
+        });
+
+    } else {
+        // 🛑 Game Over Scenario: Show Final Score and Close Button
+        overlay.innerHTML = `
+            <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
+                ${message}
+            </div>
+            <p>Final Score: ${currentScore.toLocaleString()}</p>
+            <button id="close-overlay-btn" style="
+                width: 100%;
+                padding: 12px;
+                background-color: #666;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 16px;
+                cursor: pointer;
+                margin-top: 15px;
+                transition: background-color 0.2s ease;
+            ">CLOSE</button>
+        `;
+
+        document.getElementById('game-grid').appendChild(overlay);
+
+        const closeBtn = document.getElementById('close-overlay-btn');
+        closeBtn.addEventListener('click', () => overlay.remove());
+    }
 }
-                    }
-                } else {
-                    overlay.innerHTML = `
-                        <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
-                            ${message}
-                        </div>
-                        <p>Final Score: ${currentScore.toLocaleString()}</p>
-                        <button id="close-overlay-btn" style="
-                            width: 100%;
-                            padding: 12px;
-                            background-color: #666;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            font-weight: bold;
-                            font-size: 16px;
-                            cursor: pointer;
-                            margin-top: 15px;
-                            transition: background-color 0.2s ease;
-                        ">
-                            CLOSE
-                        </button>
-                    `;
-                    
-                    document.getElementById('game-grid').appendChild(overlay);
-                    
-                    const closeBtn = document.getElementById('close-overlay-btn');
-                    if (closeBtn) {
-                        closeBtn.addEventListener('click', () => {
-                            overlay.remove();
-                        });
-                    }
-                }
-            }
 			function startGame() {
                 const overlay = document.querySelector('.game-over');
                 if (overlay) overlay.remove();
@@ -1139,6 +1080,66 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                 isPaused = !isPaused;
                 pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
             }
+
+function displayShareWindow(playerName, score, word) {
+    const overlay = document.createElement('div');
+    overlay.className = 'game-over';
+
+    const shareMessage = `
+        I scored ${score.toLocaleString()} points building the word '${word}' in Leximax!
+        Play here: https://playleximax.com/game.html?gameId=${GAME_ID}
+    `;
+
+    overlay.innerHTML = `
+        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+            Congrats <b>${playerName}</b>! Your score of <b>${score.toLocaleString()}</b> has been saved.
+        </div>
+        <button id="share-btn" style="
+            width: 100%;
+            padding: 12px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        ">SHARE</button>
+        <button id="close-share-btn" style="
+            width: 100%;
+            padding: 12px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+        ">CLOSE</button>
+    `;
+
+    document.getElementById('game-grid').appendChild(overlay);
+
+    const shareBtn = document.getElementById('share-btn');
+    shareBtn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(shareMessage);
+            shareBtn.textContent = 'COPIED!';
+            shareBtn.style.backgroundColor = '#002244';
+            setTimeout(() => {
+                shareBtn.textContent = 'SHARE';
+                shareBtn.style.backgroundColor = '#003366';
+            }, 2000);
+        } catch (err) {
+            console.error('❌ Failed to copy to clipboard:', err);
+            shareBtn.textContent = 'COPY FAILED';
+            shareBtn.style.backgroundColor = '#d32f2f';
+        }
+    });
+
+    const closeBtn = document.getElementById('close-share-btn');
+    closeBtn.addEventListener('click', () => overlay.remove());
+}
 
             // Event listeners
             const startBtn = document.getElementById('start-btn');
