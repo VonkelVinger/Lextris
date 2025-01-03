@@ -961,10 +961,29 @@ if (gameTime < 30) {
                 }
             }
 
-           function endGame(message, isWin = false) {
+          function endGame(message, isWin = false) {
     isGameOver = true;
     clearInterval(gameInterval);
     clearInterval(timerInterval);
+
+    // Apply final timeMultiplier adjustment
+    let finalScore = currentScore;
+
+    if (isWin) {
+        if (gameTime < 30) {
+            finalScore *= 10.0;
+        } else if (gameTime < 60) {
+            finalScore *= 5.0;
+        } else if (gameTime < 90) {
+            finalScore *= 3.0;
+        } else if (gameTime < 120) {
+            finalScore *= 2.0;
+        } else if (gameTime < 150) {
+            finalScore *= 1.5;
+        }
+    }
+
+    finalScore = Math.round(finalScore);
 
     const overlay = document.createElement('div');
     overlay.className = 'game-over';
@@ -973,7 +992,7 @@ if (gameTime < 30) {
         // 🎯 Winning Scenario: Prompt for Name Submission
         overlay.innerHTML = `
             <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                WOW! Enter your name to save your score of <b>${currentScore.toLocaleString()}</b> for the word <b>${TARGET_WORD}</b>.
+                WOW! Enter your name to save your score of <b>${finalScore.toLocaleString()}</b> for the word <b>${TARGET_WORD}</b>.
             </div>
             <input type="text" id="player-name"
                    maxlength="12"
@@ -1003,9 +1022,9 @@ if (gameTime < 30) {
             const playerName = nameInput.value.trim() || 'Anonymous';
 
             try {
-                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
+                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, finalScore);
                 overlay.remove();
-                displayShareWindow(playerName, currentScore, TARGET_WORD);
+                displayShareWindow(playerName, finalScore, TARGET_WORD);
             } catch (error) {
                 console.error('❌ Error submitting score:', error);
                 nameInput.value = 'Submission Failed, Try Again';
@@ -1018,12 +1037,11 @@ if (gameTime < 30) {
         });
 
     } else {
-        // 🛑 Game Over Scenario: Show Final Score and Close Button
         overlay.innerHTML = `
             <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
                 ${message}
             </div>
-            <p>Final Score: ${currentScore.toLocaleString()}</p>
+            <p>Final Score: ${finalScore.toLocaleString()}</p>
             <button id="close-overlay-btn" style="
                 width: 100%;
                 padding: 12px;
