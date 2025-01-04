@@ -10,18 +10,20 @@
     
     <!-- Prevent Cookie Banner Flash -->
     <style>
-    
+    /* Button Styles */
     .button {
         font-weight: normal !important;
     }
-        
-        #cookie-banner {
-            display: none;
-        }
-        html.show-cookie-banner #cookie-banner {
-            display: block;
-        }
-    </style>
+
+    /* Cookie Banner Styles */
+    #cookie-banner {
+        display: none;
+    }
+
+    html.show-cookie-banner #cookie-banner {
+        display: block;
+    }
+</style>
     <script>
     (function () {
         const hasAcceptedCookies = localStorage.getItem('cookiesAccepted');
