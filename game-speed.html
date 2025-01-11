@@ -272,53 +272,44 @@
 
     // ✅ Initialize Game
     document.addEventListener('DOMContentLoaded', async () => {
-        const gameData = await getGameData();
-        if (!gameData) {
-            alert('❌ Could not load game data. Please check the console for details.');
-            return;
+    try {
+        // Game constants
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const leftBtn = document.getElementById('left-btn');
+        const downBtn = document.getElementById('down-btn');
+        const rightBtn = document.getElementById('right-btn');
+
+        // Ensure all buttons exist before adding event listeners
+        if (!startBtn || !pauseBtn || !leftBtn || !downBtn || !rightBtn) {
+            throw new Error("One or more control elements are missing in the DOM.");
         }
 
-        const { id: gameId, targetWord } = gameData;
-        setupLeaderboard(gameId);
+        // Attach event listeners
+        startBtn.addEventListener('click', startGame);
+        pauseBtn.addEventListener('click', togglePause);
+        leftBtn.addEventListener('click', () => moveBlock(-1, 0));
+        rightBtn.addEventListener('click', () => moveBlock(1, 0));
+        downBtn.addEventListener('click', dropBlock);
 
-        const targetWordContainer = document.getElementById('target-word');
-        targetWordContainer.innerHTML = '';
-        for (const letter of targetWord) {
-            const letterDiv = document.createElement('div');
-            letterDiv.className = 'target-letter';
-            letterDiv.textContent = letter;
-            targetWordContainer.appendChild(letterDiv);
-        }
-        // Game State Variables
-        let grid = [];
-        const GRID_WIDTH = 8;
-        const GRID_HEIGHT = 10;
-        const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
-        const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
-        const VOWELS = 'AEIOUY';
-        let currentBlock = null;
-        let nextBlock = null;
-        let timerInterval = null;
-        let gameTime = 0;
-        let isPaused = false;
-        let isGameOver = false;
-
-        // Initialize Game Grid
-        function initGrid() {
-            const gameGrid = document.getElementById('game-grid');
-            gameGrid.innerHTML = '';
-            grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
-
-            for (let y = 0; y < GRID_HEIGHT; y++) {
-                for (let x = 0; x < GRID_WIDTH; x++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'grid-cell';
-                    cell.setAttribute('data-x', x);
-                    cell.setAttribute('data-y', y);
-                    gameGrid.appendChild(cell);
-                }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') moveBlock(-1, 0);
+            if (e.key === 'ArrowRight') moveBlock(1, 0);
+            if (e.key === 'ArrowDown') moveBlock(0, 1);
+            if (e.key === ' ') {
+                e.preventDefault();
+                dropBlock();
             }
-        }
+        });
+
+        // Initialize game
+        await initializeGame();
+        console.log("Game initialized successfully.");
+    } catch (error) {
+        console.error("Error initializing the game:", error);
+        alert(`Error: ${error.message}`);
+    }
+});
 
         // Create New Block
         function createBlock() {
