@@ -861,15 +861,15 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                    let timeMultiplier = 1;
 
 if (gameTime < 30) {
-    timeMultiplier = 5.0; // Under 30 seconds
+    timeMultiplier = 3.0; // Under 30 seconds
 } else if (gameTime < 60) {
-    timeMultiplier = 4.0; // 30–60 seconds
+    timeMultiplier = 2.5; // 30–60 seconds
 } else if (gameTime < 90) {
-    timeMultiplier = 3.0; // 60–90 seconds
+    timeMultiplier = 2.0; // 60–90 seconds
 } else if (gameTime < 120) {
-    timeMultiplier = 2.0; // 90–120 seconds
+    timeMultiplier = 1.5; // 90–120 seconds
 } else if (gameTime < 150) {
-    timeMultiplier = 1.5; // 120–150 seconds
+    timeMultiplier = 1.25; // 120–150 seconds
 } else {
     timeMultiplier = 1.0; // 150+ seconds
 }
