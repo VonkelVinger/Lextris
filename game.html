@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -962,48 +963,6 @@ if (gameTime < 30) {
             }
 
           function endGame(message, isWin = false) {
-   async function calculateRanking(score) {
-    try {
-        // Get reference to leaderboard collection
-        const leaderboardRef = window.firebaseUtils.collection(db, 'daily_games', GAME_ID, 'leaderboard');
-        
-        // Get all scores higher than the current score
-        const scoresAboveQuery = window.firebaseUtils.query(
-            leaderboardRef,
-            window.firebaseUtils.orderBy('score', 'desc')
-        );
-        
-        const snapshot = await window.firebaseUtils.getDocs(scoresAboveQuery);
-        let position = 1;
-        
-        snapshot.forEach((doc) => {
-            if (doc.data().score > score) {
-                position++;
-            }
-        });
-        
-        // Convert number to ordinal text
-        const ordinals = {
-            1: 'FIRST',
-            2: 'SECOND',
-            3: 'THIRD',
-            4: 'FOURTH',
-            5: 'FIFTH',
-            6: 'SIXTH',
-            7: 'SEVENTH',
-            8: 'EIGHTH',
-            9: 'NINTH',
-            10: 'TENTH'
-        };
-        
-        return ordinals[position] || position.toString();
-    } catch (error) {
-        console.error('Error calculating ranking:', error);
-        return '';
-    }
-}
-
-function endGame(message, isWin = false) {
     isGameOver = true;
     clearInterval(gameInterval);
     clearInterval(timerInterval);
@@ -1031,54 +990,53 @@ function endGame(message, isWin = false) {
     overlay.className = 'game-over';
 
     if (isWin) {
-        (async () => {
-            const ranking = await calculateRanking(finalScore);
-            overlay.innerHTML = `
-                <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                    GREAT! Enter your name to secure your score of <b>${finalScore.toLocaleString()}</b> at ${ranking} on the Leaderboard for <b>${TARGET_WORD}</b>.
-                </div>
-                <input type="text" id="player-name"
-                       maxlength="12"
-                       placeholder="Enter your name"
-                       style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
-                <button id="submit-name-btn" style="
-                    width: 100%;
-                    padding: 12px;
-                    background-color: #003366;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    font-weight: bold;
-                    font-size: 16px;
-                    cursor: pointer;
-                    transition: background-color 0.2s ease;
-                    margin-bottom: 15px;
-                ">SUBMIT</button>
-            `;
+        // 🎯 Winning Scenario: Prompt for Name Submission
+        overlay.innerHTML = `
+            <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+                GREAT! Enter your name to record your score of <b>${finalScore.toLocaleString()}</b> for <b>${TARGET_WORD}</b> on the Leaderboard.
+            </div>
+            <input type="text" id="player-name"
+                   maxlength="12"
+                   placeholder="Enter your name"
+                   style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
+            <button id="submit-name-btn" style="
+                width: 100%;
+                padding: 12px;
+                background-color: #003366;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                margin-bottom: 15px;
+            ">SUBMIT</button>
+        `;
 
-            document.getElementById('game-grid').appendChild(overlay);
+        document.getElementById('game-grid').appendChild(overlay);
 
-            const submitBtn = document.getElementById('submit-name-btn');
-            const nameInput = document.getElementById('player-name');
+        const submitBtn = document.getElementById('submit-name-btn');
+        const nameInput = document.getElementById('player-name');
 
-            const handleSubmission = async () => {
-                const playerName = nameInput.value.trim() || 'Anonymous';
+        const handleSubmission = async () => {
+            const playerName = nameInput.value.trim() || 'Anonymous';
 
-                try {
-                    await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, finalScore);
-                    overlay.remove();
-                    displayShareWindow(playerName, finalScore, TARGET_WORD);
-                } catch (error) {
-                    console.error('❌ Error submitting score:', error);
-                    nameInput.value = 'Submission Failed, Try Again';
-                }
-            };
+            try {
+                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, finalScore);
+                overlay.remove();
+                displayShareWindow(playerName, finalScore, TARGET_WORD);
+            } catch (error) {
+                console.error('❌ Error submitting score:', error);
+                nameInput.value = 'Submission Failed, Try Again';
+            }
+        };
 
-            submitBtn.addEventListener('click', handleSubmission);
-            nameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleSubmission();
-            });
-        })();
+        submitBtn.addEventListener('click', handleSubmission);
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSubmission();
+        });
+
     } else {
         overlay.innerHTML = `
             <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
@@ -1147,8 +1105,7 @@ function displayShareWindow(playerName, score, word) {
     overlay.className = 'game-over';
 
     const shareMessage = `
-        I scored ${score.toLocaleString()} with '${word}' on Leximax!
-        Can you beat me? Play here: https://playleximax.com/game.html?gameId=${GAME_ID}
+        Can you beat my score of ${score.toLocaleString()} for '${word}' on Leximax at https://playleximax.com/game.html?gameId=${GAME_ID}?
     `;
 
     overlay.innerHTML = `
