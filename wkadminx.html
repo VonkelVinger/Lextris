@@ -77,7 +77,7 @@
                 alert('❌ Error creating game. Check the logs below.');
             }
 
-            // Clear inputs
+            // Clear inputs only if the game creation succeeded
             document.getElementById('gameId').value = '';
             document.getElementById('targetWord').value = '';
         };
