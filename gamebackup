@@ -67,38 +67,35 @@
             color: #666666;
         }
 
-        #target-word {
-            display: flex;
-            gap: 1px;
-            justify-content: center;
-            background-color: white;
-            padding: 1px;
-            border: 1px solid #004d40;
-        }
+       #target-word {
+    display: inline-flex; /* Align letters in a single row */
+    gap: 1px; /* Minimal spacing between letters */
+    justify-content: center; /* Center the letters horizontally */
+    align-items: center; /* Align letters vertically */
+    background-color: #004d40; /* Ensure background matches the game grid */
+    padding: 2px; /* Adjust padding for spacing */
+    border: none; /* Remove border if unnecessary */
+}
 
-        .target-letter {
-            width: 25px;
-            height: 25px;
-            background-color: #004d40;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 16px;
-            position: relative;
-        }
-
-        .target-letter::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-        }
+.target-letter {
+    width: 30px; /* Fixed width for each letter block */
+    height: 30px; /* Fixed height for each letter block */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    background-color: #004d40;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+@media (max-width: 600px) {
+    .target-letter {
+        width: 25px;
+        height: 25px;
+        font-size: 14px;
+    }
+}
     </style>
 
     <!-- Grid Styles (Next Section) -->
@@ -308,7 +305,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: #900C3F;
     color: white;
     padding: 20px;
     border-radius: 8px;
@@ -514,14 +511,14 @@ window.db = db; // ✅ Explicitly expose db globally
 <body>
     <div class="game-wrapper">
         <div id="leximax-title">
-            <div class="title-block" style="background-color: #2196f3;">L</div>
-            <div class="title-block" style="background-color: #f44336;">E</div>
-            <div class="title-block" style="background-color: #4caf50;">X</div>
-            <div class="title-block" style="background-color: #ffc107;">I</div>
-            <div class="title-block" style="background-color: #9c27b0;">M</div>
-            <div class="title-block" style="background-color: #0066FF;">A</div>
-            <div class="title-block" style="background-color: #900C3F;">X</div>
-        </div>
+    <div class="title-block" style="background-color: #2196f3;">L</div>
+    <div class="title-block" style="background-color: #f44336;">E</div>
+    <div class="title-block" style="background-color: #4caf50;">X</div>
+    <div class="title-block" style="background-color: #ffc107;">I</div>
+    <div class="title-block" style="background-color: #9c27b0;">M</div>
+    <div class="title-block" style="background-color: #0066FF;">A</div>
+    <div class="title-block" style="background-color: #900C3F;">X</div>
+</div>
 
         <div id="target-word-container">
             <div id="target-word-label">TARGET WORD:</div>
@@ -861,7 +858,21 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                         .reduce((a, b) => a + b, 0) / toRemove.size;
                     const heightMultiplier = avgHeight < GRID_HEIGHT / 3 ? 2.0 :
                                            avgHeight < (2 * GRID_HEIGHT) / 3 ? 1.5 : 1.0;
-                    const timeMultiplier = Math.max(0.5, 1 - (Math.floor(gameTime / 30) * 0.1));
+                   let timeMultiplier = 1;
+
+if (gameTime < 30) {
+    timeMultiplier = 3.0; // Under 30 seconds
+} else if (gameTime < 60) {
+    timeMultiplier = 2.5; // 30–60 seconds
+} else if (gameTime < 90) {
+    timeMultiplier = 2.0; // 60–90 seconds
+} else if (gameTime < 120) {
+    timeMultiplier = 1.5; // 90–120 seconds
+} else if (gameTime < 150) {
+    timeMultiplier = 1.25; // 120–150 seconds
+} else {
+    timeMultiplier = 1.0; // 150+ seconds
+}
                     const finalPoints = Math.round(matchPoints * chainBonus * heightMultiplier * timeMultiplier);
                     
                     updateScore(finalPoints);
@@ -950,10 +961,29 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                 }
             }
 
-           function endGame(message, isWin = false) {
+          function endGame(message, isWin = false) {
     isGameOver = true;
     clearInterval(gameInterval);
     clearInterval(timerInterval);
+
+    // Apply final timeMultiplier adjustment
+    let finalScore = currentScore;
+
+    if (isWin) {
+        if (gameTime < 30) {
+            finalScore *= 10.0;
+        } else if (gameTime < 60) {
+            finalScore *= 5.0;
+        } else if (gameTime < 90) {
+            finalScore *= 3.0;
+        } else if (gameTime < 120) {
+            finalScore *= 2.0;
+        } else if (gameTime < 150) {
+            finalScore *= 1.5;
+        }
+    }
+
+    finalScore = Math.round(finalScore);
 
     const overlay = document.createElement('div');
     overlay.className = 'game-over';
@@ -962,7 +992,7 @@ console.log('✅ GAME_ID Value:', GAME_ID);
         // 🎯 Winning Scenario: Prompt for Name Submission
         overlay.innerHTML = `
             <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                WOW! Enter your name to save your score of <b>${currentScore.toLocaleString()}</b> for the word <b>${TARGET_WORD}</b>.
+                GREAT! Enter your name to record your score of <b>${finalScore.toLocaleString()}</b> for <b>${TARGET_WORD}</b> on the Leaderboard.
             </div>
             <input type="text" id="player-name"
                    maxlength="12"
@@ -992,9 +1022,9 @@ console.log('✅ GAME_ID Value:', GAME_ID);
             const playerName = nameInput.value.trim() || 'Anonymous';
 
             try {
-                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, currentScore);
+                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, finalScore);
                 overlay.remove();
-                displayShareWindow(playerName, currentScore, TARGET_WORD);
+                displayShareWindow(playerName, finalScore, TARGET_WORD);
             } catch (error) {
                 console.error('❌ Error submitting score:', error);
                 nameInput.value = 'Submission Failed, Try Again';
@@ -1007,12 +1037,11 @@ console.log('✅ GAME_ID Value:', GAME_ID);
         });
 
     } else {
-        // 🛑 Game Over Scenario: Show Final Score and Close Button
         overlay.innerHTML = `
             <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
                 ${message}
             </div>
-            <p>Final Score: ${currentScore.toLocaleString()}</p>
+            <p>Final Score: ${finalScore.toLocaleString()}</p>
             <button id="close-overlay-btn" style="
                 width: 100%;
                 padding: 12px;
@@ -1081,7 +1110,7 @@ function displayShareWindow(playerName, score, word) {
 
     overlay.innerHTML = `
         <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-            Congrats <b>${playerName}</b>! Your score of <b>${score.toLocaleString()}</b> has been saved.
+            Congrats <b>${playerName}</b>! Your score of <b>${score.toLocaleString()}</b> puts you on the Leaderboard.
         </div>
         <button id="share-btn" style="
             width: 100%;
@@ -1104,7 +1133,7 @@ function displayShareWindow(playerName, score, word) {
             border-radius: 4px;
             font-weight: bold;
             font-size: 16px;
-        ">CLOSE WITHOUT SHARING</button>
+        ">CLOSE</button>
     `;
 
     document.getElementById('game-grid').appendChild(overlay);
