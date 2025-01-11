@@ -45,50 +45,53 @@
         let isGameOver = false;
 
         // ✅ Fetch game data from Firestore
-        async function initGame() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                let gameId = urlParams.get('gameId');
+        async function initGame(db) {
+    if (!db) {
+        console.error('❌ db is not defined. Please check your Firebase initialization.');
+        return false;
+    }
 
-                if (!gameId) {
-                    const gamesRef = collection(db, 'daily_games_speed');
-                    const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
-                    const querySnapshot = await getDocs(q);
+    try {
+        // Extract the gameId from the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('gameId');
 
-                    if (!querySnapshot.empty) {
-                        gameId = querySnapshot.docs[0].id;
-                    } else {
-                        console.error("❌ No games found");
-                        return null;
-                    }
-                }
-
-                const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
-
-                if (!gameDoc.exists()) {
-                    console.error("❌ No game found for:", gameId);
-                    return null;
-                }
-
-                const gameData = gameDoc.data();
-                TARGET_WORD = gameData.targetWord;
-                GAME_ID = gameId;
-
-                const targetWordDiv = document.getElementById('target-word');
-                targetWordDiv.innerHTML = '';
-                for (const letter of TARGET_WORD) {
-                    const letterDiv = document.createElement('div');
-                    letterDiv.className = 'target-letter';
-                    letterDiv.textContent = letter;
-                    targetWordDiv.appendChild(letterDiv);
-                }
-
-                return true;
-            } catch (error) {
-                console.error('❌ Error initializing game:', error);
-                return false;
-            }
+        if (!gameId) {
+            console.error('❌ gameId parameter is missing from the URL.');
+            return false;
         }
+
+        console.log(`🔍 Fetching game with ID: ${gameId}`);
+
+        // Fetch the game document from the `daily_games_speed` collection
+        const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
+
+        if (gameDoc.exists()) {
+            const gameData = gameDoc.data();
+            console.log('✅ Game Data:', gameData);
+
+            // Update target word in the game interface
+            const targetWordDiv = document.getElementById('target-word');
+            targetWordDiv.innerHTML = '';
+
+            const targetWord = gameData.targetWord || '';
+            for (const letter of targetWord) {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'target-letter';
+                letterDiv.textContent = letter;
+                targetWordDiv.appendChild(letterDiv);
+            }
+
+            return true;
+        } else {
+            console.error(`❌ No game found for: ${gameId}`);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error fetching game data:', error);
+        return false;
+    }
+}
 
         // ✅ Start the game timer
         function startTimer() {
