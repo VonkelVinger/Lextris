@@ -24,20 +24,21 @@
 
         // ✅ Create Game Function
         window.createGame = async function createGame() {
-            const gameId = document.getElementById('gameId').value.trim();
+            const gameIdScore = document.getElementById('gameId').value.trim();
+            const gameIdSpeed = `${gameIdScore}-speed`;
             const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
 
             const logs = document.getElementById('logs');
             logs.innerHTML = '';
 
             // ✅ Validation
-            if (!gameId || !targetWord) {
+            if (!gameIdScore || !targetWord) {
                 logs.innerHTML += '❌ Both Game ID and Target Word are required.<br>';
                 return;
             }
 
             const gameIdPattern = /^Game\d{4}-\d{2}-\d{2}$/;
-            if (!gameIdPattern.test(gameId)) {
+            if (!gameIdPattern.test(gameIdScore)) {
                 logs.innerHTML += '❌ Game ID must be in the format "GameYYYY-MM-DD".<br>';
                 return;
             }
@@ -50,9 +51,6 @@
                 return;
             }
 
-            const gameIdScore = `${gameId}-score`;
-            const gameIdSpeed = `${gameId}-speed`;
-
             try {
                 // ✅ Add to `daily_games` (Score-based game)
                 logs.innerHTML += `⏳ Creating game for Score-based collection: ${gameIdScore}...<br>`;
@@ -61,28 +59,26 @@
                     createdAt: serverTimestamp(),
                     active: true
                 });
-
                 logs.innerHTML += `✅ Score-based Game '${gameIdScore}' created successfully!<br>`;
 
                 // ✅ Add to `daily_games_speed` (Time-based game)
                 logs.innerHTML += `⏳ Creating game for Time-based collection: ${gameIdSpeed}...<br>`;
                 await setDoc(doc(db, 'daily_games_speed', gameIdSpeed), {
                     targetWord: targetWord,
+                    time: null, // Add default 'time' field
                     createdAt: serverTimestamp(),
                     active: true
                 });
-
-                logs.innerHTML += `✅ Time-based Game '${gameIdSpeed}' created successfully!<br>`;
-
-                alert(`✅ Games created successfully:\n\nScore-based: ${gameIdScore}\nTime-based: ${gameIdSpeed}`);
-
-                document.getElementById('gameId').value = '';
-                document.getElementById('targetWord').value = '';
+                logs.innerHTML += `✅ Time-based Game '${gameIdSpeed}' created successfully with 'time' field!<br>`;
             } catch (error) {
-                console.error('❌ Error creating games:', error);
+                console.error('❌ Error creating game:', error);
                 logs.innerHTML += `❌ Error: ${error.message}<br>`;
-                alert('❌ Error creating games. Check the logs below.');
+                alert('❌ Error creating game. Check the logs below.');
             }
+
+            // Clear inputs
+            document.getElementById('gameId').value = '';
+            document.getElementById('targetWord').value = '';
         };
     </script>
 
@@ -152,7 +148,7 @@
     <div class="admin-container">
         <h1>Leximax Admin Panel</h1>
         <div class="form-group">
-            <label for="gameId">Game ID (e.g., Game2025-01-15):</label>
+            <label for="gameId">Game ID (e.g., Game2025-01-12):</label>
             <input type="text" id="gameId" placeholder="Enter Game ID">
         </div>
         <div class="form-group">
@@ -160,7 +156,7 @@
             <input type="text" id="targetWord" placeholder="Enter Target Word">
         </div>
         <div class="form-group">
-            <button id="create-game-btn">Create Games</button>
+            <button id="create-game-btn">Create Game</button>
         </div>
         <div class="logs" id="logs"></div>
     </div>
