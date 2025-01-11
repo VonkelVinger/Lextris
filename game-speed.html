@@ -3,26 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leximax Speed Game</title>
+    <title>Leximax Speed</title>
+    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
     <link rel="stylesheet" href="styles.css">
     <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc, 
-            getDoc, 
-            collection, 
-            addDoc, 
-            query, 
-            orderBy, 
-            limit, 
-            onSnapshot, 
-            serverTimestamp 
-        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+        // ✅ Firebase SDK Initialization
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
-        // Firebase Config
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -32,528 +21,225 @@
             appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Utility functions
-        const formatTime = (seconds) => {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-        };
-
-        // Fetch game data
-        async function fetchGameData(gameId) {
-            const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
-            if (!gameDoc.exists()) {
-                throw new Error(`Game ID ${gameId} not found.`);
-            }
-            return gameDoc.data();
-        }
-
-        // Add leaderboard entry
-        async function addLeaderboardEntry(gameId, name, time) {
-            const leaderboardRef = collection(db, 'daily_games_speed', gameId, 'leaderboard');
-            await addDoc(leaderboardRef, { name, time, timestamp: serverTimestamp() });
-        }
-
-        // Fetch leaderboard data
-        async function fetchLeaderboard(gameId) {
-            const leaderboardRef = collection(db, 'daily_games_speed', gameId, 'leaderboard');
-            const q = query(leaderboardRef, orderBy("time", "asc"), limit(10));
-            const snapshot = await getDocs(q);
-
-            const leaderboard = [];
-            snapshot.forEach(doc => {
-                leaderboard.push(doc.data());
-            });
-            return leaderboard;
-        }
+        console.log("✅ Firebase Initialized");
     </script>
 </head>
 <body>
-    <div id="game-container">
-        <div id="title">Leximax Speed Game</div>
-        <div id="game-info">
-            <div id="timer">Time: 00:00</div>
+    <div class="game-wrapper">
+        <h1>Leximax Speed</h1>
+        <div id="target-word-container">
+            <h2>Target Word:</h2>
+            <div id="target-word"></div>
         </div>
-        <div id="grid-container"></div>
+        <div id="timer-container">
+            <h2>Timer:</h2>
+            <div id="timer">00:00</div>
+        </div>
         <div id="controls">
             <button id="start-btn">Start</button>
             <button id="pause-btn">Pause</button>
+            <button id="reset-btn">Reset</button>
         </div>
-        <div id="leaderboard">
-            <h3>Leaderboard</h3>
-            <ul id="leaderboard-list"></ul>
-        </div>
+        <div id="logs" class="logs"></div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            let timerInterval;
-            let gameTime = 0;
-            let isPaused = true;
-            let isGameOver = false;
-            const gameId = new URLSearchParams(window.location.search).get('gameId');
-
-            if (!gameId) {
-                alert('Game ID is missing in the URL!');
-                return;
-            }
-
-            try {
-                // Fetch game data
-                const gameData = await fetchGameData(gameId);
-                document.getElementById('title').textContent = `Target Word: ${gameData.targetWord}`;
-            } catch (error) {
-                console.error(error.message);
-                alert('Failed to fetch game data. Check the console for details.');
-                return;
-            }
-
-            // Timer functions
-            const updateTimer = () => {
-                if (!isPaused && !isGameOver) {
-                    gameTime++;
-                    document.getElementById('timer').textContent = `Time: ${formatTime(gameTime)}`;
-                }
-            };
-
-            const startTimer = () => {
-                timerInterval = setInterval(updateTimer, 1000);
-            };
-
-            const stopTimer = () => {
-                clearInterval(timerInterval);
-            };
-
-            // Game controls
-            document.getElementById('start-btn').addEventListener('click', () => {
-                if (isGameOver) return;
-                isPaused = false;
-                startTimer();
-            });
-
-            document.getElementById('pause-btn').addEventListener('click', () => {
-                isPaused = true;
-                stopTimer();
-            });
-
-            // End game logic
-            const endGame = async (isWin) => {
-                isGameOver = true;
-                stopTimer();
-
-                const playerName = prompt('Enter your name for the leaderboard:', 'Anonymous');
-                if (playerName) {
-                    try {
-                        await addLeaderboardEntry(gameId, playerName, gameTime);
-                        alert('Your time has been submitted to the leaderboard!');
-                        renderLeaderboard(gameId);
-                    } catch (error) {
-                        console.error('Failed to submit leaderboard entry:', error);
-                    }
-                }
-            };
-
-            // Render leaderboard
-            const renderLeaderboard = async (gameId) => {
-                try {
-                    const leaderboard = await fetchLeaderboard(gameId);
-                    const leaderboardList = document.getElementById('leaderboard-list');
-                    leaderboardList.innerHTML = '';
-
-                    leaderboard.forEach((entry, index) => {
-                        const li = document.createElement('li');
-                        li.textContent = `${index + 1}. ${entry.name} - ${formatTime(entry.time)}`;
-                        leaderboardList.appendChild(li);
-                    });
-                } catch (error) {
-                    console.error('Failed to fetch leaderboard:', error);
-                }
-            };
-
-            // Initial leaderboard render
-            renderLeaderboard(gameId);
-        });
-    </script>
-</body>
-<!-- Game Style Section -->
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f9;
-        color: #333;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        min-height: 100vh;
-    }
-
-    h1 {
-        font-size: 24px;
-        margin: 20px 0;
-        color: #004d40;
-    }
-
-    #timer {
-        font-size: 18px;
-        margin: 10px 0;
-        color: #00796b;
-    }
-
-    .controls {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin: 15px 0;
-    }
-
-    .controls button {
-        background-color: #004d40;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 4px;
-    }
-
-    .controls button:hover {
-        background-color: #00796b;
-    }
-
-    .leaderboard {
-        width: 90%;
-        max-width: 400px;
-        margin: 20px 0;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    .leaderboard-header {
-        background-color: #004d40;
-        color: #fff;
-        padding: 10px;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    .leaderboard-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .leaderboard-list li {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .leaderboard-list li:nth-child(odd) {
-        background-color: #f9f9f9;
-    }
-
-    .leaderboard-list li:last-child {
-        border-bottom: none;
-    }
-</style>
-
-<!-- Leaderboard Section -->
-<div class="leaderboard">
-    <div class="leaderboard-header">Leaderboard</div>
-    <ul id="leaderboard-list"></ul>
-</div>
-
-<!-- Footer Section -->
-<footer>
-    <p>&copy; 2025 Leximax. All rights reserved.</p>
-    <p>
-        <a href="privacy-policy.html">Privacy Policy</a> |
-        <a href="contact.html">Contact Us</a>
-    </p>
-</footer>
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-
-    // Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
-        authDomain: "leximax-96299.firebaseapp.com",
-        projectId: "leximax-96299",
-        storageBucket: "leximax-96299.appspot.com",
-        messagingSenderId: "1067424610925",
-        appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    console.log("✅ Firebase initialized");
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        const queryString = new URLSearchParams(window.location.search);
-        const gameId = queryString.get("gameId");
-        const leaderboardList = document.getElementById("leaderboard-list");
-
-        if (!gameId) {
-            alert("Game ID is missing from the URL.");
-            return;
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        console.log(`🔍 Fetching game data for Game ID: ${gameId}`);
+        .game-wrapper {
+            max-width: 600px;
+            margin: 20px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-        // Fetch game data
+        h1 {
+            text-align: center;
+            color: #004d40;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        #target-word {
+            font-size: 24px;
+            font-weight: bold;
+            color: #003366;
+            margin-top: 10px;
+        }
+
+        #timer {
+            font-size: 20px;
+            color: #900C3F;
+            margin-top: 10px;
+        }
+
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #004d40;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #003333;
+        }
+
+        .logs {
+            margin-top: 20px;
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+    <script type="module">
         async function fetchGameData() {
+            const logs = document.getElementById("logs");
+            logs.innerHTML += "⏳ Fetching game data...<br>";
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get("gameId");
+
+            if (!gameId) {
+                logs.innerHTML += "❌ No game ID found in the URL.<br>";
+                return null;
+            }
+
             try {
                 const gameDoc = await getDoc(doc(db, "daily_games_speed", gameId));
                 if (gameDoc.exists()) {
-                    const gameData = gameDoc.data();
-                    console.log("✅ Game data retrieved:", gameData);
-
-                    // Display target word
-                    const targetWordElement = document.getElementById("target-word");
-                    targetWordElement.textContent = `Target Word: ${gameData.targetWord}`;
-
-                    return gameData;
+                    logs.innerHTML += "✅ Game data retrieved successfully!<br>";
+                    return gameDoc.data();
                 } else {
-                    throw new Error("Game not found.");
+                    logs.innerHTML += `❌ No game found for ID: ${gameId}<br>`;
+                    return null;
                 }
             } catch (error) {
+                logs.innerHTML += `❌ Error fetching game data: ${error.message}<br>`;
                 console.error("❌ Error fetching game data:", error);
-                alert("Error fetching game data. Check the console for more details.");
+                return null;
             }
         }
 
-        const gameData = await fetchGameData();
+        document.addEventListener("DOMContentLoaded", async () => {
+            const gameData = await fetchGameData();
+            if (gameData) {
+                document.getElementById("target-word").textContent = gameData.targetWord;
+            }
+        });
+    </script>
+    <script type="module">
+        let timerInterval = null;
+        let elapsedSeconds = 0;
 
-        if (!gameData) {
-            return;
-        }
-
-        // Real-time leaderboard updates
-        function setupLeaderboard() {
-            const leaderboardRef = collection(db, "daily_games_speed", gameId, "leaderboard");
-            const q = query(leaderboardRef, orderBy("time", "asc"), limit(10));
-
-            onSnapshot(q, (snapshot) => {
-                leaderboardList.innerHTML = "";
-
-                let rank = 1;
-                snapshot.forEach((doc) => {
-                    const entry = doc.data();
-                    const listItem = document.createElement("li");
-                    listItem.textContent = `${rank}. ${entry.name}: ${formatTime(entry.time)}`;
-                    leaderboardList.appendChild(listItem);
-                    rank++;
-                });
-            });
-        }
-
-        setupLeaderboard();
-
-        // Format time in MM:SS
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+            return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
         }
-    });
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        let timerInterval;
-        let gameTime = 0;
-        let isGameActive = false;
 
-        // Start Timer
         function startTimer() {
+            if (timerInterval) return; // Prevent multiple intervals
             const timerDisplay = document.getElementById("timer");
             timerInterval = setInterval(() => {
-                gameTime++;
-                timerDisplay.textContent = formatTime(gameTime);
+                elapsedSeconds++;
+                timerDisplay.textContent = formatTime(elapsedSeconds);
             }, 1000);
         }
 
-        // Stop Timer
-        function stopTimer() {
+        function pauseTimer() {
             clearInterval(timerInterval);
+            timerInterval = null;
         }
 
-        // Reset Timer
         function resetTimer() {
-            stopTimer();
-            gameTime = 0;
-            const timerDisplay = document.getElementById("timer");
-            timerDisplay.textContent = "00:00";
+            clearInterval(timerInterval);
+            timerInterval = null;
+            elapsedSeconds = 0;
+            document.getElementById("timer").textContent = "00:00";
         }
 
-        // Format Time in MM:SS
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-        }
+        document.getElementById("start-btn").addEventListener("click", startTimer);
+        document.getElementById("pause-btn").addEventListener("click", pauseTimer);
+        document.getElementById("reset-btn").addEventListener("click", resetTimer);
+    </script>
+    <script type="module">
+        async function submitLeaderboardEntry(playerName, time) {
+            const logs = document.getElementById("logs");
+            logs.innerHTML += "⏳ Submitting leaderboard entry...<br>";
 
-        // Event Listeners
-        document.getElementById("start-btn").addEventListener("click", () => {
-            if (!isGameActive) {
-                isGameActive = true;
-                startTimer();
-            }
-        });
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get("gameId");
 
-        document.getElementById("pause-btn").addEventListener("click", () => {
-            if (isGameActive) {
-                isGameActive = false;
-                stopTimer();
-            }
-        });
-
-        document.getElementById("reset-btn").addEventListener("click", () => {
-            isGameActive = false;
-            resetTimer();
-        });
-
-        // Submit Time to Leaderboard
-        document.getElementById("submit-btn").addEventListener("click", async () => {
-            const playerName = document.getElementById("player-name").value.trim();
-            if (!playerName) {
-                alert("Please enter your name to submit your score.");
+            if (!gameId) {
+                logs.innerHTML += "❌ Cannot submit entry: No game ID found.<br>";
                 return;
             }
 
-            stopTimer();
-
-            const gameId = new URLSearchParams(window.location.search).get("gameId");
-            const leaderboardRef = collection(db, "daily_games_speed", gameId, "leaderboard");
+            if (!playerName || !time) {
+                logs.innerHTML += "❌ Player name and time are required to submit.<br>";
+                return;
+            }
 
             try {
-                await addDoc(leaderboardRef, {
-                    name: playerName,
-                    time: gameTime,
-                    timestamp: new Date().toISOString(),
+                const leaderboardRef = collection(db, "daily_games_speed", gameId, "leaderboard");
+                await setDoc(doc(leaderboardRef, playerName), {
+                    time: time,
+                    timestamp: serverTimestamp()
                 });
-                alert("Time submitted successfully!");
-                resetTimer();
+                logs.innerHTML += "✅ Leaderboard entry submitted successfully!<br>";
             } catch (error) {
-                console.error("❌ Error submitting time:", error);
-                alert("Error submitting your time. Please try again.");
+                logs.innerHTML += `❌ Error submitting leaderboard entry: ${error.message}<br>`;
+                console.error("❌ Error submitting leaderboard entry:", error);
             }
+        }
+
+        // Example leaderboard submission (to be replaced with real form inputs)
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("submit-btn").addEventListener("click", () => {
+                const playerName = prompt("Enter your name:");
+                if (playerName) {
+                    submitLeaderboardEntry(playerName, elapsedSeconds);
+                }
+            });
         });
-    });
-</script>
-<style>
-    /* General Styles */
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        margin: 0;
-    }
-
-    .container {
-        max-width: 600px;
-        margin: 50px auto;
-        padding: 20px;
-        background-color: white;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-    }
-
-    h1 {
-        text-align: center;
-        color: #333;
-    }
-
-    #timer {
-        font-size: 2em;
-        font-weight: bold;
-        color: #004d40;
-        text-align: center;
-        margin: 20px 0;
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 10px 15px;
-        margin: 5px;
-        font-size: 16px;
-        font-weight: bold;
-        color: white;
-        background-color: #004d40;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        text-transform: uppercase;
-    }
-
-    .btn:hover {
-        background-color: #00695c;
-    }
-
-    .btn:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-    }
-
-    #leaderboard {
-        margin-top: 20px;
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    #leaderboard th,
-    #leaderboard td {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    }
-
-    #leaderboard th {
-        background-color: #004d40;
-        color: white;
-    }
-
-    .form-group {
-        margin: 15px 0;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 10px;
-        font-size: 14px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-</style>
-
-<footer>
-    <div style="text-align: center; padding: 20px; background-color: #004d40; color: white;">
-        <p>&copy; 2025 Leximax. All rights reserved.</p>
-        <p>
-            <a href="privacy-policy.html" style="color: #FFC107; text-decoration: none;">Privacy Policy</a> |
-            <a href="contact.html" style="color: #FFC107; text-decoration: none;">Contact Us</a>
-        </p>
-    </div>
-</footer>
+    </script>
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2025 Leximax. All rights reserved.</p>
+            <p>
+                <a href="index.html">Home</a> |
+                <a href="about.html">About</a> |
+                <a href="privacy.html">Privacy Policy</a>
+            </p>
+        </div>
+    </footer>
 </body>
 </html>
-
-
-
-
-
-    
