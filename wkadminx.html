@@ -56,6 +56,7 @@
                 logs.innerHTML += `⏳ Creating game for Score-based collection: ${gameIdScore}...<br>`;
                 await setDoc(doc(db, 'daily_games', gameIdScore), {
                     targetWord: targetWord,
+                    score: 0, // Add default 'score' field
                     createdAt: serverTimestamp(),
                     active: true
                 });
