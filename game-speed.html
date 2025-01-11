@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LEXIMAX - Speed Challenge</title>
+    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+    <!-- Styles remain the same as in game.html -->
+    <style>
+        /* Use the same styles from your game.html */
+    </style>
+    <script type="module">
+        // ✅ Import Firebase Modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            collection, 
+            addDoc, 
+            getDoc, 
+            query, 
+            orderBy, 
+            limit, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+        // ✅ Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+        };
+
+        // ✅ Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let TARGET_WORD = '';
+        let GAME_ID = '';
+        let elapsedSeconds = 0;
+        let timerInterval = null;
+        let isGameOver = false;
+
+        // ✅ Fetch game data from Firestore
+        async function initGame() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                let gameId = urlParams.get('gameId');
+
+                if (!gameId) {
+                    const gamesRef = collection(db, 'daily_games_speed');
+                    const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        gameId = querySnapshot.docs[0].id;
+                    } else {
+                        console.error("❌ No games found");
+                        return null;
+                    }
+                }
+
+                const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
+
+                if (!gameDoc.exists()) {
+                    console.error("❌ No game found for:", gameId);
+                    return null;
+                }
+
+                const gameData = gameDoc.data();
+                TARGET_WORD = gameData.targetWord;
+                GAME_ID = gameId;
+
+                const targetWordDiv = document.getElementById('target-word');
+                targetWordDiv.innerHTML = '';
+                for (const letter of TARGET_WORD) {
+                    const letterDiv = document.createElement('div');
+                    letterDiv.className = 'target-letter';
+                    letterDiv.textContent = letter;
+                    targetWordDiv.appendChild(letterDiv);
+                }
+
+                return true;
+            } catch (error) {
+                console.error('❌ Error initializing game:', error);
+                return false;
+            }
+        }
+
+        // ✅ Start the game timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (!isGameOver) {
+                    elapsedSeconds++;
+                    document.querySelector('#timer-container span').textContent = window.formatTime(elapsedSeconds);
+                }
+            }, 1000);
+        }
+
+        // ✅ End the game
+        function endGame(isWin = false) {
+            clearInterval(timerInterval);
+            isGameOver = true;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'game-over';
+
+            if (isWin) {
+                // 🎯 Winning Scenario: Prompt for Name Submission
+                overlay.innerHTML = `
+                    <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
+                        You completed the word in <b>${window.formatTime(elapsedSeconds)}</b>!
+                    </div>
+                    <input type="text" id="player-name" maxlength="12" placeholder="Enter your name">
+                    <button id="submit-name-btn">Submit</button>
+                `;
+
+                document.getElementById('game-grid').appendChild(overlay);
+
+                const submitBtn = document.getElementById('submit-name-btn');
+                submitBtn.addEventListener('click', async () => {
+                    const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
+
+                    try {
+                        await addDoc(collection(db, 'daily_games_speed', GAME_ID, 'leaderboard'), {
+                            name: playerName,
+                            time: elapsedSeconds,
+                            timestamp: new Date().toISOString()
+                        });
+                        overlay.remove();
+                        alert('Time submitted!');
+                    } catch (error) {
+                        console.error('❌ Error submitting time:', error);
+                    }
+                });
+            } else {
+                overlay.innerHTML = `
+                    <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
+                        Game Over!
+                    </div>
+                    <p>Final Time: ${window.formatTime(elapsedSeconds)}</p>
+                    <button id="close-overlay-btn">CLOSE</button>
+                `;
+
+                document.getElementById('game-grid').appendChild(overlay);
+                document.getElementById('close-overlay-btn').addEventListener('click', () => overlay.remove());
+            }
+        }
+
+        // ✅ Check for a win
+        async function checkWin() {
+            const formedWord = ''; // Logic to get the formed word from the grid
+            if (formedWord === TARGET_WORD) {
+                endGame(true);
+            }
+        }
+
+        // ✅ Utility function to format time
+        window.formatTime = function(seconds) {
+            if (!seconds && seconds !== 0) return '--:--';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        };
+
+        // ✅ Event listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initGame();
+
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+
+            startBtn.addEventListener('click', () => {
+                startTimer();
+            });
+
+            pauseBtn.addEventListener('click', () => {
+                clearInterval(timerInterval);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="game-wrapper">
+        <div id="leximax-title">
+            <!-- Title blocks -->
+        </div>
+
+        <div id="target-word-container">
+            <div id="target-word-label">TARGET WORD:</div>
+            <div id="target-word"></div>
+        </div>
+
+        <div id="game-grid"></div>
+
+        <div id="controls">
+            <div id="game-buttons">
+                <button class="game-btn" id="start-btn">START</button>
+                <button class="game-btn" id="pause-btn">PAUSE</button>
+            </div>
+
+            <div id="time-display">
+                <div id="timer-container" class="time-container">
+                    Time: <span>00:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table id="leaderboard">
+        <caption>LEADERBOARD</caption>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <footer>
+        <!-- Footer content -->
+    </footer>
+</body>
+</html>
