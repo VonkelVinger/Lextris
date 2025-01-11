@@ -2,16 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leximax Speed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LEXIMAX - Time Mode</title>
     <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
-    <link rel="stylesheet" href="styles.css">
-    <script type="module">
-        // ✅ Firebase SDK Initialization
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
-        // Firebase configuration
+    <!-- Base Styles -->
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            max-width: 320px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        /* Title Styles */
+        #leximax-title {
+            display: flex;
+            gap: 0;
+            margin-bottom: 8px;
+        }
+
+        .title-block {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* Target Word Styles */
+        #target-word-container {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        #target-word-label {
+            font-size: 22px;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #666666;
+        }
+
+        #target-word {
+            display: inline-flex;
+            gap: 1px;
+            justify-content: center;
+            align-items: center;
+            background-color: #004d40;
+            padding: 2px;
+        }
+
+        .target-letter {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+            background-color: #004d40;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .target-letter {
+                width: 25px;
+                height: 25px;
+                font-size: 14px;
+            }
+        }
+    </style>
+
+    <!-- Grid Styles -->
+    <style>
+        #game-grid {
+            width: 100%;
+            aspect-ratio: 8/10;
+            background-color: white;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 1px;
+            border: 1px solid #004d40;
+            padding: 1px;
+            margin-bottom: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-cell {
+            background-color: #004d40;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.15s ease-out;
+        }
+
+        .grid-cell::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .grid-cell.filled {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+
+        .grid-cell.pop {
+            transform: scale(1.2);
+            opacity: 0;
+            transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+        }
+    </style>
+
+    <!-- Firebase Initialization -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            getDoc,
+            collection,
+            addDoc,
+            query,
+            orderBy,
+            limit,
+            onSnapshot,
+            getDocs
+        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
             authDomain: "leximax-96299.firebaseapp.com",
@@ -24,222 +180,405 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        console.log("✅ Firebase Initialized");
+        // Firebase Utilities
+        window.firebaseUtils = {
+            collection,
+            doc,
+            setDoc,
+            getDoc,
+            addDoc,
+            query,
+            orderBy,
+            limit,
+            onSnapshot,
+            getDocs
+        };
+
+        window.db = db;
     </script>
 </head>
 <body>
     <div class="game-wrapper">
-        <h1>Leximax Speed</h1>
+        <!-- Title -->
+        <div id="leximax-title">
+            <div class="title-block" style="background-color: #2196f3;">L</div>
+            <div class="title-block" style="background-color: #f44336;">E</div>
+            <div class="title-block" style="background-color: #4caf50;">X</div>
+            <div class="title-block" style="background-color: #ffc107;">I</div>
+            <div class="title-block" style="background-color: #9c27b0;">M</div>
+            <div class="title-block" style="background-color: #0066FF;">A</div>
+            <div class="title-block" style="background-color: #900C3F;">X</div>
+        </div>
+
+        <!-- Target Word -->
         <div id="target-word-container">
-            <h2>Target Word:</h2>
+            <div id="target-word-label">TARGET WORD:</div>
             <div id="target-word"></div>
         </div>
-        <div id="timer-container">
-            <h2>Timer:</h2>
-            <div id="timer">00:00</div>
-        </div>
+
+        <!-- Game Grid -->
+        <div id="game-grid"></div>
+
+        <!-- Controls -->
         <div id="controls">
-            <button id="start-btn">Start</button>
-            <button id="pause-btn">Pause</button>
-            <button id="reset-btn">Reset</button>
+            <!-- Mobile Controls -->
+            <div id="mobile-controls">
+                <button class="mobile-btn" id="left-btn">◀</button>
+                <button class="mobile-btn" id="down-btn">▼</button>
+                <button class="mobile-btn" id="right-btn">▶</button>
+            </div>
+
+            <!-- Start and Pause Buttons -->
+            <div id="game-buttons">
+                <button class="game-btn" id="start-btn">START</button>
+                <button class="game-btn" id="pause-btn">PAUSE</button>
+            </div>
+
+            <!-- Time Display -->
+            <div id="time-display">
+                <div id="timer-container" class="time-container">
+                    Time: <span>00:00</span>
+                </div>
+            </div>
         </div>
-        <div id="logs" class="logs"></div>
     </div>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    <!-- Leaderboard -->
+    <table id="leaderboard">
+        <caption>LEADERBOARD</caption>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-        .game-wrapper {
-            max-width: 600px;
-            margin: 20px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #004d40;
-        }
-
-        h2 {
-            color: #333;
-        }
-
-        #target-word {
-            font-size: 24px;
-            font-weight: bold;
-            color: #003366;
-            margin-top: 10px;
-        }
-
-        #timer {
-            font-size: 20px;
-            color: #900C3F;
-            margin-top: 10px;
-        }
-
-        #controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 10px 15px;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            background-color: #004d40;
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #003333;
-        }
-
-        .logs {
-            margin-top: 20px;
-            background: #f9f9f9;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 14px;
-            color: #555;
-        }
-    </style>
-    <script type="module">
-        async function fetchGameData() {
-            const logs = document.getElementById("logs");
-            logs.innerHTML += "⏳ Fetching game data...<br>";
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const gameId = urlParams.get("gameId");
-
-            if (!gameId) {
-                logs.innerHTML += "❌ No game ID found in the URL.<br>";
-                return null;
-            }
-
-            try {
-                const gameDoc = await getDoc(doc(db, "daily_games_speed", gameId));
-                if (gameDoc.exists()) {
-                    logs.innerHTML += "✅ Game data retrieved successfully!<br>";
-                    return gameDoc.data();
-                } else {
-                    logs.innerHTML += `❌ No game found for ID: ${gameId}<br>`;
-                    return null;
-                }
-            } catch (error) {
-                logs.innerHTML += `❌ Error fetching game data: ${error.message}<br>`;
-                console.error("❌ Error fetching game data:", error);
-                return null;
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", async () => {
-            const gameData = await fetchGameData();
-            if (gameData) {
-                document.getElementById("target-word").textContent = gameData.targetWord;
-            }
-        });
-    </script>
-    <script type="module">
-        let timerInterval = null;
-        let elapsedSeconds = 0;
-
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
-        }
-
-        function startTimer() {
-            if (timerInterval) return; // Prevent multiple intervals
-            const timerDisplay = document.getElementById("timer");
-            timerInterval = setInterval(() => {
-                elapsedSeconds++;
-                timerDisplay.textContent = formatTime(elapsedSeconds);
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            elapsedSeconds = 0;
-            document.getElementById("timer").textContent = "00:00";
-        }
-
-        document.getElementById("start-btn").addEventListener("click", startTimer);
-        document.getElementById("pause-btn").addEventListener("click", pauseTimer);
-        document.getElementById("reset-btn").addEventListener("click", resetTimer);
-    </script>
-    <script type="module">
-        async function submitLeaderboardEntry(playerName, time) {
-            const logs = document.getElementById("logs");
-            logs.innerHTML += "⏳ Submitting leaderboard entry...<br>";
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const gameId = urlParams.get("gameId");
-
-            if (!gameId) {
-                logs.innerHTML += "❌ Cannot submit entry: No game ID found.<br>";
-                return;
-            }
-
-            if (!playerName || !time) {
-                logs.innerHTML += "❌ Player name and time are required to submit.<br>";
-                return;
-            }
-
-            try {
-                const leaderboardRef = collection(db, "daily_games_speed", gameId, "leaderboard");
-                await setDoc(doc(leaderboardRef, playerName), {
-                    time: time,
-                    timestamp: serverTimestamp()
-                });
-                logs.innerHTML += "✅ Leaderboard entry submitted successfully!<br>";
-            } catch (error) {
-                logs.innerHTML += `❌ Error submitting leaderboard entry: ${error.message}<br>`;
-                console.error("❌ Error submitting leaderboard entry:", error);
-            }
-        }
-
-        // Example leaderboard submission (to be replaced with real form inputs)
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("submit-btn").addEventListener("click", () => {
-                const playerName = prompt("Enter your name:");
-                if (playerName) {
-                    submitLeaderboardEntry(playerName, elapsedSeconds);
-                }
-            });
-        });
-    </script>
+    <!-- Footer -->
     <footer>
-        <div class="footer-container">
-            <p>&copy; 2025 Leximax. All rights reserved.</p>
-            <p>
+        <div class="footer-content">
+            <div class="footer-links">
                 <a href="index.html">Home</a> |
-                <a href="about.html">About</a> |
-                <a href="privacy.html">Privacy Policy</a>
-            </p>
+                <a href="about-leximax.html">About Leximax</a> |
+                <a href="privacy-policy.html">Privacy Policy</a> |
+                <a href="contact.html">Contact Us</a>
+            </div>
+            <p class="footer-copyright">&copy; 2024 Leximax. All rights reserved.</p>
+            <div class="coffee-button">
+                <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                    data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+                    data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+                    data-font-color="#000000" data-coffee-color="#ffffff">
+                </script>
+            </div>
         </div>
     </footer>
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Game constants
+            const GRID_WIDTH = 8;
+            const GRID_HEIGHT = 10;
+            const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
+            const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
+            const VOWELS = 'AEIOUY';
+            let TARGET_WORD = '';
+            let GAME_ID = '';
+            let timerInterval = null;
+            let gameTime = 0;
+            let isPaused = false;
+            let isGameOver = false;
+
+            // Firebase Integration: Fetch Game Data
+            async function initGame(db) {
+                if (!db) {
+                    console.error('❌ db is not defined. Please check your Firebase initialization.');
+                    return false;
+                }
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let gameId = urlParams.get('gameId');
+
+                    if (!gameId) {
+                        const gamesRef = collection(db, 'daily_games_speed');
+                        const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
+                        const querySnapshot = await getDocs(q);
+
+                        if (!querySnapshot.empty) {
+                            gameId = querySnapshot.docs[0].id;
+                        } else {
+                            console.error("❌ No games found");
+                            return null;
+                        }
+                    }
+
+                    console.log("🔍 Looking for game:", gameId);
+                    const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
+
+                    if (!gameDoc.exists()) {
+                        console.error("❌ No game found for:", gameId);
+                        return null;
+                    }
+
+                    TARGET_WORD = gameDoc.data().targetWord;
+                    GAME_ID = gameId;
+
+                    const targetWordDiv = document.getElementById('target-word');
+                    targetWordDiv.innerHTML = '';
+                    for (const letter of TARGET_WORD) {
+                        const letterDiv = document.createElement('div');
+                        letterDiv.className = 'target-letter';
+                        letterDiv.textContent = letter;
+                        targetWordDiv.appendChild(letterDiv);
+                    }
+
+                    setupLeaderboard();
+                    return true;
+                } catch (error) {
+                    console.error('❌ Error initializing game:', error);
+                    return false;
+                }
+            }
+
+            // Timer Update
+            function updateTimer() {
+                if (!isPaused && !isGameOver) {
+                    gameTime++;
+                    document.querySelector('#timer-container span').textContent = window.formatTime(gameTime);
+                }
+            }
+
+            // Initialize Grid
+            function initGrid() {
+                const gameGrid = document.getElementById('game-grid');
+                gameGrid.innerHTML = '';
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'grid-cell';
+                        cell.setAttribute('data-x', x);
+                        cell.setAttribute('data-y', y);
+                        gameGrid.appendChild(cell);
+                    }
+                }
+            }
+
+            // Leaderboard Setup
+            function setupLeaderboard() {
+                const leaderboardRef = collection(db, 'daily_games_speed', GAME_ID, 'leaderboard');
+                const q = query(leaderboardRef, orderBy('time', 'asc'), limit(10));
+
+                onSnapshot(q, (snapshot) => {
+                    const tbody = document.querySelector('#leaderboard tbody');
+                    if (tbody) {
+                        tbody.innerHTML = '';
+                        let rank = 1;
+
+                        snapshot.forEach((doc) => {
+                            const data = doc.data();
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${rank}</td>
+                                <td>${data.name}</td>
+                                <td>${window.formatTime(data.time)}</td>
+                            `;
+                            tbody.appendChild(row);
+                            rank++;
+                        });
+                    }
+                });
+            }
+
+            // Format Time
+            window.formatTime = function(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            };
+
+            // Start Game
+            function startGame() {
+                clearInterval(timerInterval);
+                isGameOver = false;
+                isPaused = false;
+                gameTime = 0;
+
+                document.querySelector('#timer-container span').textContent = '00:00';
+                timerInterval = setInterval(updateTimer, 1000);
+
+                initGrid();
+            }
+
+            // Pause Game
+            function togglePause() {
+                if (isGameOver) return;
+                isPaused = !isPaused;
+                document.getElementById('pause-btn').textContent = isPaused ? 'RESUME' : 'PAUSE';
+            }
+
+            // Check Win Condition
+            async function checkWin() {
+                isGameOver = true;
+                clearInterval(timerInterval);
+
+                const overlay = document.createElement('div');
+                overlay.className = 'game-over';
+                overlay.innerHTML = `
+                    <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+                        GREAT! Your time: <b>${window.formatTime(gameTime)}</b>
+                    </div>
+                    <input type="text" id="player-name"
+                        maxlength="12"
+                        placeholder="Enter your name"
+                        style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
+                    <button id="submit-name-btn" style="
+                        width: 100%;
+                        padding: 12px;
+                        background-color: #003366;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        font-size: 16px;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease;
+                        margin-bottom: 15px;
+                    ">SUBMIT</button>
+                `;
+
+                document.getElementById('game-grid').appendChild(overlay);
+
+                const submitBtn = document.getElementById('submit-name-btn');
+                const nameInput = document.getElementById('player-name');
+
+                submitBtn.addEventListener('click', async () => {
+                    const playerName = nameInput.value.trim() || 'Anonymous';
+                    try {
+                        await addDoc(collection(db, 'daily_games_speed', GAME_ID, 'leaderboard'), {
+                            name: playerName,
+                            time: gameTime,
+                            timestamp: new Date().toISOString(),
+                        });
+                        overlay.remove();
+                    } catch (error) {
+                        console.error('❌ Error submitting time:', error);
+                    }
+                });
+            }
+
+            // Initialize the game
+            await initGame(db);
+            initGrid();
+
+            // Event Listeners
+            document.getElementById('start-btn').addEventListener('click', startGame);
+            document.getElementById('pause-btn').addEventListener('click', togglePause);
+        });
+    </script>
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const GRID_WIDTH = 8;
+            const GRID_HEIGHT = 10;
+
+            let isGameOver = false;
+
+            // End Game
+            function endGame(message, isWin = false) {
+                isGameOver = true;
+                clearInterval(timerInterval);
+
+                const overlay = document.createElement('div');
+                overlay.className = 'game-over';
+
+                if (isWin) {
+                    // Win condition
+                    overlay.innerHTML = `
+                        <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
+                            ${message}
+                        </div>
+                        <p>Your Time: ${window.formatTime(gameTime)}</p>
+                        <input type="text" id="player-name"
+                            maxlength="12"
+                            placeholder="Enter your name"
+                            style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
+                        <button id="submit-time-btn" style="
+                            width: 100%;
+                            padding: 12px;
+                            background-color: #003366;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            font-weight: bold;
+                            font-size: 16px;
+                            cursor: pointer;
+                            transition: background-color 0.2s ease;
+                            margin-bottom: 15px;
+                        ">SUBMIT</button>
+                    `;
+                } else {
+                    // Game Over condition
+                    overlay.innerHTML = `
+                        <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
+                            ${message}
+                        </div>
+                        <button id="close-overlay-btn" style="
+                            width: 100%;
+                            padding: 12px;
+                            background-color: #666;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            font-weight: bold;
+                            font-size: 16px;
+                            cursor: pointer;
+                            margin-top: 15px;
+                            transition: background-color 0.2s ease;
+                        ">CLOSE</button>
+                    `;
+                }
+
+                document.getElementById('game-grid').appendChild(overlay);
+
+                if (isWin) {
+                    const submitBtn = document.getElementById('submit-time-btn');
+                    const nameInput = document.getElementById('player-name');
+
+                    submitBtn.addEventListener('click', async () => {
+                        const playerName = nameInput.value.trim() || 'Anonymous';
+                        try {
+                            await addDoc(collection(db, 'daily_games_speed', GAME_ID, 'leaderboard'), {
+                                name: playerName,
+                                time: gameTime,
+                                timestamp: new Date().toISOString(),
+                            });
+                            overlay.remove();
+                        } catch (error) {
+                            console.error('❌ Error submitting time:', error);
+                        }
+                    });
+                } else {
+                    const closeBtn = document.getElementById('close-overlay-btn');
+                    closeBtn.addEventListener('click', () => overlay.remove());
+                }
+            }
+
+            // Event Handlers
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
+                if (e.key === 'ArrowRight') moveBlock(1, 0);
+                if (e.key === 'ArrowDown') moveBlock(0, 1);
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    dropBlock();
+                }
+            });
+
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', togglePause);
+        });
+    </script>
 </body>
 </html>
