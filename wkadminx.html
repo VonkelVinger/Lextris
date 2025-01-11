@@ -50,26 +50,38 @@
                 return;
             }
 
-            // ✅ Add Game Document to Firestore
-            try {
-                logs.innerHTML += '⏳ Creating game document...<br>';
+            const gameIdScore = `${gameId}-score`;
+            const gameIdSpeed = `${gameId}-speed`;
 
-                await setDoc(doc(db, 'daily_games', gameId), {
+            try {
+                // ✅ Add to `daily_games` (Score-based game)
+                logs.innerHTML += `⏳ Creating game for Score-based collection: ${gameIdScore}...<br>`;
+                await setDoc(doc(db, 'daily_games', gameIdScore), {
                     targetWord: targetWord,
-                    score: 0, // Explicitly adding 'score' field with default value
                     createdAt: serverTimestamp(),
                     active: true
                 });
 
-                logs.innerHTML += `✅ Game '${gameId}' created successfully with default Score field!<br>`;
-                alert(`✅ Game '${gameId}' set up successfully!`);
+                logs.innerHTML += `✅ Score-based Game '${gameIdScore}' created successfully!<br>`;
+
+                // ✅ Add to `daily_games_speed` (Time-based game)
+                logs.innerHTML += `⏳ Creating game for Time-based collection: ${gameIdSpeed}...<br>`;
+                await setDoc(doc(db, 'daily_games_speed', gameIdSpeed), {
+                    targetWord: targetWord,
+                    createdAt: serverTimestamp(),
+                    active: true
+                });
+
+                logs.innerHTML += `✅ Time-based Game '${gameIdSpeed}' created successfully!<br>`;
+
+                alert(`✅ Games created successfully:\n\nScore-based: ${gameIdScore}\nTime-based: ${gameIdSpeed}`);
 
                 document.getElementById('gameId').value = '';
                 document.getElementById('targetWord').value = '';
             } catch (error) {
-                console.error('❌ Error creating game:', error);
+                console.error('❌ Error creating games:', error);
                 logs.innerHTML += `❌ Error: ${error.message}<br>`;
-                alert('❌ Error creating game. Check the logs below.');
+                alert('❌ Error creating games. Check the logs below.');
             }
         };
     </script>
@@ -148,7 +160,7 @@
             <input type="text" id="targetWord" placeholder="Enter Target Word">
         </div>
         <div class="form-group">
-            <button id="create-game-btn">Create Game</button>
+            <button id="create-game-btn">Create Games</button>
         </div>
         <div class="logs" id="logs"></div>
     </div>
