@@ -38,34 +38,46 @@
 
         /* Title Styles */
         #leximax-title {
-            display: flex;
-            gap: 0;
-            margin-bottom: 8px;
-        }
+    display: flex;
+    gap: 0;
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden; /* Prevent any overflow */
+}
 
-        .title-block {
-            width: 45px;
-            height: 45px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 35px;
-            font-weight: bold;
-            color: white;
-        }
+#leximax-title::before,
+#leximax-title::after {
+    display: none; /* Prevent any pseudo-elements */
+    content: none;
+}
 
-        /* Target Word Styles */
-        #target-word-container {
-            text-align: center;
-            margin-bottom: 8px;
-        }
+.title-block {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 35px;
+    font-weight: bold;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
 
-        #target-word-label {
-            font-size: 22px;
-            margin-bottom: 4px;
-            font-weight: bold;
-            color: #666666;
-        }
+.title-block::before,
+.title-block::after {
+    display: none; /* Prevent any pseudo-elements */
+    content: none;
+}
+
+/* Remove any possible inherited decorative elements */
+#leximax-title *,
+.title-block * {
+    text-decoration: none;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
 
        #target-word {
     display: inline-flex; /* Align letters in a single row */
