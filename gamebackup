@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -861,15 +862,15 @@ console.log('✅ GAME_ID Value:', GAME_ID);
                    let timeMultiplier = 1;
 
 if (gameTime < 30) {
-    timeMultiplier = 3.0; // Under 30 seconds
+    timeMultiplier = 1.0; // Under 30 seconds
 } else if (gameTime < 60) {
-    timeMultiplier = 2.5; // 30–60 seconds
+    timeMultiplier = 1; // 30–60 seconds
 } else if (gameTime < 90) {
-    timeMultiplier = 2.0; // 60–90 seconds
+    timeMultiplier = 1.0; // 60–90 seconds
 } else if (gameTime < 120) {
-    timeMultiplier = 1.5; // 90–120 seconds
+    timeMultiplier = 1.0; // 90–120 seconds
 } else if (gameTime < 150) {
-    timeMultiplier = 1.25; // 120–150 seconds
+    timeMultiplier = 1.0; // 120–150 seconds
 } else {
     timeMultiplier = 1.0; // 150+ seconds
 }
@@ -992,7 +993,7 @@ if (gameTime < 30) {
         // 🎯 Winning Scenario: Prompt for Name Submission
         overlay.innerHTML = `
             <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                GREAT! Enter your name to record your score of <b>${finalScore.toLocaleString()}</b> for <b>${TARGET_WORD}</b> on the Leaderboard.
+                GREAT! Enter your score of <b>${finalScore.toLocaleString()}</b> for <b>${TARGET_WORD}</b> on the Leaderboard, then click SHARE to challenge your friends!
             </div>
             <input type="text" id="player-name"
                    maxlength="12"
@@ -1103,14 +1104,10 @@ function displayShareWindow(playerName, score, word) {
     const overlay = document.createElement('div');
     overlay.className = 'game-over';
 
-    const shareMessage = `
-        I scored ${score.toLocaleString()} points building the word '${word}' in Leximax!
-        Play here: https://playleximax.com/game.html?gameId=${GAME_ID}
-    `;
-
+    const shareMessage = `Can you beat my score of ${score.toLocaleString()} for '${word}' on Leximax? Play here: https://playleximax.com/game.html?gameId=${GAME_ID}`;
     overlay.innerHTML = `
         <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-            Congrats <b>${playerName}</b>! Your score of <b>${score.toLocaleString()}</b> puts you on the Leaderboard.
+            <b>${playerName}</b>, challenge your friends to beat your score of <b>${score.toLocaleString()}!</b>
         </div>
         <button id="share-btn" style="
             width: 100%;
