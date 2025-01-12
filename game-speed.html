@@ -355,8 +355,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #900C3F;
-            color: FFFFFF;
+            background-color: #900C3F;  /* The dark red/burgundy background */
+            color: white;              /* Changed from #333 to white */
             padding: 20px;
             border-radius: 8px;
             text-align: center;
@@ -366,6 +366,10 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
+        /* Ensure all text in the overlay is white, including the bold text */
+        .game-over b {
+            color: white;
+        }
         .game-over input {
             margin: 10px 0;
             padding: 8px;
