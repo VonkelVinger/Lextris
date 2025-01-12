@@ -921,122 +921,62 @@
             }
 
             function endGame(isWin) {
-                isGameOver = true;
-                clearInterval(gameInterval);
-                clearInterval(timerInterval);
+    isGameOver = true;
+    clearInterval(gameInterval);
+    clearInterval(timerInterval);
 
-                const overlay = document.createElement('div');
-                overlay.className = 'game-over';
+    const overlay = document.createElement('div');
+    overlay.className = 'game-over';
 
-              if (isWin) {
-    const timeStr = window.formatTime(gameTime);
-    overlay.innerHTML = `
-        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5; color: white;">
-            GREAT! Enter your time of <b>${timeStr}</b> for <b>${TARGET_WORD}</b> on the Leaderboard, then click SHARE to challenge your friends!
-        </div>
-        <input type="text" id="player-name"
-               maxlength="12"
-               placeholder="Enter your name"
-               style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
-        <button id="submit-name-btn" style="
-            width: 100%;
-            padding: 12px;
-            background-color: #003366;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            margin-bottom: 15px;
-        ">SUBMIT</button>
-    `;
+    if (isWin) {
+        const timeStr = window.formatTime(gameTime);
+        overlay.innerHTML = `
+            <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5; color: white;">
+                GREAT! Enter your time of <b>${timeStr}</b> for <b>${TARGET_WORD}</b> on the Leaderboard, then click SHARE to challenge your friends!
+            </div>
+            <input type="text" id="player-name"
+                   maxlength="12"
+                   placeholder="Enter your name"
+                   style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
+            <button id="submit-name-btn" style="
+                width: 100%;
+                padding: 12px;
+                background-color: #003366;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                margin-bottom: 15px;
+            ">SUBMIT</button>
+        `;
 
-    document.getElementById('game-grid').appendChild(overlay);
+        document.getElementById('game-grid').appendChild(overlay);
 
-    const submitBtn = document.getElementById('submit-name-btn');
-    const nameInput = document.getElementById('player-name');
-    nameInput.focus();
+        const submitBtn = document.getElementById('submit-name-btn');
+        const nameInput = document.getElementById('player-name');
+        nameInput.focus();
 
-    const handleSubmission = async () => {
-        const playerName = nameInput.value.trim() || 'Anonymous';
-        try {
-            // Important: Pass gameTime here, not timeStr
-            await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, gameTime);
-            overlay.remove();
-            displayShareWindow(playerName, timeStr);
-        } catch (error) {
-            console.error('❌ Error submitting score:', error);
-            nameInput.value = 'Submission Failed, Try Again';
-        }
-    };
+        const handleSubmission = async () => {
+            const playerName = nameInput.value.trim() || 'Anonymous';
+            try {
+                await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, gameTime);
+                overlay.remove();
+                displayShareWindow(playerName, gameTime, TARGET_WORD);
+            } catch (error) {
+                console.error('❌ Error submitting score:', error);
+                nameInput.value = 'Submission Failed, Try Again';
+            }
+        };
 
-    submitBtn.addEventListener('click', handleSubmission);
-    nameInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleSubmission();
-    });
+        submitBtn.addEventListener('click', handleSubmission);
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSubmission();
+        });
+    }
 }
-
-                const closeBtn = document.getElementById('close-share-btn');
-                closeBtn.addEventListener('click', () => overlay.remove());
-            }
-
-            function startGame() {
-                const overlay = document.querySelector('.game-over');
-                if (overlay) overlay.remove();
-                
-                clearInterval(gameInterval);
-                clearInterval(timerInterval);
-                isGameOver = false;
-                isPaused = false;
-                gameTime = 0;
-                
-                initGrid();
-                currentBlock = createBlock();
-                nextBlock = createBlock();
-                drawBlock(currentBlock);
-                
-                document.querySelector('#timer-container span').textContent = '00:00';
-                pauseBtn.textContent = 'PAUSE';
-                
-                gameInterval = setInterval(() => {
-                    if (!isPaused && !isGameOver) {
-                        moveBlock(0, 1);
-                    }
-                }, 1000);
-                
-                timerInterval = setInterval(updateTimer, 1000);
-            }
-
-            function togglePause() {
-                if (isGameOver) return;
-                isPaused = !isPaused;
-                pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
-            }
-// Event listeners
-            const startBtn = document.getElementById('start-btn');
-            const pauseBtn = document.getElementById('pause-btn');
-            const leftBtn = document.getElementById('left-btn');
-            const downBtn = document.getElementById('down-btn');
-            const rightBtn = document.getElementById('right-btn');
-
-            startBtn.addEventListener('click', startGame);
-            pauseBtn.addEventListener('click', togglePause);
-            leftBtn.addEventListener('click', () => moveBlock(-1, 0));
-            rightBtn.addEventListener('click', () => moveBlock(1, 0));
-            downBtn.addEventListener('click', dropBlock);
-
-            // Keyboard controls
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
-                if (e.key === 'ArrowRight') moveBlock(1, 0);
-                if (e.key === 'ArrowDown') moveBlock(0, 1);
-                if (e.key === ' ') {
-                    e.preventDefault();
-                    dropBlock();
-                }
-            });
 
             // Initialize the game
             await initGame(db);
