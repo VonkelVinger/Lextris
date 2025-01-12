@@ -53,6 +53,55 @@
             font-weight: bold;
             color: white;
         }
+        footer {
+            background-color: #004d40;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 30px 0;
+            font-size: 14px;
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-links {
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .footer-links a {
+            color: #FFC107;
+            text-decoration: none;
+            margin: 0 12px;
+            font-weight: normal;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-copyright {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: normal;
+            margin-top: 15px;
+            color: #FFFFFF;
+        }
+
+        .coffee-button {
+            margin-top: 15px;
+            text-align: center;
+        }
     </style>
     <!-- Game Components Styles -->
     <style>
@@ -295,9 +344,10 @@
         }
 
         #leaderboard td:last-child {
-            font-family: 'Courier New', monospace;
+            font-family: Arial, sans-serif;  /* Changed from 'Courier New' */
             font-weight: bold;
-            text-align: right;
+            text-align: right;              /* Ensure right alignment */
+            padding-right: 10px;            /* Add some padding on the right */
         }
 
         .game-over {
@@ -305,8 +355,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
-            color: #333;
+            background-color: #900C3F;  /* The dark red/burgundy background */
+            color: white;              /* Changed from #333 to white */
             padding: 20px;
             border-radius: 8px;
             text-align: center;
@@ -316,6 +366,10 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
+        /* Ensure all text in the overlay is white, including the bold text */
+        .game-over b {
+            color: white;
+        }
         .game-over input {
             margin: 10px 0;
             padding: 8px;
@@ -381,17 +435,17 @@
 
             <div id="time-display">
                 <div id="timer-container" class="time-container">
-                    Time: <span>00:00</span>
+                    Your Time: <span>00:00</span>
                 </div>
                 <div id="best-time-container" class="time-container">
-                    Best: <span>--:--</span>
+                    Best Time: <span>--:--</span>
                 </div>
             </div>
         </div>
     </div>
 
     <table id="leaderboard">
-        <caption>SPEED LEADERBOARD</caption>
+        <caption>LEXISPEED LEADERBOARD</caption>
         <thead>
             <tr>
                 <th>Rank</th>
@@ -403,21 +457,19 @@
     </table>
 
     <footer>
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="index.html">Home</a> |
-                <a href="about-leximax.html">About Leximax</a> |
-                <a href="privacy-policy.html">Privacy Policy</a> |
-                <a href="contact.html">Contact Us</a>
-            </div>
-            <p class="footer-copyright">&copy; 2024 Leximax. All rights reserved.</p>
-            <div class="coffee-button">
-                <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-                    data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
-                    data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
-                    data-font-color="#000000" data-coffee-color="#ffffff">
-                </script>
-            </div>
+        <div class="footer-links">
+            <a href="index.html">Home</a> |
+            <a href="about-leximax.html">About Leximax</a> |
+            <a href="privacy-policy.html">Privacy Policy</a> |
+            <a href="contact.html">Contact Us</a>
+        </div>
+        <p class="footer-copyright">&copy; 2024 Leximax. All rights reserved.</p>
+        <div class="coffee-button">
+            <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+                data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+                data-font-color="#000000" data-coffee-color="#ffffff">
+            </script>
         </div>
     </footer>
 
@@ -437,7 +489,6 @@
             onSnapshot, 
             getDocs 
         } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-       ;
 
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
@@ -878,22 +929,29 @@
                 overlay.className = 'game-over';
 
                 if (isWin) {
-                    const timeStr = window.formatTime(gameTime);
-                    const isBestTime = !bestTime || gameTime < bestTime;
-                    const message = isBestTime ? 'NEW RECORD!' : 'COMPLETED!';
-
-                    overlay.innerHTML = `
-                        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                            ${message}<br>
-                            You completed ${TARGET_WORD} in ${timeStr}!<br>
-                            Enter your name for the leaderboard:
-                        </div>
-                        <input type="text" id="player-name"
-                               maxlength="12"
-                               placeholder="Enter your name"
-                               style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
-                        <button id="submit-score-btn">SUBMIT</button>
-                    `;
+    const timeStr = window.formatTime(gameTime);
+    overlay.innerHTML = `
+        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+            GREAT! Enter your time of <b>${timeStr}</b> for <b>${TARGET_WORD}</b> on the Leaderboard, then click SHARE to challenge your friends!
+        </div>
+        <input type="text" id="player-name"
+               maxlength="12"
+               placeholder="Enter your name"
+               style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
+        <button id="submit-name-btn" style="
+            width: 100%;
+            padding: 12px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-bottom: 15px;
+        ">SUBMIT</button>
+    `;
 
                     document.getElementById('game-grid').appendChild(overlay);
 
