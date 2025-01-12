@@ -927,13 +927,12 @@
                 if (isWin) {
                     const timeStr = window.formatTime(gameTime);
                     const isBestTime = !bestTime || gameTime < bestTime;
-                    const message = isBestTime ? 'NEW RECORD!' : 'COMPLETED!';
+                    const message = isBestTime ? 'GREAT!';
 
                     overlay.innerHTML = `
                         <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
                             ${message}<br>
-                            You completed ${TARGET_WORD} in ${timeStr}!<br>
-                            Enter your name for the leaderboard:
+                            Enter your time of ${timeStr}!<br> for ${TARGET_WORD} on the Leaderboard, then click SHARE to challenge your friends!
                         </div>
                         <input type="text" id="player-name"
                                maxlength="12"
