@@ -299,10 +299,19 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     let gameId = urlParams.get('gameId');
 
+                console.log('🔍 URL Parameters:', urlParams.toString());
+                console.log('Game ID from URL:', gameId);
+
                     if (!gameId) {
                         const gamesRef = collection(db, 'daily_games_speed');
                         const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
                         const querySnapshot = await getDocs(q);
+                        
+                        if (querySnapshot.empty) {
+    console.error('❌ No games found in Firestore.');
+} else {
+    console.log('✅ Fallback Game ID:', querySnapshot.docs[0].id);
+}
 
                         if (!querySnapshot.empty) {
                             gameId = querySnapshot.docs[0].id;
@@ -311,17 +320,30 @@
                             return null;
                         }
                     }
-
                     console.log("🔍 Looking for game:", gameId);
+
                     const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
 
                     if (!gameDoc.exists()) {
-                        console.error("❌ No game found for:", gameId);
-                        return null;
-                    }
+    console.error(`❌ No game document found for: ${gameId}`);
+    return null;
+}
+
+// Extract game data
+const gameData = gameDoc.data();
+console.log('✅ Game Document Data:', gameData);
+
+// Validate required fields
+if (!gameData.targetWord) {
+    console.error('❌ Missing targetWord in game data:', gameData);
+    return null;
+}
+
+console.log('✅ Game Document Data:', gameDoc.data());
 
                     TARGET_WORD = gameDoc.data().targetWord;
                     GAME_ID = gameId;
+console.log('✅ Target Word:', TARGET_WORD);
 
                     const targetWordDiv = document.getElementById('target-word');
                     targetWordDiv.innerHTML = '';
