@@ -470,57 +470,65 @@
 
         // Firebase Operations
         window.firebaseOps = {
-            async getGameData() {
-                try {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    let gameId = urlParams.get('gameId');
-                    
-                    if (!gameId) {
-                        const gamesRef = collection(db, 'daily_games_speed');
-                        const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
-                        const querySnapshot = await getDocs(q);
-                        
-                        if (!querySnapshot.empty) {
-                            gameId = querySnapshot.docs[0].id;
-                        } else {
-                            console.error("❌ No games found");
-                            return null;
-                        }
-                    }
-                    
-                    console.log("🔍 Looking for game:", gameId);
-                    const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
-                    
-                    if (!gameDoc.exists()) {
-                        console.error("❌ No game found for:", gameId);
-                        return null;
-                    }
-                    
-                    return {
-                        id: gameId,
-                        ...gameDoc.data()
-                    };
-                } catch (error) {
-                    console.error("❌ Error fetching game data:", error);
+    async getGameData() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            let gameId = urlParams.get('gameId');
+            
+            if (!gameId) {
+                const gamesRef = collection(db, 'daily_games_speed');
+                const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    gameId = querySnapshot.docs[0].id;
+                } else {
+                    console.error("❌ No games found");
                     return null;
                 }
-            },
-
-            async addLeaderboardEntry(gameId, name, time) {  
-                try {
-                    const entry = {
-                        name: String(name).slice(0, 12),
-                        time: Number(time),
-                        timestamp: new Date().toISOString()
-                    };
-                    await addDoc(collection(db, 'daily_games_speed', gameId, 'leaderboard'), entry);
-                    return true;
-                } catch (error) {
-                    console.error("❌ Error adding leaderboard entry:", error);
-                    return false;
-                }
             }
-        };
+            
+            console.log("🔍 Looking for game:", gameId);
+            const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
+            
+            if (!gameDoc.exists()) {
+                console.error("❌ No game found for:", gameId);
+                return null;
+            }
+            
+            const data = gameDoc.data();
+            return {
+                id: gameId,
+                targetWord: data.targetWord,
+                createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+                active: data.active || true
+            };
+        } catch (error) {
+            console.error("❌ Error fetching game data:", error);
+            return null;
+        }
+    },
+
+    async addLeaderboardEntry(gameId, name, time) {  
+        try {
+            const entry = {
+                name: String(name).slice(0, 12),
+                time: Number(time),
+                timestamp: new Date().toISOString(),
+                gameId: gameId // Adding explicit gameId reference
+            };
+
+            // Convert any special objects to plain strings/numbers
+            const sanitizedEntry = JSON.parse(JSON.stringify(entry));
+            
+            await addDoc(collection(db, 'daily_games_speed', gameId, 'leaderboard'), sanitizedEntry);
+            return true;
+        } catch (error) {
+            console.error("❌ Error adding leaderboard entry:", error);
+            return false;
+        }
+    }
+};
 
         // Time formatting utility
         window.formatTime = function(seconds) {
@@ -592,49 +600,57 @@
             }
 
             function setupLeaderboard() {
-                if (!GAME_ID) {
-                    console.warn('❌ GAME_ID is undefined.');
-                    return;
-                }
+    if (!GAME_ID) {
+        console.warn('❌ GAME_ID is undefined.');
+        return;
+    }
 
-                try {
-                    const leaderboardRef = window.firebaseUtils.collection(db, 'daily_games_speed', GAME_ID, 'leaderboard');
-                    const q = window.firebaseUtils.query(leaderboardRef, 
-                        window.firebaseUtils.orderBy('time', 'asc'), 
-                        window.firebaseUtils.limit(10)
-                    );
+    try {
+        const leaderboardRef = window.firebaseUtils.collection(db, 'daily_games_speed', GAME_ID, 'leaderboard');
+        const q = window.firebaseUtils.query(
+            leaderboardRef, 
+            window.firebaseUtils.orderBy('time', 'asc'), 
+            window.firebaseUtils.limit(10)
+        );
 
-                    return window.firebaseUtils.onSnapshot(q, (snapshot) => {
-                        const tbody = document.querySelector('#leaderboard tbody');
-                        if (tbody) {
-                            tbody.innerHTML = '';
-                            let rank = 1;
+        return window.firebaseUtils.onSnapshot(q, (snapshot) => {
+            const tbody = document.querySelector('#leaderboard tbody');
+            if (tbody) {
+                tbody.innerHTML = '';
+                let rank = 1;
 
-                            snapshot.forEach((doc) => {
-                                const data = doc.data();
-                                const row = document.createElement('tr');
-                                row.innerHTML = `
-                                    <td>${rank}</td>
-                                    <td>${data.name}</td>
-                                    <td>${window.formatTime(data.time)}</td>
-                                `;
-                                tbody.appendChild(row);
-                                
-                                // Update best time if this is the first (fastest) entry
-                                if (rank === 1) {
-                                    bestTime = data.time;
-                                    document.querySelector('#best-time-container span').textContent = 
-                                        window.formatTime(bestTime);
-                                }
-                                
-                                rank++;
-                            });
+                snapshot.forEach((doc) => {
+                    try {
+                        const data = doc.data();
+                        // Ensure we have valid data
+                        if (data && typeof data.name === 'string' && typeof data.time === 'number') {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${rank}</td>
+                                <td>${data.name}</td>
+                                <td>${window.formatTime(data.time)}</td>
+                            `;
+                            tbody.appendChild(row);
+                            
+                            // Update best time if this is the first (fastest) entry
+                            if (rank === 1) {
+                                bestTime = data.time;
+                                document.querySelector('#best-time-container span').textContent = 
+                                    window.formatTime(bestTime);
+                            }
+                            
+                            rank++;
                         }
-                    });
-                } catch (error) {
-                    console.error('❌ Error in setupLeaderboard:', error);
-                }
+                    } catch (err) {
+                        console.error('❌ Error processing leaderboard entry:', err);
+                    }
+                });
             }
+        });
+    } catch (error) {
+        console.error('❌ Error in setupLeaderboard:', error);
+    }
+}
             function updateTimer() {
                 if (!isPaused && !isGameOver) {
                     gameTime++;
