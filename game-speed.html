@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>LEXIMAX Speed</title>
+    <title>LEXISPEED</title>
     <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
     
     <!-- Base Styles -->
@@ -955,21 +955,30 @@
 
                     document.getElementById('game-grid').appendChild(overlay);
 
-                    const submitBtn = document.getElementById('submit-score-btn');
-                    const nameInput = document.getElementById('player-name');
-                    nameInput.focus();
+                    const submitBtn = document.getElementById('submit-name-btn'); // Correct button ID
+const nameInput = document.getElementById('player-name');
+nameInput.focus();
 
-                    const handleSubmission = async () => {
-                        const playerName = nameInput.value.trim() || 'Anonymous';
-                        try {
-                            await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, gameTime);
-                            displayShareWindow(playerName, timeStr);
-                            overlay.remove();
-                        } catch (error) {
-                            console.error('❌ Error submitting score:', error);
-                            nameInput.value = 'Submission Failed, Try Again';
-                        }
-                    };
+const handleSubmission = async () => {
+    const playerName = nameInput.value.trim() || 'Anonymous';
+    try {
+        // Add leaderboard entry using time instead of score
+        await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, gameTime);
+
+        // Display the share window
+        displayShareWindow(playerName, window.formatTime(gameTime));
+        overlay.remove();
+    } catch (error) {
+        console.error('❌ Error submitting time:', error);
+        nameInput.value = 'Submission Failed, Try Again';
+    }
+};
+
+// Attach event listeners to the submission button and Enter key
+submitBtn.addEventListener('click', handleSubmission);
+nameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleSubmission();
+});
 
                     submitBtn.addEventListener('click', handleSubmission);
                     nameInput.addEventListener('keypress', (e) => {
@@ -990,61 +999,61 @@
                 }
             }
             function displayShareWindow(playerName, timeStr) {
-                const overlay = document.createElement('div');
-                overlay.className = 'game-over';
+    const overlay = document.createElement('div');
+    overlay.className = 'game-over';
 
-                const shareMessage = `I completed ${TARGET_WORD} in ${timeStr} on Leximax Speed! Can you beat my time? Play here: https://playleximax.com/game-speed.html?gameId=${GAME_ID}`;
+    const shareMessage = `I completed ${TARGET_WORD} in ${timeStr} on LEXISPEED! Can you beat my time? Play here: https://playleximax.com/game-speed.html?gameId=${GAME_ID}`;
 
-                overlay.innerHTML = `
-                    <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                        <b>${playerName}</b>, challenge your friends to beat your time of <b>${timeStr}!</b>
-                    </div>
-                    <button id="share-btn" style="
-                        width: 100%;
-                        padding: 12px;
-                        background-color: #003366;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        font-weight: bold;
-                        font-size: 16px;
-                        cursor: pointer;
-                        margin-bottom: 10px;
-                    ">SHARE</button>
-                    <button id="close-share-btn" style="
-                        width: 100%;
-                        padding: 12px;
-                        background-color: #666;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        font-weight: bold;
-                        font-size: 16px;
-                    ">CLOSE</button>
-                `;
+    overlay.innerHTML = `
+        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+            <b>${playerName}</b>, challenge your friends to beat your time of <b>${timeStr}!</b>
+        </div>
+        <button id="share-btn" style="
+            width: 100%;
+            padding: 12px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        ">SHARE</button>
+        <button id="close-share-btn" style="
+            width: 100%;
+            padding: 12px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+        ">CLOSE</button>
+    `;
 
-                document.getElementById('game-grid').appendChild(overlay);
+    document.getElementById('game-grid').appendChild(overlay);
 
-                const shareBtn = document.getElementById('share-btn');
-                shareBtn.addEventListener('click', async () => {
-                    try {
-                        await navigator.clipboard.writeText(shareMessage);
-                        shareBtn.textContent = 'COPIED!';
-                        shareBtn.style.backgroundColor = '#002244';
-                        setTimeout(() => {
-                            shareBtn.textContent = 'SHARE';
-                            shareBtn.style.backgroundColor = '#003366';
-                        }, 2000);
-                    } catch (err) {
-                        console.error('❌ Failed to copy to clipboard:', err);
-                        shareBtn.textContent = 'COPY FAILED';
-                        shareBtn.style.backgroundColor = '#d32f2f';
-                    }
-                });
+    const shareBtn = document.getElementById('share-btn');
+    shareBtn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(shareMessage);
+            shareBtn.textContent = 'COPIED!';
+            shareBtn.style.backgroundColor = '#002244';
+            setTimeout(() => {
+                shareBtn.textContent = 'SHARE';
+                shareBtn.style.backgroundColor = '#003366';
+            }, 2000);
+        } catch (err) {
+            console.error('❌ Failed to copy to clipboard:', err);
+            shareBtn.textContent = 'COPY FAILED';
+            shareBtn.style.backgroundColor = '#d32f2f';
+        }
+    });
 
-                const closeBtn = document.getElementById('close-share-btn');
-                closeBtn.addEventListener('click', () => overlay.remove());
-            }
+    const closeBtn = document.getElementById('close-share-btn');
+    closeBtn.addEventListener('click', () => overlay.remove());
+}
 
             function startGame() {
                 const overlay = document.querySelector('.game-over');
