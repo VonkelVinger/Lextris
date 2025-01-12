@@ -925,21 +925,29 @@
                 overlay.className = 'game-over';
 
                 if (isWin) {
-                    const timeStr = window.formatTime(gameTime);
-                    const isBestTime = !bestTime || gameTime < bestTime;
-                    const message = isBestTime ? 'GREAT!';
-
-                    overlay.innerHTML = `
-                        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
-                            ${message}<br>
-                            Enter your time of ${timeStr}!<br> for ${TARGET_WORD} on the Leaderboard, then click SHARE to challenge your friends!
-                        </div>
-                        <input type="text" id="player-name"
-                               maxlength="12"
-                               placeholder="Enter your name"
-                               style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
-                        <button id="submit-score-btn">SUBMIT</button>
-                    `;
+    const timeStr = window.formatTime(gameTime);
+    overlay.innerHTML = `
+        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+            GREAT! Enter your time of <b>${timeStr}</b> for <b>${TARGET_WORD}</b> on the Leaderboard, then click SHARE to challenge your friends!
+        </div>
+        <input type="text" id="player-name"
+               maxlength="12"
+               placeholder="Enter your name"
+               style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
+        <button id="submit-name-btn" style="
+            width: 100%;
+            padding: 12px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-bottom: 15px;
+        ">SUBMIT</button>
+    `;
 
                     document.getElementById('game-grid').appendChild(overlay);
 
