@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LEXIMAX Speed</title>
+    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+    
+    <!-- Base Styles -->
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            max-width: 320px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        /* Title Styles */
+        #leximax-title {
+            display: flex;
+            gap: 0;
+            margin-bottom: 8px;
+        }
+
+        .title-block {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+    <!-- Game Components Styles -->
+    <style>
+        #target-word-container {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        #target-word-label {
+            font-size: 22px;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #666666;
+        }
+
+        #target-word {
+            display: inline-flex;
+            gap: 1px;
+            justify-content: center;
+            align-items: center;
+            background-color: #004d40;
+            padding: 2px;
+            border: none;
+        }
+
+        .target-letter {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+            background-color: #004d40;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #game-grid {
+            width: 100%;
+            aspect-ratio: 8/10;
+            background-color: white;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 1px;
+            border: 1px solid #004d40;
+            padding: 1px;
+            margin-bottom: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-cell {
+            background-color: #004d40;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.15s ease-out;
+        }
+
+        .grid-cell::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .grid-cell.filled {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+
+        .grid-cell.pop {
+            transform: scale(1.2);
+            opacity: 0;
+            transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .target-letter {
+                width: 25px;
+                height: 25px;
+                font-size: 14px;
+            }
+        }
+    </style>
+    <!-- Controls and Display Styles -->
+    <style>
+        #controls {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #mobile-controls {
+            width: 100%;
+            max-width: 320px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .mobile-btn {
+            aspect-ratio: 1;
+            width: calc((320px - 16px) / 3);
+            background-color: #003366;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 45px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .mobile-btn:active {
+            background-color: #002244;
+        }
+
+        #game-buttons {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .game-btn {
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            padding: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .game-btn:active {
+            background-color: #002244;
+        }
+
+        #time-display {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .time-container {
+            padding: 8px;
+            text-align: center;
+            background-color: #004d40;
+            color: white;
+            border-radius: 2px;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1.2;
+            flex: 1;
+        }
+    </style>
+    <!-- Leaderboard and Game Over Styles -->
+    <style>
+        #leaderboard {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            border-radius: 8px;
+            overflow: hidden;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            border: 1px solid #004d40;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #leaderboard caption {
+            background-color: #003366;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #leaderboard thead {
+            background-color: #004d40;
+            color: #ffffff;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        #leaderboard th {
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        #leaderboard tbody tr {
+            background-color: #ffffff;
+            transition: background-color 0.3s ease;
+        }
+
+        #leaderboard tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+
+        #leaderboard tbody tr:hover {
+            background-color: #e0f7fa;
+        }
+
+        #leaderboard tbody tr:first-child {
+            background-color: #FFD700;
+            font-weight: bold;
+            color: #000;
+        }
+
+        #leaderboard td {
+            padding: 10px;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #leaderboard td:first-child {
+            font-weight: bold;
+            color: #003366;
+        }
+
+        #leaderboard td:last-child {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .game-over input {
+            margin: 10px 0;
+            padding: 8px;
+            width: 100%;
+            border: 2px solid #004d40;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .game-over button {
+            width: 100%;
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+
+        .game-over button:hover {
+            background-color: #004488;
+        }
+
+        .game-over button:active {
+            background-color: #002244;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <div id="leximax-title">
+            <div class="title-block" style="background-color: #2196f3;">L</div>
+            <div class="title-block" style="background-color: #f44336;">E</div>
+            <div class="title-block" style="background-color: #4caf50;">X</div>
+            <div class="title-block" style="background-color: #ffc107;">I</div>
+            <div class="title-block" style="background-color: #9c27b0;">M</div>
+            <div class="title-block" style="background-color: #0066FF;">A</div>
+            <div class="title-block" style="background-color: #900C3F;">X</div>
+        </div>
+
+        <div id="target-word-container">
+            <div id="target-word-label">TARGET WORD:</div>
+            <div id="target-word"></div>
+        </div>
+
+        <div id="game-grid"></div>
+
+        <div id="controls">
+            <div id="mobile-controls">
+                <button class="mobile-btn" id="left-btn">◀</button>
+                <button class="mobile-btn" id="down-btn">▼</button>
+                <button class="mobile-btn" id="right-btn">▶</button>
+            </div>
+
+            <div id="game-buttons">
+                <button class="game-btn" id="start-btn">START</button>
+                <button class="game-btn" id="pause-btn">PAUSE</button>
+            </div>
+
+            <div id="time-display">
+                <div id="timer-container" class="time-container">
+                    Time: <span>00:00</span>
+                </div>
+                <div id="best-time-container" class="time-container">
+                    Best: <span>--:--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table id="leaderboard">
+        <caption>SPEED LEADERBOARD</caption>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="index.html">Home</a> |
+                <a href="about-leximax.html">About Leximax</a> |
+                <a href="privacy-policy.html">Privacy Policy</a> |
+                <a href="contact.html">Contact Us</a>
+            </div>
+            <p class="footer-copyright">&copy; 2024 Leximax. All rights reserved.</p>
+            <div class="coffee-button">
+                <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                    data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+                    data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+                    data-font-color="#000000" data-coffee-color="#ffffff">
+                </script>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        // Firebase Initialization
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            collection, 
+            addDoc, 
+            query, 
+            orderBy, 
+            limit, 
+            onSnapshot, 
+            getDocs 
+        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+       ;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        console.log('✅ Firebase Initialized:', db);
+
+        // Attach Firestore functions to window object for global access
+        window.firebaseUtils = {
+            collection,
+            doc,
+            setDoc,
+            getDoc,
+            addDoc,
+            query,
+            orderBy,
+            limit,
+            onSnapshot,
+            getDocs
+        };
+        window.db = db;
+
+        // Firebase Operations
+        window.firebaseOps = {
+    async getGameData() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            let gameId = urlParams.get('gameId');
+            
+            if (!gameId) {
+                const gamesRef = collection(db, 'daily_games_speed');
+                const q = query(gamesRef, orderBy('createdAt', 'desc'), limit(1));
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    gameId = querySnapshot.docs[0].id;
+                } else {
+                    console.error("❌ No games found");
+                    return null;
+                }
+            }
+            
+            console.log("🔍 Looking for game:", gameId);
+            const gameDoc = await getDoc(doc(db, 'daily_games_speed', gameId));
+            
+            if (!gameDoc.exists()) {
+                console.error("❌ No game found for:", gameId);
+                return null;
+            }
+            
+            const data = gameDoc.data();
+            return {
+                id: gameId,
+                targetWord: data.targetWord,
+                createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+                active: data.active || true
+            };
+        } catch (error) {
+            console.error("❌ Error fetching game data:", error);
+            return null;
+        }
+    },
+
+    async addLeaderboardEntry(gameId, name, time) {  
+        try {
+            const entry = {
+                name: String(name).slice(0, 12),
+                time: Number(time),
+                timestamp: new Date().toISOString(),
+                gameId: gameId // Adding explicit gameId reference
+            };
+
+            // Convert any special objects to plain strings/numbers
+            const sanitizedEntry = JSON.parse(JSON.stringify(entry));
+            
+            await addDoc(collection(db, 'daily_games_speed', gameId, 'leaderboard'), sanitizedEntry);
+            return true;
+        } catch (error) {
+            console.error("❌ Error adding leaderboard entry:", error);
+            return false;
+        }
+    }
+};
+
+        // Time formatting utility
+        window.formatTime = function(seconds) {
+            if (!seconds && seconds !== 0) return '--:--';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        };
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Game constants
+            const GRID_WIDTH = 8;
+            const GRID_HEIGHT = 10;
+            const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ffc107', '#9c27b0', '#003366', '#009688'];
+            const LETTERS = 'BCDFGHJKLMNPQRSTVWXZ';
+            const VOWELS = 'AEIOUY';
+            let TARGET_WORD = '';
+            let GAME_ID = '';
+
+            // Game state variables
+            let grid = [];
+            let currentBlock = null;
+            let nextBlock = null;
+            let gameInterval = null;
+            let timerInterval = null;
+            let gameTime = 0;
+            let bestTime = null;
+            let isPaused = false;
+            let isGameOver = false;
+            let isMoving = false;
+
+            // Initialize game data from Firebase
+            async function initGame(db) {
+                if (!db) {
+                    console.error('❌ db is not defined. Please check your Firebase initialization.');
+                    return false;
+                }
+                try {
+                    const gameData = await window.firebaseOps.getGameData();
+                    if (gameData) {
+                        TARGET_WORD = gameData.targetWord;
+                        GAME_ID = gameData.id;
+
+                        console.log('✅ Game initialized with:', { TARGET_WORD, GAME_ID });
+
+                        const targetWordDiv = document.getElementById('target-word');
+                        targetWordDiv.innerHTML = '';
+                        for (const letter of TARGET_WORD) {
+                            const letterDiv = document.createElement('div');
+                            letterDiv.className = 'target-letter';
+                            letterDiv.textContent = letter;
+                            targetWordDiv.appendChild(letterDiv);
+                        }
+
+                        if (GAME_ID) {
+                            setupLeaderboard();
+                        } else {
+                            console.warn('❌ GAME_ID is undefined after initialization.');
+                        }
+
+                        return true;
+                    } else {
+                        console.warn('❌ No game data returned from Firebase.');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('❌ Error initializing game:', error);
+                    return false;
+                }
+            }
+
+            function setupLeaderboard() {
+    if (!GAME_ID) {
+        console.warn('❌ GAME_ID is undefined.');
+        return;
+    }
+
+    try {
+        const leaderboardRef = window.firebaseUtils.collection(db, 'daily_games_speed', GAME_ID, 'leaderboard');
+        const q = window.firebaseUtils.query(
+            leaderboardRef, 
+            window.firebaseUtils.orderBy('time', 'asc'), 
+            window.firebaseUtils.limit(10)
+        );
+
+        return window.firebaseUtils.onSnapshot(q, (snapshot) => {
+            const tbody = document.querySelector('#leaderboard tbody');
+            if (tbody) {
+                tbody.innerHTML = '';
+                let rank = 1;
+
+                snapshot.forEach((doc) => {
+                    try {
+                        const data = doc.data();
+                        // Ensure we have valid data
+                        if (data && typeof data.name === 'string' && typeof data.time === 'number') {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${rank}</td>
+                                <td>${data.name}</td>
+                                <td>${window.formatTime(data.time)}</td>
+                            `;
+                            tbody.appendChild(row);
+                            
+                            // Update best time if this is the first (fastest) entry
+                            if (rank === 1) {
+                                bestTime = data.time;
+                                document.querySelector('#best-time-container span').textContent = 
+                                    window.formatTime(bestTime);
+                            }
+                            
+                            rank++;
+                        }
+                    } catch (err) {
+                        console.error('❌ Error processing leaderboard entry:', err);
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error in setupLeaderboard:', error);
+    }
+}
+            function updateTimer() {
+                if (!isPaused && !isGameOver) {
+                    gameTime++;
+                    document.querySelector('#timer-container span').textContent = window.formatTime(gameTime);
+                }
+            }
+
+            function initGrid() {
+                const gameGrid = document.getElementById('game-grid');
+                gameGrid.innerHTML = '';
+                grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(null));
+                
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'grid-cell';
+                        cell.setAttribute('data-x', x);
+                        cell.setAttribute('data-y', y);
+                        gameGrid.appendChild(cell);
+                    }
+                }
+            }
+
+            function createBlock() {
+                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                const letter = Math.random() < 0.3 ? 
+                    VOWELS[Math.floor(Math.random() * VOWELS.length)] :
+                    LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                return { color, letter, x: Math.floor(GRID_WIDTH / 2), y: 0 };
+            }
+
+            function drawBlock(block) {
+                if (!block || block.x < 0 || block.x >= GRID_WIDTH || block.y < 0 || block.y >= GRID_HEIGHT) return;
+                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
+                if (cell) {
+                    cell.className = 'grid-cell filled';
+                    cell.style.backgroundColor = block.color;
+                    cell.textContent = block.letter;
+                }
+            }
+
+            function clearBlock(block) {
+                if (!block || block.x < 0 || block.x >= GRID_WIDTH || block.y < 0 || block.y >= GRID_HEIGHT) return;
+                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${block.x}"][data-y="${block.y}"]`);
+                if (cell) {
+                    cell.className = 'grid-cell';
+                    cell.style.backgroundColor = '#004d40';
+                    cell.textContent = '';
+                }
+            }
+
+            function isCollision(block) {
+                if (!block) return true;
+                if (block.x < 0 || block.x >= GRID_WIDTH) return true;
+                if (block.y >= GRID_HEIGHT) return true;
+                if (block.y >= 0 && grid[block.y][block.x] !== null) return true;
+                return false;
+            }
+
+            async function moveBlock(dx, dy) {
+                if (!currentBlock || isPaused || isGameOver || isMoving) return;
+                
+                isMoving = true;
+                clearBlock(currentBlock);
+                
+                const newX = currentBlock.x + dx;
+                const newY = currentBlock.y + dy;
+                const testBlock = { ...currentBlock, x: newX, y: newY };
+                
+                if (!isCollision(testBlock)) {
+                    currentBlock.x = newX;
+                    currentBlock.y = newY;
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                    drawBlock(currentBlock);
+                } else if (dy > 0) {
+                    drawBlock(currentBlock);
+                    placeBlock();
+                } else {
+                    drawBlock(currentBlock);
+                }
+                
+                isMoving = false;
+            }
+            function dropBlock() {
+                if (!currentBlock || isPaused || isGameOver) return;
+                clearBlock(currentBlock);
+                while (currentBlock.y < GRID_HEIGHT - 1 && !isCollision({ ...currentBlock, y: currentBlock.y + 1 })) {
+                    currentBlock.y++;
+                }
+                placeBlock();
+            }
+
+            async function placeBlock() {
+                if (!currentBlock || currentBlock.y < 0) return;
+                grid[currentBlock.y][currentBlock.x] = { ...currentBlock };
+                drawBlock(currentBlock);
+                await checkMatches();
+                checkGameOver();
+                checkWin();
+                currentBlock = nextBlock;
+                nextBlock = createBlock();
+                if (currentBlock) drawBlock(currentBlock);
+            }
+
+            function isPartOfTargetWord(letter) {
+                return TARGET_WORD.includes(letter);
+            }
+
+            async function checkMatches() {
+                const toRemove = new Set();
+                
+                // Check for matching pairs
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x < GRID_WIDTH; x++) {
+                        if (!grid[y][x] || isPartOfTargetWord(grid[y][x].letter)) continue;
+                        
+                        // Check adjacent cells
+                        const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+                        for (const [dx, dy] of directions) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            
+                            if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                const neighbor = grid[ny][nx];
+                                if (neighbor && !isPartOfTargetWord(neighbor.letter)) {
+                                    if (grid[y][x].letter === neighbor.letter || 
+                                        grid[y][x].color === neighbor.color) {
+                                        toRemove.add(`${x},${y}`);
+                                        toRemove.add(`${nx},${ny}`);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (toRemove.size > 0) {
+                    const removePromises = Array.from(toRemove).map(pos => {
+                        return new Promise(resolve => {
+                            const [x, y] = pos.split(',').map(Number);
+                            const cell = document.querySelector(`#game-grid .grid-cell[data-x="${x}"][data-y="${y}"]`);
+                            if (cell) {
+                                cell.classList.add('pop');
+                                setTimeout(() => {
+                                    grid[y][x] = null;
+                                    clearBlock({ x, y });
+                                    resolve();
+                                }, 150);
+                            } else {
+                                resolve();
+                            }
+                        });
+                    });
+                    
+                    await Promise.all(removePromises);
+                    dropColumns();
+                }
+            }
+
+            function dropColumns() {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    let writeY = GRID_HEIGHT - 1;
+                    for (let y = GRID_HEIGHT - 1; y >= 0; y--) {
+                        if (grid[y][x] !== null) {
+                            if (y !== writeY) {
+                                grid[writeY][x] = grid[y][x];
+                                grid[y][x] = null;
+                                clearBlock({ x, y });
+                                drawBlock({ ...grid[writeY][x], x, y: writeY });
+                            }
+                            writeY--;
+                        }
+                    }
+                }
+            }
+            async function checkWin() {
+                for (let y = 0; y < GRID_HEIGHT; y++) {
+                    for (let x = 0; x <= GRID_WIDTH - TARGET_WORD.length; x++) {
+                        let word = '';
+                        let isValid = true;
+                        let winningCells = [];
+                        
+                        for (let i = 0; i < TARGET_WORD.length; i++) {
+                            if (!grid[y][x + i]) {
+                                isValid = false;
+                                break;
+                            }
+                            word += grid[y][x + i].letter;
+                            winningCells.push([x + i, y]);
+                        }
+                        
+                        if (isValid && word === TARGET_WORD) {
+                            isGameOver = true;
+                            clearInterval(gameInterval);
+                            clearInterval(timerInterval);
+                            
+                            // Highlight winning word
+                            for (const [wx, wy] of winningCells) {
+                                const cell = document.querySelector(`#game-grid .grid-cell[data-x="${wx}"][data-y="${wy}"]`);
+                                if (cell) {
+                                    cell.style.transform = 'scale(1.1)';
+                                }
+                            }
+                            
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            endGame(true);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            function checkGameOver() {
+                if (nextBlock && isCollision(nextBlock)) {
+                    endGame(false);
+                }
+            }
+
+            function endGame(isWin) {
+                isGameOver = true;
+                clearInterval(gameInterval);
+                clearInterval(timerInterval);
+
+                const overlay = document.createElement('div');
+                overlay.className = 'game-over';
+
+                if (isWin) {
+                    const timeStr = window.formatTime(gameTime);
+                    const isBestTime = !bestTime || gameTime < bestTime;
+                    const message = isBestTime ? 'NEW RECORD!' : 'COMPLETED!';
+
+                    overlay.innerHTML = `
+                        <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+                            ${message}<br>
+                            You completed ${TARGET_WORD} in ${timeStr}!<br>
+                            Enter your name for the leaderboard:
+                        </div>
+                        <input type="text" id="player-name"
+                               maxlength="12"
+                               placeholder="Enter your name"
+                               style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
+                        <button id="submit-score-btn">SUBMIT</button>
+                    `;
+
+                    document.getElementById('game-grid').appendChild(overlay);
+
+                    const submitBtn = document.getElementById('submit-score-btn');
+                    const nameInput = document.getElementById('player-name');
+                    nameInput.focus();
+
+                    const handleSubmission = async () => {
+                        const playerName = nameInput.value.trim() || 'Anonymous';
+                        try {
+                            await window.firebaseOps.addLeaderboardEntry(GAME_ID, playerName, gameTime);
+                            displayShareWindow(playerName, timeStr);
+                            overlay.remove();
+                        } catch (error) {
+                            console.error('❌ Error submitting score:', error);
+                            nameInput.value = 'Submission Failed, Try Again';
+                        }
+                    };
+
+                    submitBtn.addEventListener('click', handleSubmission);
+                    nameInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') handleSubmission();
+                    });
+                } else {
+                    overlay.innerHTML = `
+                        <div style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">
+                            GAME OVER
+                        </div>
+                        <button id="close-overlay-btn">CLOSE</button>
+                    `;
+                    
+                    document.getElementById('game-grid').appendChild(overlay);
+                    
+                    const closeBtn = document.getElementById('close-overlay-btn');
+                    closeBtn.addEventListener('click', () => overlay.remove());
+                }
+            }
+            function displayShareWindow(playerName, timeStr) {
+                const overlay = document.createElement('div');
+                overlay.className = 'game-over';
+
+                const shareMessage = `I completed ${TARGET_WORD} in ${timeStr} on Leximax Speed! Can you beat my time? Play here: https://playleximax.com/game-speed.html?gameId=${GAME_ID}`;
+
+                overlay.innerHTML = `
+                    <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5;">
+                        <b>${playerName}</b>, challenge your friends to beat your time of <b>${timeStr}!</b>
+                    </div>
+                    <button id="share-btn" style="
+                        width: 100%;
+                        padding: 12px;
+                        background-color: #003366;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        font-size: 16px;
+                        cursor: pointer;
+                        margin-bottom: 10px;
+                    ">SHARE</button>
+                    <button id="close-share-btn" style="
+                        width: 100%;
+                        padding: 12px;
+                        background-color: #666;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        font-size: 16px;
+                    ">CLOSE</button>
+                `;
+
+                document.getElementById('game-grid').appendChild(overlay);
+
+                const shareBtn = document.getElementById('share-btn');
+                shareBtn.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(shareMessage);
+                        shareBtn.textContent = 'COPIED!';
+                        shareBtn.style.backgroundColor = '#002244';
+                        setTimeout(() => {
+                            shareBtn.textContent = 'SHARE';
+                            shareBtn.style.backgroundColor = '#003366';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('❌ Failed to copy to clipboard:', err);
+                        shareBtn.textContent = 'COPY FAILED';
+                        shareBtn.style.backgroundColor = '#d32f2f';
+                    }
+                });
+
+                const closeBtn = document.getElementById('close-share-btn');
+                closeBtn.addEventListener('click', () => overlay.remove());
+            }
+
+            function startGame() {
+                const overlay = document.querySelector('.game-over');
+                if (overlay) overlay.remove();
+                
+                clearInterval(gameInterval);
+                clearInterval(timerInterval);
+                isGameOver = false;
+                isPaused = false;
+                gameTime = 0;
+                
+                initGrid();
+                currentBlock = createBlock();
+                nextBlock = createBlock();
+                drawBlock(currentBlock);
+                
+                document.querySelector('#timer-container span').textContent = '00:00';
+                pauseBtn.textContent = 'PAUSE';
+                
+                gameInterval = setInterval(() => {
+                    if (!isPaused && !isGameOver) {
+                        moveBlock(0, 1);
+                    }
+                }, 1000);
+                
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+
+            function togglePause() {
+                if (isGameOver) return;
+                isPaused = !isPaused;
+                pauseBtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+            }
+// Event listeners
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const leftBtn = document.getElementById('left-btn');
+            const downBtn = document.getElementById('down-btn');
+            const rightBtn = document.getElementById('right-btn');
+
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', togglePause);
+            leftBtn.addEventListener('click', () => moveBlock(-1, 0));
+            rightBtn.addEventListener('click', () => moveBlock(1, 0));
+            downBtn.addEventListener('click', dropBlock);
+
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') moveBlock(-1, 0);
+                if (e.key === 'ArrowRight') moveBlock(1, 0);
+                if (e.key === 'ArrowDown') moveBlock(0, 1);
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    dropBlock();
+                }
+            });
+
+            // Initialize the game
+            await initGame(db);
+            initGrid();
+        });
+    </script>
+</body>
+</html>
+                
