@@ -80,10 +80,10 @@
                 logs.innerHTML += '❌ Target Word must be between 3 and 12 letters.<br>';
                 return;
             }
-            if (wordDescription.length > 250) {
-                logs.innerHTML += '❌ Description must be 250 words or less.<br>';
-                return;
-            }
+            if (wordDescription.split(/\s+/).length > 250) {
+    logs.innerHTML += '❌ Description must be 250 words or less.<br>';
+    return;
+}
 
             try {
                 await setDoc(doc(db, 'daily_games', gameIdScore), {
