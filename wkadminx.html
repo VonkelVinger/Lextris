@@ -5,9 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax Admin Panel</title>
     <script type="module">
-        // Firebase imports and config...
-        [Previous Firebase configuration code remains the same]
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            const loginForm = document.getElementById('login-form');
+            const adminPanel = document.getElementById('admin-panel');
+            if (user) {
+                loginForm.style.display = 'none';
+                adminPanel.style.display = 'block';
+            } else {
+                loginForm.style.display = 'block';
+                adminPanel.style.display = 'none';
+            }
+        });
+
+        // Login function
+        window.login = async function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                document.getElementById('login-error').textContent = error.message;
+            }
+        };
+
+        // Game creation function
+        window.createGame = async function() {
+            if (!auth.currentUser) {
+                alert('Please login first');
+                return;
+            }
+
+            const gameIdScore = document.getElementById('gameId').value.trim();
+            const gameIdSpeed = `${gameIdScore}-speed`;
+            const gameIdAbout = `${gameIdScore}-aboutword`;
+            const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
+            const wordDescription = document.getElementById('wordDescription').value.trim();
+
+            const logs = document.getElementById('logs');
+            logs.innerHTML = '';
+
+            if (!gameIdScore || !targetWord || !wordDescription) {
+                logs.innerHTML += '❌ Game ID, Target Word, and Description are required.<br>';
+                return;
+            }
+
+            const gameIdPattern = /^Game\d{4}-\d{2}-\d{2}$/;
+            if (!gameIdPattern.test(gameIdScore)) {
+                logs.innerHTML += '❌ Game ID must be in the format "GameYYYY-MM-DD".<br>';
+                return;
+            }
+            if (!/^[A-Z]+$/.test(targetWord)) {
+                logs.innerHTML += '❌ Target word must contain only uppercase letters.<br>';
+                return;
+            }
+            if (targetWord.length < 3 || targetWord.length > 12) {
+                logs.innerHTML += '❌ Target Word must be between 3 and 12 letters.<br>';
+                return;
+            }
+            if (wordDescription.length > 100) {
+                logs.innerHTML += '❌ Description must be 100 words or less.<br>';
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, 'daily_games', gameIdScore), {
+                    targetWord: targetWord,
+                    score: 0,
+                    createdAt: serverTimestamp(),
+                    active: true
+                });
+                logs.innerHTML += `✅ Score-based Game '${gameIdScore}' created successfully!<br>`;
+
+                await setDoc(doc(db, 'daily_games_speed', gameIdSpeed), {
+                    targetWord: targetWord,
+                    time: null,
+                    createdAt: serverTimestamp(),
+                    active: true
+                });
+                logs.innerHTML += `✅ Time-based Game '${gameIdSpeed}' created successfully!<br>`;
+
+                await setDoc(doc(db, 'daily_games_info', gameIdAbout), {
+                    description: wordDescription,
+                    createdAt: serverTimestamp()
+                });
+                logs.innerHTML += `✅ Word description saved as '${gameIdAbout}'!<br>`;
+
+                document.getElementById('gameId').value = '';
+                document.getElementById('targetWord').value = '';
+                document.getElementById('wordDescription').value = '';
+            } catch (error) {
+                console.error('Error:', error);
+                logs.innerHTML += `❌ Error: ${error.message}<br>`;
+            }
+        };
     </script>
     <style>
         body {
@@ -68,10 +176,28 @@
             border-radius: 5px;
             min-height: 50px;
         }
+        .login-error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="admin-container">
+    <div id="login-form" class="admin-container">
+        <h1>Admin Login</h1>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter admin email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter password">
+        </div>
+        <button onclick="login()">Login</button>
+        <div id="login-error" class="login-error"></div>
+    </div>
+
+    <div id="admin-panel" class="admin-container" style="display: none;">
         <h1>Leximax Admin Panel</h1>
         <div class="form-group">
             <label for="gameId">Game ID (e.g., Game2025-01-26):</label>
@@ -85,21 +211,8 @@
             <label for="wordDescription">Word Description (100 words max):</label>
             <textarea id="wordDescription" placeholder="Enter a description about the target word"></textarea>
         </div>
-        <button id="create-game-btn">Create Game</button>
-        <div class="logs" id="logs"></div>
+        <button onclick="createGame()">Create Game</button>
+        <div id="logs" class="logs"></div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const createGameBtn = document.getElementById('create-game-btn');
-            createGameBtn.addEventListener('click', () => {
-                if (window.createGame) {
-                    window.createGame();
-                } else {
-                    console.error('❌ createGame function is not available.');
-                }
-            });
-        });
-    </script>
 </body>
 </html>
