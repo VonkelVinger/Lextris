@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leximax - About Today's Word</title>
-    <!-- Same head content as before -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
@@ -18,16 +14,15 @@
             appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
         };
 
+        // Initialize Firebase first
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Get date from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const dateParam = urlParams.get('date'); // Format: YYYY-MM-DD
-
         async function fetchWordDescription() {
-            let gameId;
+            const urlParams = new URLSearchParams(window.location.search);
+            const dateParam = urlParams.get('date');
             
+            let gameId;
             if (dateParam) {
                 gameId = `Game${dateParam}-aboutword`;
             } else {
@@ -35,24 +30,46 @@
                 gameId = `Game${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}-aboutword`;
             }
             
+            console.log('Fetching document:', gameId);
+            
             try {
                 const docRef = doc(db, 'daily_games_info', gameId);
                 const docSnap = await getDoc(docRef);
-
-                const instructionsElement = document.querySelector('.instructions');
+                const instructionsElement = document.getElementById('word-description');
+                
                 if (docSnap.exists()) {
+                    console.log('Document data:', docSnap.data());
                     instructionsElement.textContent = docSnap.data().description;
                 } else {
+                    console.log('No such document');
                     instructionsElement.textContent = "No description available for this date.";
                 }
             } catch (error) {
-                console.error("Error fetching word description:", error);
-                document.querySelector('.instructions').textContent = "Error loading word description. Please try again later.";
+                console.error('Error:', error);
+                document.getElementById('word-description').textContent = 
+                    "Error loading word description. Please try again later.";
             }
         }
 
-        document.addEventListener('DOMContentLoaded', fetchWordDescription);
+        // Wait for DOM and Firebase initialization
+        window.addEventListener('load', () => {
+            console.log('Page loaded, fetching description...');
+            fetchWordDescription().catch(console.error);
+        });
     </script>
+    <!-- Rest of head content -->
 </head>
-<!-- Rest of the HTML remains the same -->
+<body>
+    <header>
+        <!-- Header content -->
+    </header>
+    <main>
+        <h1 class="center-text dark-green">Why today's word is hard to spell</h1>
+        <section class="instructions">
+            <div id="word-description">Loading word description...</div>
+        </section>
+        <!-- Rest of main content -->
+    </main>
+    <!-- Rest of body content -->
+</body>
 </html>
