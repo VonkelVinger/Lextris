@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leximax Admin Panel</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
+            authDomain: "leximax-96299.firebaseapp.com",
+            projectId: "leximax-96299",
+            storageBucket: "leximax-96299.appspot.com",
+            messagingSenderId: "1067424610925",
+            appId: "1:1067424610925:web:f2d344a474e9bad8b8dd64"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.createGame = async function createGame() {
+            const gameIdScore = document.getElementById('gameId').value.trim();
+            const gameIdSpeed = `${gameIdScore}-speed`;
+            const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
+            const aboutWord = document.getElementById('aboutWord').value.trim();
+
+            const logs = document.getElementById('logs');
+            logs.innerHTML = '';
+
+            if (!gameIdScore || !targetWord || !aboutWord) {
+                logs.innerHTML += '❌ Game ID, Target Word, and About Word information are required.<br>';
+                return;
+            }
+
+            const gameIdPattern = /^Game\d{4}-\d{2}-\d{2}$/;
+            if (!gameIdPattern.test(gameIdScore)) {
+                logs.innerHTML += '❌ Game ID must be in the format "GameYYYY-MM-DD".<br>';
+                return;
+            }
+            if (!/^[A-Z]+$/.test(targetWord)) {
+                logs.innerHTML += '❌ Target word must contain only uppercase letters.<br>';
+                return;
+            }
+            if (targetWord.length < 3 || targetWord.length > 12) {
+                logs.innerHTML += '❌ Target Word must be between 3 and 12 letters.<br>';
+                return;
+            }
+
+            try {
+                // Add to daily_games (Score-based game)
+                logs.innerHTML += `⏳ Creating game for Score-based collection: ${gameIdScore}...<br>`;
+                await setDoc(doc(db, 'daily_games', gameIdScore), {
+                    targetWord: targetWord,
+                    score: 0,
+                    createdAt: serverTimestamp(),
+                    active: true,
+                    aboutWord: aboutWord
+                });
+                logs.innerHTML += `✅ Score-based Game '${gameIdScore}' created successfully!<br>`;
+
+                // Add to daily_games_speed (Time-based game)
+                logs.innerHTML += `⏳ Creating game for Time-based collection: ${gameIdSpeed}...<br>`;
+                await setDoc(doc(db, 'daily_games_speed', gameIdSpeed), {
+                    targetWord: targetWord,
+                    time: null,
+                    createdAt: serverTimestamp(),
+                    active: true,
+                    aboutWord: aboutWord
+                });
+                logs.innerHTML += `✅ Time-based Game '${gameIdSpeed}' created successfully!<br>`;
+            } catch (error) {
+                console.error('❌ Error creating game:', error);
+                logs.innerHTML += `❌ Error: ${error.message}<br>`;
+                alert('❌ Error creating game. Check the logs below.');
+            }
+
+            document.getElementById('gameId').value = '';
+            document.getElementById('targetWord').value = '';
+            document.getElementById('aboutWord').value = '';
+        };
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .admin-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        h1 {
+            text-align: center;
+            color: #004d40;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .form-group button {
+            width: 100%;
+            background-color: #004d40;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .form-group button:hover {
+            background-color: #00695c;
+        }
+        .logs {
+            margin-top: 20px;
+            background: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #555;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Leximax Admin Panel</h1>
+        <div class="form-group">
+            <label for="gameId">Game ID (e.g., Game2025-01-26):</label>
+            <input type="text" id="gameId" placeholder="Enter Game ID">
+        </div>
+        <div class="form-group">
+            <label for="targetWord">Target Word:</label>
+            <input type="text" id="targetWord" placeholder="Enter Target Word">
+        </div>
+        <div class="form-group">
+            <label for="aboutWord">About Today's Word:</label>
+            <textarea id="aboutWord" placeholder="Enter information about today's word"></textarea>
+        </div>
+        <div class="form-group">
+            <button id="create-game-btn">Create Game</button>
+        </div>
+        <div class="logs" id="logs"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const createGameBtn = document.getElementById('create-game-btn');
+            createGameBtn.addEventListener('click', () => {
+                if (window.createGame) {
+                    window.createGame();
+                } else {
+                    console.error('❌ createGame function is not available.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
