@@ -47,19 +47,17 @@
             if (dateParam) {
                 gameId = `Game${dateParam}-aboutword`;
                 const [year, month, day] = dateParam.split('-');
-                displayDate = new Date(year, month - 1, day);
+                displayDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
             } else {
                 const today = new Date();
                 gameId = `Game${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}-aboutword`;
                 displayDate = today;
             }
 
-            const formattedDate = displayDate.toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'MMMM',
-                year: 'numeric'
-            });
-
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
+                          'August', 'September', 'October', 'November', 'December'];
+            const formattedDate = `${displayDate.getDate()} ${months[displayDate.getMonth()]} ${displayDate.getFullYear()}`;
+            
             document.getElementById('page-title').textContent = `Why today's word from ${formattedDate} is hard to spell`;
             
             try {
