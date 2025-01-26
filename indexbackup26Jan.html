@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leximax</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="favicon_L_top_highres.png">
+    
+    <!-- Prevent Cookie Banner Flash -->
+    <style>
+    /* Button Styles */
+    .button {
+        font-weight: normal !important;
+    }
+
+.tagline {
+    text-align: center;
+    color: #FFFFFF;
+    font-size: 1.2em;
+    font-weight: normal;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+   /* Cookie Banner Styles */
+    #cookie-banner {
+        display: none;
+    }
+
+    html.show-cookie-banner #cookie-banner {
+        display: block;
+    }
+</style>
+    <script>
+    (function () {
+        const hasAcceptedCookies = localStorage.getItem('cookiesAccepted');
+        if (hasAcceptedCookies !== 'true') {
+            document.documentElement.classList.add('show-cookie-banner');
+        }
+    })();
+</script>
+
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8193235321568974"
+    crossorigin="anonymous"></script>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-8193235321568974",
+        enable_page_level_ads: true
+    });
+</script>
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R4QL2RYESM"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-R4QL2RYESM');
+</script>
+
+</head>
+<body>
+    <!-- Header with Game Title -->
+    <header>
+        <div id="game-title">
+            <div class="title-block" style="background-color: #0066FF;">L</div>
+            <div class="title-block" style="background-color: #f44336;">E</div>
+            <div class="title-block" style="background-color: #4caf50;">X</div>
+            <div class="title-block" style="background-color: #ffc107;">I</div>
+            <div class="title-block" style="background-color: #9c27b0;">M</div>
+            <div class="title-block" style="background-color: #0066FF;">A</div>
+            <div class="title-block" style="background-color: #900C3F;">X</div>
+        </div>
+        <div class="tagline">THE FUN GAME THAT IMPROVES YOUR READING SPEED AND SPELLING SKILLS!</div>
+    </header>
+
+    <!-- Main Navigation Buttons -->
+    <main>
+        <div class="buttons-container">
+            <a href="how-to-play.html" class="button">HOW TO PLAY LEXISTRAT AND LEXISPEED</a>
+            <a href="game.html?gameId=Game2025-01-26" class="button">TODAY'S LEXISTRAT</a>
+            <a href="game-speed.html?gameId=Game2025-01-26-speed" class="button">TODAY'S LEXISPEED</a>
+            <a href="todaysword.html" class="button">WHY TODAY'S WORD IS HARD TO SPELL</a>
+            <a href="archive-games.html" class="button">PREVIOUS LEXISTRATS</a>
+            <a href="archive-speed.html" class="button">PREVIOUS LEXISPEEDS</a>
+            <a href="archive-words.html" class="button">PREVIOUS WORDS</a>            
+        </div>
+
+        <!-- Ad Section -->
+        <section class="ads">
+            <h2>Help us keep the game free by supporting our advertisers</h2>
+            <div class="ad-container">
+                <div class="ad-placeholder"> </div>
+                <div class="ad-placeholder"> </div>
+            </div>
+        </section>
+
+        <!-- Cookie Banner -->
+        <div id="cookie-banner" class="cookie-banner">
+            <p>
+                This website uses cookies to enhance your experience, personalize ads, and analyze traffic.
+                By clicking "Accept All Cookies," you consent to our use of cookies.
+                See our <a href="privacy-policy.html" target="_blank">Privacy Policy</a> for more details.
+            </p>
+            <div class="cookie-buttons">
+                <button id="accept-cookies">Accept All Cookies</button>
+                <button id="customize-cookies">Customize</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Coffee Support Button -->
+    <div class="coffee-button"></div>
+
+    <!-- Footer -->
+    <footer>
+        <a href="about-leximax.html">About Leximax</a> |
+        <a href="privacy-policy.html">Privacy Policy</a> |
+        <a href="contact.html">Contact Us</a>
+        <p>&copy; 2024 Leximax. All rights reserved.</p>
+        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+            data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
+            data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
+            data-font-color="#000000" data-coffee-color="#ffffff"></script>
+    </footer>
+
+    <!-- JavaScript File -->
+    <script src="scripts.js"></script>
+</body>
+</html>
