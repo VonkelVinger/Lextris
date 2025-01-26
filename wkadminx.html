@@ -81,7 +81,7 @@
                 return;
             }
             if (wordDescription.length > 150) {
-                logs.innerHTML += '❌ Description must be 100 words or less.<br>';
+                logs.innerHTML += '❌ Description must be 150 words or less.<br>';
                 return;
             }
 
@@ -208,7 +208,7 @@
             <input type="text" id="targetWord" placeholder="Enter Target Word">
         </div>
         <div class="form-group">
-            <label for="wordDescription">Word Description (100 words max):</label>
+            <label for="wordDescription">Word Description (150 words max):</label>
             <textarea id="wordDescription" placeholder="Enter a description about the target word"></textarea>
         </div>
         <button onclick="createGame()">Create Game</button>
