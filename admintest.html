@@ -7,7 +7,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-        import { getStorage, ref, uploadString } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC7MGy-7Gh5h1zp6KjuDq2_pRekPvCHrM4",
@@ -20,55 +19,19 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        function generateAboutTodayHTML(targetWord, aboutWord) {
-            return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Today's Word - ${targetWord}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        h1 {
-            color: #004d40;
-            text-align: center;
-        }
-        .content {
-            background: #f5f5f5;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <h1>About Today's Word: ${targetWord}</h1>
-    <div class="content">
-        ${aboutWord.replace(/\n/g, '<br>')}
-    </div>
-</body>
-</html>`;
-        }
 
         window.createGame = async function createGame() {
             const gameIdScore = document.getElementById('gameId').value.trim();
             const gameIdSpeed = `${gameIdScore}-speed`;
+            const gameIdAbout = `${gameIdScore}-aboutword`;
             const targetWord = document.getElementById('targetWord').value.trim().toUpperCase();
-            const aboutWord = document.getElementById('aboutWord').value.trim();
+            const wordDescription = document.getElementById('wordDescription').value.trim();
 
             const logs = document.getElementById('logs');
             logs.innerHTML = '';
 
-            if (!gameIdScore || !targetWord || !aboutWord) {
-                logs.innerHTML += '❌ Game ID, Target Word, and About Word information are required.<br>';
+            if (!gameIdScore || !targetWord || !wordDescription) {
+                logs.innerHTML += '❌ Game ID, Target Word, and Description are required.<br>';
                 return;
             }
 
@@ -77,53 +40,55 @@
                 logs.innerHTML += '❌ Game ID must be in the format "GameYYYY-MM-DD".<br>';
                 return;
             }
+            if (!/^[A-Z]+$/.test(targetWord)) {
+                logs.innerHTML += '❌ Target word must contain only uppercase letters.<br>';
+                return;
+            }
+            if (targetWord.length < 3 || targetWord.length > 12) {
+                logs.innerHTML += '❌ Target Word must be between 3 and 12 letters.<br>';
+                return;
+            }
+            if (wordDescription.length > 100) {
+                logs.innerHTML += '❌ Description must be 100 words or less.<br>';
+                return;
+            }
 
             try {
-                // Create and upload about today HTML file
-                const aboutTodayHtml = generateAboutTodayHTML(targetWord, aboutWord);
-                const htmlFileName = `${gameIdScore}-abouttoday.html`;
-                const storageRef = ref(storage, htmlFileName);
-                await uploadString(storageRef, aboutTodayHtml, 'raw', {
-                    contentType: 'text/html'
-                });
-                logs.innerHTML += `✅ About Today file '${htmlFileName}' created successfully!<br>`;
-
-                // Add to daily_games (Score-based game)
                 await setDoc(doc(db, 'daily_games', gameIdScore), {
                     targetWord: targetWord,
                     score: 0,
                     createdAt: serverTimestamp(),
-                    active: true,
-                    aboutWord: aboutWord,
-                    aboutTodayUrl: `${htmlFileName}`
+                    active: true
                 });
                 logs.innerHTML += `✅ Score-based Game '${gameIdScore}' created successfully!<br>`;
 
-                // Add to daily_games_speed (Time-based game)
                 await setDoc(doc(db, 'daily_games_speed', gameIdSpeed), {
                     targetWord: targetWord,
                     time: null,
                     createdAt: serverTimestamp(),
-                    active: true,
-                    aboutWord: aboutWord,
-                    aboutTodayUrl: `${htmlFileName}`
+                    active: true
                 });
                 logs.innerHTML += `✅ Time-based Game '${gameIdSpeed}' created successfully!<br>`;
 
+                await setDoc(doc(db, 'daily_games_info', gameIdAbout), {
+                    description: wordDescription,
+                    createdAt: serverTimestamp()
+                });
+                logs.innerHTML += `✅ Word description saved as '${gameIdAbout}'!<br>`;
+
             } catch (error) {
-                console.error('❌ Error:', error);
+                console.error('❌ Error creating game:', error);
                 logs.innerHTML += `❌ Error: ${error.message}<br>`;
                 alert('❌ Error creating game. Check the logs below.');
             }
 
             document.getElementById('gameId').value = '';
             document.getElementById('targetWord').value = '';
-            document.getElementById('aboutWord').value = '';
+            document.getElementById('wordDescription').value = '';
         };
     </script>
 
     <style>
-        /* Existing styles remain unchanged */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -199,8 +164,8 @@
             <input type="text" id="targetWord" placeholder="Enter Target Word">
         </div>
         <div class="form-group">
-            <label for="aboutWord">About Today's Word:</label>
-            <textarea id="aboutWord" placeholder="Enter information about today's word"></textarea>
+            <label for="wordDescription">Word Description (100 words max):</label>
+            <textarea id="wordDescription" placeholder="Enter a description about the target word"></textarea>
         </div>
         <div class="form-group">
             <button id="create-game-btn">Create Game</button>
