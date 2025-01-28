@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Previous head content remains the same -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leximax - About Today's Word</title>
@@ -20,8 +21,26 @@
         footer {
             margin-top: 20px;
         }
+        /* Added style for date navigation */
+        .date-nav {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .date-nav a {
+            padding: 10px 20px;
+            background-color: #0066FF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 0 10px;
+        }
+        .date-nav a:hover {
+            background-color: #0052cc;
+        }
     </style>
+    <!-- Firebase script remains the same -->
     <script type="module">
+        // Previous Firebase configuration and functions remain the same
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
@@ -95,6 +114,11 @@
         </div>
     </header>
     <main>
+        <!-- Added date navigation section -->
+        <div class="date-nav">
+            <a href="about-word.html?date=2025-01-29">View January 29, 2025</a>
+            <a href="about-word.html">View Today's Word</a>
+        </div>
         <h1 id="page-title" class="center-text dark-green">Why today's word is hard to spell</h1>
         <section class="instructions">
             <div id="word-description">Loading word description...</div>
