@@ -485,7 +485,7 @@ window.db = db; // ✅ Explicitly expose db globally
         async addLeaderboardEntry(gameId, name, score) {  
             try {
                 const entry = {
-                    name: String(name).slice(0, 12),
+                    name: String(name).slice(0, 18),
                     score: Number(score),
                     timestamp: new Date().toISOString()  
                 };
@@ -995,7 +995,7 @@ if (gameTime < 30) {
                 GREAT! Enter your score of <b>${finalScore.toLocaleString()}</b> for <b>${TARGET_WORD}</b> on the Leaderboard, then click SHARE to challenge your friends!
             </div>
             <input type="text" id="player-name"
-                   maxlength="12"
+                   maxlength="18"
                    placeholder="Enter your name"
                    style="width: 100%; padding: 10px; border: 2px solid #004d40; border-radius: 4px; font-size: 16px; margin-bottom: 10px;">
             <button id="submit-name-btn" style="
