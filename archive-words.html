@@ -55,11 +55,14 @@
             margin: 20px 0;
         }
         footer {
+            background-color: #004d40;
+            padding: 20px 0;
             text-align: center;
-            margin-top: 20px;
+            position: relative;
+            margin-top: 40px;
         }
         footer a {
-            color: #004d40;
+            color: white;
             text-decoration: none;
             margin: 0 10px;
         }
@@ -82,6 +85,28 @@
             font-weight: bold;
             font-size: 24px;
         }
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+        }
+        .footer-links {
+            color: white;
+            margin-bottom: 10px;
+        }
+        .footer-copyright {
+            color: white;
+            margin-bottom: 20px;
+        }
+        .coffee-button-container {
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -96,6 +121,7 @@
             <div class="title-block" style="background-color: #900C3F;">X</div>
         </div>
     </header>
+
     <main>
         <h1 class="center-text dark-green">Can you beat these fastest times?</h1>
         <div class="calendar-container">
@@ -157,7 +183,7 @@
         </div>
         
         <section class="ads">
-            <h2 style="margin-top: 40px; margin-bottom: 15px;">Help us keep the game free by supporting like-minded projects</h2>
+            <h2 style="text-align: center;">Help us keep the game free by supporting like-minded projects</h2>
             <div class="ad-container">
                 <a href="https://informedliteracy.com/" target="_blank">
                     <img src="InforLit.jpg" alt="Informed Literacy" style="width: 300px; height: 250px; object-fit: contain; border: 1px solid black;">
@@ -168,19 +194,28 @@
             </div>
         </section>
     </main>
-    
-    <div class="coffee-button"></div>
-    
+
     <footer>
-        <a href="index.html">Home</a> |
-        <a href="about-leximax.html">About Leximax</a> |
-        <a href="privacy-policy.html">Privacy Policy</a> |
-        <a href="contact.html">Contact Us</a>
-        <p>&copy; 2024 Leximax. All rights reserved.</p>
-        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-            data-name="bmc-button" data-slug="PlayLeximax" data-color="#FFDD00" data-emoji=""
-            data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000"
-            data-font-color="#000000" data-coffee-color="#ffffff"></script>
+        <div class="footer-links">
+            <a href="index.html">Home</a> |
+            <a href="about-leximax.html">About Leximax</a> |
+            <a href="privacy-policy.html">Privacy Policy</a> |
+            <a href="contact.html">Contact Us</a>
+        </div>
+        <div class="footer-copyright">© 2024 Leximax. All rights reserved</div>
+        <div class="coffee-button-container">
+            <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                data-name="bmc-button" 
+                data-slug="PlayLeximax" 
+                data-color="#FFDD00" 
+                data-emoji=""
+                data-font="Cookie" 
+                data-text="Buy me a coffee" 
+                data-outline-color="#000000"
+                data-font-color="#000000" 
+                data-coffee-color="#ffffff">
+            </script>
+        </div>
     </footer>
 </body>
 </html>
