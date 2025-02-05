@@ -77,7 +77,7 @@
                           'August', 'September', 'October', 'November', 'December'];
             const formattedDate = `${displayDate.getDate()} ${months[displayDate.getMonth()]} ${displayDate.getFullYear()}`;
             
-            document.getElementById('page-title').textContent = `Why the word from ${formattedDate} is hard to spell`;
+            document.getElementById('page-title').textContent = `Tips for spelling the word from ${formattedDate}`;
             
             try {
                 const docRef = doc(db, 'daily_games_info', gameId);
