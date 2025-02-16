@@ -50,19 +50,29 @@
             <p>Click 📤 <strong>SHARE</strong> to challenge your friends and show off your time!</p>
        
            <p class="bold-heading">📊 5. PLAY NOW!</p>
-<p>
+<p class="center-link">
   <a id="daily-lexispeed" href="#" target="_blank">TODAY'S LEXISPEED</a>
 </p>
 
+<!-- Add this CSS (either in <style> tags or your external CSS file) -->
+<style>
+  .center-link {
+    text-align: center;
+  }
+  /* Optional: If you want the link itself centered as a block */
+  #daily-lexispeed {
+    display: inline-block;
+  }
+</style>
+
 <script>
-  // Generate today's date in YYYY-MM-DD format
+  // Date code remains the same
   const today = new Date();
   const formattedDate = today.toISOString().split('T')[0];
-  
-  // Update the link dynamically
   document.getElementById('daily-lexispeed').href = 
     `game-speed.html?gameId=Game${formattedDate}-speed`;
 </script>
+
  </section>
 
         <!-- Strategy Version -->
