@@ -60,7 +60,7 @@
   }
   #daily-lexispeed {
     display: inline-block;
-    font-size: 18pt; /* Added font size */
+    font-size: 18pt; /
     font-weight: bold; /* Optional: maintains bold appearance from previous formatting */
   }
 </style>
@@ -116,7 +116,7 @@
                 <li>Take your time: there is no bonus for building the <strong>Target Word</strong> faster.</li>
             </ul>
 
- <p class="bold-heading">🏆 7. PLAY NOW!</p>
+<p class="bold-heading">🏆 7. PLAY NOW!</p>
 <p class="center-link">
   <a id="daily-lexistrat" href="#" target="_blank">TODAY'S LEXISTRAT</a>
 </p>
@@ -127,24 +127,18 @@
   }
   #daily-lexistrat {
     display: inline-block;
-    font-size: 18pt; /* Added font size */
-    font-weight: bold; /* Optional: maintains bold appearance from previous formatting */
+    font-size: 18pt; /
+    font-weight: bold;
   }
 </style>
 
 <script>
-  // Date code remains unchanged
-  const today = new Date();
-  const formattedDate = today.toISOString().split('T')[0];
-  document.getElementById('daily-lexispeed').href = 
-    `game.html?gameId=Game${formattedDate}`;
+  // Date generation for Strategy version
+  const todayStrat = new Date();
+  const formattedDateStrat = todayStrat.toISOString().split('T')[0];
+  document.getElementById('daily-lexistrat').href = 
+    `game.html?gameId=Game${formattedDateStrat}`;
 </script>
-
-
-
-
-
-
 
         </section>
 
