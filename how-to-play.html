@@ -49,9 +49,20 @@
             <p>If your time is fast enough, you'll get to add your name to the 🏅 <strong>Leaderboard</strong>.</p>
             <p>Click 📤 <strong>SHARE</strong> to challenge your friends and show off your time!</p>
        
-            <p class="bold-heading">📊 5. PLAY NOW!</p>
-            <p><a href="game-speed.html?gameId=Game2025-02-16-speed" target="_blank">TODAY'S LEXISPEED</a>
+           <p class="bold-heading">📊 5. PLAY NOW!</p>
+<p>
+  <a id="daily-lexispeed" href="#" target="_blank">TODAY'S LEXISPEED</a>
+</p>
 
+<script>
+  // Generate today's date in YYYY-MM-DD format
+  const today = new Date();
+  const formattedDate = today.toISOString().split('T')[0];
+  
+  // Update the link dynamically
+  document.getElementById('daily-lexispeed').href = 
+    `game-speed.html?gameId=Game${formattedDate}-speed`;
+</script>
  </section>
 
         <!-- Strategy Version -->
