@@ -54,19 +54,19 @@
   <a id="daily-lexispeed" href="#" target="_blank">TODAY'S LEXISPEED</a>
 </p>
 
-<!-- Add this CSS (either in <style> tags or your external CSS file) -->
 <style>
   .center-link {
     text-align: center;
   }
-  /* Optional: If you want the link itself centered as a block */
   #daily-lexispeed {
     display: inline-block;
+    font-size: 24pt; /* Added font size */
+    font-weight: bold; /* Optional: maintains bold appearance from previous formatting */
   }
 </style>
 
 <script>
-  // Date code remains the same
+  // Date code remains unchanged
   const today = new Date();
   const formattedDate = today.toISOString().split('T')[0];
   document.getElementById('daily-lexispeed').href = 
